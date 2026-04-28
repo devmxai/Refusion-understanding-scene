@@ -127,7 +127,11 @@ Rules:
 - Beats must stay inside `durationMs`.
 - Every beat must include explicit `componentRefs`.
 - Beats may overlap only when `componentRefs` are explicit and disjoint.
-- Same-component overlap is ambiguous and should be one intentional beat with multiple primitives.
+- Same-component overlap is allowed only as a deliberate handoff when the
+  overlapping primitives animate disjoint property groups, such as `scale`
+  ending while `width` begins on the same prompt shell.
+- Same-component overlap on the same property group is ambiguous and should be
+  one intentional beat with multiple primitives.
 - Use readable holds for text/UI states before major transformations.
 
 Professional beat example:
@@ -538,7 +542,8 @@ Before returning JSON, verify:
 - `sceneProgram.schemaVersion` is `refusion.scene-program/v1`.
 - `durationMs`, `startMs`, `endMs`, `timeMs`, and `frameRate` are numbers, not strings.
 - Every beat has `componentRefs`.
-- Overlapping beats have disjoint `componentRefs`.
+- Overlapping beats have disjoint `componentRefs`, or share a component only
+  when the overlapping primitives animate disjoint property groups.
 - Every primitive target exists in `components`.
 - Every primitive stays inside its beat.
 - Every Scene Program layer has `id`, `kind`, `startMs`, `durationMs`, and `elements`.
