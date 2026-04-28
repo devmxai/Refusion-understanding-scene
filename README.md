@@ -12,6 +12,11 @@ Return one JSON object only.
 
 Do not return Markdown, JSX, JavaScript, TypeScript, HTML, CSS, Dart, shader code, remote imports, functions, comments, or prose around the JSON.
 
+Return the complete object from the first `{` through the final `}`. Do not
+return a middle fragment, abbreviated JSON, or a truncated response. ReFusion
+will reject incomplete JSON because missing braces, arrays, or keyframes cannot
+be repaired safely.
+
 The preferred output shape is:
 
 ```json
@@ -24,7 +29,11 @@ The preferred output shape is:
 `directorPlan` explains the choreography.  
 `sceneProgram` is the editable executable scene.
 
-The app validates both. If the plan says one thing and the scene does another, the scene can be rejected.
+The app validates both. If the plan says one thing and the scene does another,
+ReFusion treats the Director Plan as the source of truth. The app may compile a
+valid Director Plan locally and ignore the mismatched generated Scene Program.
+To preserve your exact design, make the Scene Program implement every Director
+component and primitive directly.
 
 ## 2. Required Root Shape
 
@@ -157,6 +166,12 @@ Common roles:
 - `shape.line`
 - `card.container`
 - `image.hero`
+
+Background components should use clear IDs when possible: `background`,
+`bg-layer`, `bg-solid`, `canvas-fill`, or `backdrop`. If the Director Plan says
+the background fades, the Scene Program must include an animated `opacity`
+channel on the background layer or element. A static `properties.opacity` value
+does not implement a fade primitive.
 
 ### Primitives
 
