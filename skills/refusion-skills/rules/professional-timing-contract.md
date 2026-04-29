@@ -183,6 +183,10 @@ Current enforced rules:
   keyframes or be removed.
 - visible components whose final motion ends exactly at the scene boundary now
   produce a completion warning so agents add a resolve/hold moment.
+- direct Scene Program JSON is checked too: text reveal/typewriter channels
+  must end early enough to leave readable hold inside the owning layer, and
+  visible non-exit final motion should leave a completion hold before the layer
+  ends.
 - the Director compiler merges sequential primitives for the same
   component/property into one ordered Scene Program channel before lowering.
   For same-time handoffs, keep one editable keyframe at that time; the later

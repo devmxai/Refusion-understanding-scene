@@ -45,6 +45,10 @@ No URLs unless the user and engine explicitly support that asset path.
 - Visible component final motion should not land exactly on the final scene
   boundary without a resolve/hold moment.
 - Text has readable hold when important.
+- Text reveal/typewriter channels must finish early enough to leave readable
+  hold inside the owning layer.
+- Final visible motion should leave completion hold unless it exits via
+  opacity/scale to zero or belongs to a background, mask, or transition cover.
 
 ## Director Plan Alignment
 

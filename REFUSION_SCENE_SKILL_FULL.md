@@ -643,6 +643,10 @@ Current enforced rules:
   keyframes or be removed.
 - visible components whose final motion ends exactly at the scene boundary now
   produce a completion warning so agents add a resolve/hold moment.
+- direct Scene Program JSON is checked too: text reveal/typewriter channels
+  must end early enough to leave readable hold inside the owning layer, and
+  visible non-exit final motion should leave a completion hold before the layer
+  ends.
 - the Director compiler merges sequential primitives for the same
   component/property into one ordered Scene Program channel before lowering.
   For same-time handoffs, keep one editable keyframe at that time; the later
@@ -769,6 +773,11 @@ text/label readable hold: 400-900ms
 large scene transition: 700-1400ms
 hero title reveal: 900-1800ms
 ```
+
+If a reveal or final visible movement reaches its last keyframe too close to
+the layer end, extend the layer/scene or move the last keyframe earlier. The
+viewer must see the completed state before the next cut, scope exit, or scene
+end.
 
 ## Layer Count
 
@@ -1113,6 +1122,10 @@ No URLs unless the user and engine explicitly support that asset path.
 - Visible component final motion should not land exactly on the final scene
   boundary without a resolve/hold moment.
 - Text has readable hold when important.
+- Text reveal/typewriter channels must finish early enough to leave readable
+  hold inside the owning layer.
+- Final visible motion should leave completion hold unless it exits via
+  opacity/scale to zero or belongs to a background, mask, or transition cover.
 
 ## Director Plan Alignment
 

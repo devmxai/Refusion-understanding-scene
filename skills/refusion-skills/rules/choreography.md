@@ -90,6 +90,11 @@ large scene transition: 700-1400ms
 hero title reveal: 900-1800ms
 ```
 
+If a reveal or final visible movement reaches its last keyframe too close to
+the layer end, extend the layer/scene or move the last keyframe earlier. The
+viewer must see the completed state before the next cut, scope exit, or scene
+end.
+
 ## Layer Count
 
 Prefer semantic layers:
