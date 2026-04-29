@@ -170,10 +170,17 @@ Current enforced rules:
   component/property into one ordered Scene Program channel before lowering.
   For same-time handoffs, keep one editable keyframe at that time; the later
   primitive defines the post-handoff value.
+- Scene Program authoring and live Scene Generate extraction both run the
+  professional timing contract before lowering or accepting generated JSON.
+  Direct generated Scene Program JSON with duplicate target/property channels
+  is rejected. Wrapped responses with a valid Director Plan may fall back to
+  locally compiled Director output when the generated Scene Program violates
+  timing.
 
 Current caution:
 
-- avoid multiple channels for the same target/property;
+- avoid multiple channels for the same target/property; authored Scene Programs
+  should already be merged into one ordered channel;
 - avoid ambiguous overlaps;
 - prefer longer, explicit keyframe tracks;
 - keep Scene Program and Director Plan aligned;
