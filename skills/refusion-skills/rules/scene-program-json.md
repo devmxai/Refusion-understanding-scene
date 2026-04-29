@@ -219,6 +219,11 @@ Use these properties in `properties` and `channels`:
 - `movingMaskReveal`
 - `maskReveal`
 - `fontSize`
+- `fontWeight`: integer weight such as `400`, `700`, or `900`
+- `fontFamily`: optional static font family name
+- `fontStyle`: `normal` or `italic`
+- `lineHeight`: text line-height multiplier, usually `1.0` to `1.3`
+- `textAlign`: `left`, `center`, or `right`
 - `letterSpacing`
 - `typewriterProgress`
 - `typingProgress`
@@ -233,6 +238,10 @@ Preferred canonical names:
 - use `mask` elements with `maskTarget`, `maskMode`, and `movingMaskReveal`
   when describing a travelling matte/wipe. Do not fake a mask by making many
   one-frame text or shape layers;
+- keep words in the same title on a coherent typography system. If the text is
+  `Welcome to Codex`, use matching `fontSize`, `fontWeight`, `lineHeight`, and
+  close natural spacing unless the user explicitly asks for contrast. Vary the
+  motion timing, not random font sizes.
 - use `typewriterProgress`, not one text element per character;
 - use `startMs`, `durationMs`, and `timeMs` as numeric values.
 
