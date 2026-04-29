@@ -527,6 +527,11 @@ Rules:
 - important text/UI states need a readable hold beat;
 - overlaps are intentional only when components are disjoint or the handoff is
   explicit and same-property conflict does not exist.
+- distinct-component beat overlap must be marked with explicit parallel intent
+  such as `parallel`, `while`, `meanwhile`, `alongside`, or `during`.
+- shared-component disjoint-property overlap must be marked with explicit
+  handoff intent such as `handoff`, `morph`, `transform`, `expand`,
+  `collapse`, or `becomes`.
 
 ### Component Lifetime
 
@@ -651,6 +656,10 @@ Current enforced rules:
 - Timing-contract rejection summaries include explicit `Fix:` hints. Agents
   must use these hints to repair JSON before retrying instead of repeating the
   same timing shape.
+- Beat overlap is now stricter: distinct-component overlap without explicit
+  parallel intent is rejected, and shared-component overlap without explicit
+  handoff/morph/transform intent is rejected even when property groups are
+  disjoint.
 
 Current caution:
 
@@ -713,6 +722,16 @@ Bad:
 - text moves while being typed without reason;
 - scene transitions before current motion finishes;
 - elements disappear because their layer duration ended early.
+
+Overlapping beats are only valid when the intent is explicit:
+
+- For distinct components, write parallel intent with words such as `parallel`,
+  `while`, `meanwhile`, `alongside`, or `during`.
+- For the same component, overlap is valid only as an inspectable handoff:
+  disjoint property groups plus words such as `handoff`, `morph`,
+  `transform`, `expand`, `collapse`, or `becomes`.
+- If neither condition is true, separate the beats. Do not rely on accidental
+  overlap to make the scene feel busy.
 
 ## Handoff Discipline
 
@@ -1076,6 +1095,11 @@ No URLs unless the user and engine explicitly support that asset path.
 
 - `durationMs`, `startMs`, `endMs`, `timeMs`, and `frameRate` are numbers.
 - Beats stay inside `durationMs`.
+- Overlapping distinct-component beats must explicitly say they are parallel,
+  while/meanwhile, alongside, or during another motion.
+- Overlapping shared-component beats must explicitly say they are a handoff,
+  morph, transform, expand, collapse, or becomes transition, and they must
+  animate disjoint property groups.
 - Primitives stay inside owning beats.
 - Primitive `beatId` points to an existing beat.
 - The owning beat includes the primitive `targetComponentId` in

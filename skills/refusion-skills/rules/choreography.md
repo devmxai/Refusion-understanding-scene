@@ -43,6 +43,16 @@ Bad:
 - scene transitions before current motion finishes;
 - elements disappear because their layer duration ended early.
 
+Overlapping beats are only valid when the intent is explicit:
+
+- For distinct components, write parallel intent with words such as `parallel`,
+  `while`, `meanwhile`, `alongside`, or `during`.
+- For the same component, overlap is valid only as an inspectable handoff:
+  disjoint property groups plus words such as `handoff`, `morph`,
+  `transform`, `expand`, `collapse`, or `becomes`.
+- If neither condition is true, separate the beats. Do not rely on accidental
+  overlap to make the scene feel busy.
+
 ## Handoff Discipline
 
 When one shape becomes another:

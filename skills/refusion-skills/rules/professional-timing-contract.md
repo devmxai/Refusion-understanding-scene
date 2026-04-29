@@ -67,6 +67,11 @@ Rules:
 - important text/UI states need a readable hold beat;
 - overlaps are intentional only when components are disjoint or the handoff is
   explicit and same-property conflict does not exist.
+- distinct-component beat overlap must be marked with explicit parallel intent
+  such as `parallel`, `while`, `meanwhile`, `alongside`, or `during`.
+- shared-component disjoint-property overlap must be marked with explicit
+  handoff intent such as `handoff`, `morph`, `transform`, `expand`,
+  `collapse`, or `becomes`.
 
 ### Component Lifetime
 
@@ -191,6 +196,10 @@ Current enforced rules:
 - Timing-contract rejection summaries include explicit `Fix:` hints. Agents
   must use these hints to repair JSON before retrying instead of repeating the
   same timing shape.
+- Beat overlap is now stricter: distinct-component overlap without explicit
+  parallel intent is rejected, and shared-component overlap without explicit
+  handoff/morph/transform intent is rejected even when property groups are
+  disjoint.
 
 Current caution:
 

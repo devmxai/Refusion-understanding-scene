@@ -27,6 +27,11 @@ No URLs unless the user and engine explicitly support that asset path.
 
 - `durationMs`, `startMs`, `endMs`, `timeMs`, and `frameRate` are numbers.
 - Beats stay inside `durationMs`.
+- Overlapping distinct-component beats must explicitly say they are parallel,
+  while/meanwhile, alongside, or during another motion.
+- Overlapping shared-component beats must explicitly say they are a handoff,
+  morph, transform, expand, collapse, or becomes transition, and they must
+  animate disjoint property groups.
 - Primitives stay inside owning beats.
 - Primitive `beatId` points to an existing beat.
 - The owning beat includes the primitive `targetComponentId` in
