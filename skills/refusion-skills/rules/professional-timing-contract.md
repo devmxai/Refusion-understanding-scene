@@ -176,6 +176,9 @@ Current enforced rules:
   is rejected. Wrapped responses with a valid Director Plan may fall back to
   locally compiled Director output when the generated Scene Program violates
   timing.
+- Timing-contract rejection summaries include explicit `Fix:` hints. Agents
+  must use these hints to repair JSON before retrying instead of repeating the
+  same timing shape.
 
 Current caution:
 
