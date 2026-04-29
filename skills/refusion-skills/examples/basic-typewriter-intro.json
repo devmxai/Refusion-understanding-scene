@@ -1,0 +1,189 @@
+{
+  "directorPlan": {
+    "schemaVersion": "refusion.motion-director/v1",
+    "name": "Basic Typewriter Intro Plan",
+    "durationMs": 3200,
+    "frameRate": 30,
+    "canvasWidth": 1080,
+    "canvasHeight": 1920,
+    "beats": [
+      {
+        "id": "background-enter",
+        "label": "Background enters",
+        "startMs": 0,
+        "endMs": 500,
+        "intent": "Fade in a dark canvas.",
+        "componentRefs": ["background"]
+      },
+      {
+        "id": "title-enter",
+        "label": "Title enters",
+        "startMs": 400,
+        "endMs": 1200,
+        "intent": "Bring the title into the center.",
+        "componentRefs": ["title"]
+      },
+      {
+        "id": "title-type",
+        "label": "Title types",
+        "startMs": 1100,
+        "endMs": 2300,
+        "intent": "Reveal the title as keyboard typing.",
+        "componentRefs": ["title"]
+      },
+      {
+        "id": "readable-hold",
+        "label": "Readable hold",
+        "startMs": 2300,
+        "endMs": 3200,
+        "intent": "Hold the completed title long enough to read.",
+        "componentRefs": ["title"]
+      }
+    ],
+    "components": [
+      {
+        "id": "background",
+        "role": "background.canvas",
+        "label": "Dark background"
+      },
+      {
+        "id": "title",
+        "role": "text.typewriter",
+        "label": "Typed title"
+      }
+    ],
+    "primitives": [
+      {
+        "id": "background-fade",
+        "beatId": "background-enter",
+        "targetComponentId": "background",
+        "kind": "fade",
+        "property": "opacity",
+        "startMs": 0,
+        "endMs": 500,
+        "fromValue": 0.0,
+        "toValue": 1.0,
+        "easing": "linear"
+      },
+      {
+        "id": "title-slide",
+        "beatId": "title-enter",
+        "targetComponentId": "title",
+        "kind": "slide",
+        "property": "position",
+        "startMs": 400,
+        "endMs": 1200,
+        "fromValue": { "x": 0, "y": 80 },
+        "toValue": { "x": 0, "y": 0 },
+        "easing": "easeOutCubic"
+      },
+      {
+        "id": "title-opacity",
+        "beatId": "title-enter",
+        "targetComponentId": "title",
+        "kind": "fade",
+        "property": "opacity",
+        "startMs": 400,
+        "endMs": 900,
+        "fromValue": 0.0,
+        "toValue": 1.0,
+        "easing": "easeOutCubic"
+      },
+      {
+        "id": "title-typewriter",
+        "beatId": "title-type",
+        "targetComponentId": "title",
+        "kind": "typewriter",
+        "property": "typewriterProgress",
+        "startMs": 1100,
+        "endMs": 2300,
+        "fromValue": 0.0,
+        "toValue": 1.0,
+        "easing": "linear"
+      }
+    ]
+  },
+  "sceneProgram": {
+    "schemaVersion": "refusion.scene-program/v1",
+    "name": "Basic Typewriter Intro",
+    "durationMs": 3200,
+    "frameRate": 30,
+    "layers": [
+      {
+        "id": "background-layer",
+        "name": "Background",
+        "kind": "shape",
+        "startMs": 0,
+        "durationMs": 3200,
+        "elements": [
+          {
+            "id": "background",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "rectangle",
+              "position": { "x": 0, "y": 0 },
+              "width": 1080,
+              "height": 1920,
+              "color": "#05070C",
+              "opacity": 1
+            },
+            "channels": [
+              {
+                "property": "opacity",
+                "keyframes": [
+                  { "timeMs": 0, "value": 0.0, "easing": "linear" },
+                  { "timeMs": 500, "value": 1.0, "easing": "linear" }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "title-layer",
+        "name": "Title",
+        "kind": "text",
+        "startMs": 0,
+        "durationMs": 3200,
+        "elements": [
+          {
+            "id": "title",
+            "kind": "text",
+            "text": "Build with ReFusion",
+            "properties": {
+              "position": { "x": 0, "y": 0 },
+              "fontSize": 58,
+              "letterSpacing": 0,
+              "color": "#F7FAFF",
+              "opacity": 1,
+              "typewriterProgress": 0
+            },
+            "channels": [
+              {
+                "property": "position",
+                "keyframes": [
+                  { "timeMs": 400, "value": { "x": 0, "y": 80 }, "easing": "easeOutCubic" },
+                  { "timeMs": 1200, "value": { "x": 0, "y": 0 }, "easing": "easeOutCubic" }
+                ]
+              },
+              {
+                "property": "opacity",
+                "keyframes": [
+                  { "timeMs": 400, "value": 0.0, "easing": "linear" },
+                  { "timeMs": 900, "value": 1.0, "easing": "easeOutCubic" }
+                ]
+              },
+              {
+                "property": "typewriterProgress",
+                "keyframes": [
+                  { "timeMs": 1100, "value": 0.0, "easing": "linear" },
+                  { "timeMs": 2300, "value": 1.0, "easing": "linear" }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
