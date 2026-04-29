@@ -214,6 +214,11 @@ Use these properties in `properties` and `channels`:
 - `width`
 - `height`
 - `cornerRadius`
+- `trimStart`: line trim start, `0.0` to `1.0` or `0` to `100`,
+  line shapes only
+- `trimEnd`: line trim end, `0.0` to `1.0` or `0` to `100`, line shapes only
+- `trimOffset`: line trim offset, `0.0` to `1.0` or `0` to `100`,
+  line shapes only
 - `shadowOpacity`: `0.0` to `1.0`, shape/icon only
 - `shadowBlur`: canvas-pixel blur radius, shape/icon only
 - `shadowOffset`: `{ "x": 0, "y": 18 }`, shape/icon only
@@ -242,6 +247,9 @@ Preferred canonical names:
 - use `cornerRadius`, not `radius`;
 - use `width`/`height`/`cornerRadius` for canonical shape morphs, or
   `morphSize`/`roundness` when describing a circle-to-bar style morph;
+- use `trimEnd: 0 -> 1` for line reveal on `shapeKind: "line"`. Accepted
+  aliases include `lineReveal`, `lineRevealProgress`, and `trimPathEnd`. Do
+  not fake a line reveal with many small rectangles;
 - use `shadowOpacity`, `shadowBlur`, `shadowOffset`, `shadowSpread`, and
   `shadowColor` for supported shape/icon soft shadows. Accepted aliases include
   `softShadowOpacity`, `dropShadowOpacity`, `softShadowBlur`,

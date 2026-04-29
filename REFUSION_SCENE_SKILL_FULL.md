@@ -349,6 +349,11 @@ Use these properties in `properties` and `channels`:
 - `width`
 - `height`
 - `cornerRadius`
+- `trimStart`: line trim start, `0.0` to `1.0` or `0` to `100`,
+  line shapes only
+- `trimEnd`: line trim end, `0.0` to `1.0` or `0` to `100`, line shapes only
+- `trimOffset`: line trim offset, `0.0` to `1.0` or `0` to `100`,
+  line shapes only
 - `shadowOpacity`: `0.0` to `1.0`, shape/icon only
 - `shadowBlur`: canvas-pixel blur radius, shape/icon only
 - `shadowOffset`: `{ "x": 0, "y": 18 }`, shape/icon only
@@ -377,6 +382,9 @@ Preferred canonical names:
 - use `cornerRadius`, not `radius`;
 - use `width`/`height`/`cornerRadius` for canonical shape morphs, or
   `morphSize`/`roundness` when describing a circle-to-bar style morph;
+- use `trimEnd: 0 -> 1` for line reveal on `shapeKind: "line"`. Accepted
+  aliases include `lineReveal`, `lineRevealProgress`, and `trimPathEnd`. Do
+  not fake a line reveal with many small rectangles;
 - use `shadowOpacity`, `shadowBlur`, `shadowOffset`, `shadowSpread`, and
   `shadowColor` for supported shape/icon soft shadows. Accepted aliases include
   `softShadowOpacity`, `dropShadowOpacity`, `softShadowBlur`,
@@ -941,6 +949,8 @@ Supported basics:
 - width/height/cornerRadius for shapes;
 - shape morph aliases `morphSize` and `roundness` lower to editable
   width/height/cornerRadius channels;
+- line trim path controls `trimStart`, `trimEnd`, and `trimOffset` lower to
+  editable shape channels and preview for `shapeKind: "line"`;
 - `mask` scene elements and `movingMaskReveal`/`maskReveal` lower to editable
   `mask.revealProgress` graph channels with preserved mask metadata;
 - color;
@@ -953,7 +963,8 @@ Supported basics:
 
 Needs dedicated engine work before being treated as real:
 
-- trim paths;
+- trim path export parity, circular progress, arcs, dashed paths, and
+  wraparound offset rendering;
 - text range selector by word/character;
 - text shadow and export-perfect authored visual shadows;
 - glow;

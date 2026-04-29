@@ -114,6 +114,8 @@ Supported basics:
 - width/height/cornerRadius for shapes;
 - shape morph aliases `morphSize` and `roundness` lower to editable
   width/height/cornerRadius channels;
+- line trim path controls `trimStart`, `trimEnd`, and `trimOffset` lower to
+  editable shape channels and preview for `shapeKind: "line"`;
 - `mask` scene elements and `movingMaskReveal`/`maskReveal` lower to editable
   `mask.revealProgress` graph channels with preserved mask metadata;
 - color;
@@ -126,7 +128,8 @@ Supported basics:
 
 Needs dedicated engine work before being treated as real:
 
-- trim paths;
+- trim path export parity, circular progress, arcs, dashed paths, and
+  wraparound offset rendering;
 - text range selector by word/character;
 - text shadow and export-perfect authored visual shadows;
 - glow;
