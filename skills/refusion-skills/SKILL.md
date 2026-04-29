@@ -48,6 +48,9 @@ executable scene.
   [rules/professional-timing-contract.md](rules/professional-timing-contract.md).
 - For motion direction, readable holds, handoffs, and anti-random animation
   rules, read [rules/choreography.md](rules/choreography.md).
+- For composition-first workflow, Scene Clip containers, root/scene/layer scope
+  responsibilities, and editing existing scenes or mentioned elements, read
+  [rules/composition-workspace.md](rules/composition-workspace.md).
 - For supported and planned capabilities, categories, and how new tutorial
   tools should be registered, read
   [rules/capability-registry.md](rules/capability-registry.md).
@@ -72,6 +75,10 @@ rule file, and the example JSON in one document.
 - Typewriter text uses one full text element plus `typewriterProgress`.
 - Scene Program must implement the Director Plan; they may not disagree.
 - Every visible motion must be represented by editable keyframes.
+- A generated scene should become one editable Scene Clip container; do not
+  scatter one scene across many root timeline clips.
+- Existing-scene or `@mention` edits must target stable existing IDs and must
+  not create unrelated new elements.
 
 ## Current Engine Boundary
 
