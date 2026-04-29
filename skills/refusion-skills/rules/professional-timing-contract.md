@@ -166,6 +166,10 @@ Current enforced rules:
 - component timing lifetimes are derived for future compiler use;
 - Scene Program timing checks can detect duplicate channels and keyframes
   outside a layer span.
+- the Director compiler merges sequential primitives for the same
+  component/property into one ordered Scene Program channel before lowering.
+  For same-time handoffs, keep one editable keyframe at that time; the later
+  primitive defines the post-handoff value.
 
 Current caution:
 
