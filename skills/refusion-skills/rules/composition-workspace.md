@@ -93,6 +93,14 @@ Scene Contents Media:
   appended after the last video in the open scene and displayed on one video
   row. Use future explicit `Video Overlay` only when the user needs layered
   video compositing; do not make every imported video a new default row;
+- adjacent video layers in the primary Scene Contents storyline should expose a
+  selectable transition bridge. Treat this bridge as a real transition intent
+  between the two scene-local video layers, not as empty timeline space or a
+  hidden effect on only one layer;
+- manual/preset/AI transition choices may be staged before full renderer parity,
+  but the authored scene must preserve a clear boundary, stable left/right
+  layer IDs, and enough timing for the host app to open a future transition
+  scope without guessing;
 - must not be confused with Layer Scope keyframe/property Add tools.
 
 Playback and scrub projection:
