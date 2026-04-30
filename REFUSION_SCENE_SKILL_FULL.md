@@ -1046,6 +1046,11 @@ Playback and scrub projection:
 - full-interval projected media clips must keep stable identities when another
   video is added. Do not let visible-interval projection rename an unchanged clip
   and churn Live Scrub store keys;
+- native preview identity must be scoped to the playback owner, not the active
+  clip. A Scene Contents A/B video program should keep one stable
+  `native-preview-scope:*` identity while clips are inserted or playback moves
+  between them, so the fallback canvas does not cover a valid Android video
+  surface while native audio continues;
 - Scene Contents video insertion must preserve the video asset's natural
   duration. If the asset runs past the current Scene Clip duration, extend the
   source composition and Scene Clip instance together and shift later sequential
