@@ -89,6 +89,10 @@ Scene Contents Media:
 - Text and Shape are direct Scene Contents dock commands;
 - Audio, Null, and Adjustment are visible planned dock commands until their
   engines are wired;
+- normal video insertion uses one primary video storyline. New video layers are
+  appended after the last video in the open scene and displayed on one video
+  row. Use future explicit `Video Overlay` only when the user needs layered
+  video compositing; do not make every imported video a new default row;
 - must not be confused with Layer Scope keyframe/property Add tools.
 
 Playback and scrub projection:
