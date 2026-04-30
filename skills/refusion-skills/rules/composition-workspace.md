@@ -63,6 +63,12 @@ Layer scope:
 - effect controls;
 - channels;
 - keyframes;
+- image and video layers are real scene layers and may open Unified Layer Scope
+  for shared visual graph properties such as position, scale, rotation,
+  opacity, and blur;
+- do not reject video layer scope just because the source is playable media;
+  instead, preserve the layer identity and make renderer/export parity explicit
+  when an effect is not yet supported.
 - interpolation.
 
 Scene Contents Media:
