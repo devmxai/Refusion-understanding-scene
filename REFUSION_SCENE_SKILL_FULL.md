@@ -1028,14 +1028,16 @@ Playback and scrub projection:
   wait until native transport reaches the mapped scene-local target frame, then
   reveal/adopt the settled player frame;
 - Scene Contents layer clips are real source-scene timing. Dragging/moving one
-  must update the layer visible range, child element ranges, and related graph
-  channel/keyframe times. Never represent a moved scene layer as a fake detached
-  timeline chip;
+  must work as a direct horizontal layer move, must update the layer visible
+  range, child element ranges, and related graph channel/keyframe times, and
+  must never be represented as a fake detached timeline chip;
 - when nested video layers overlap, preview playback is a visible-video
   projection by draw order (`zIndex`, then insertion order). Hidden elapsed time
   under a higher video remains real elapsed source time for the lower video, so
   when that lower video becomes visible it must continue from its true source
   offset instead of frame zero;
+- Scene Contents row order must match preview draw order: the visually higher
+  row is the higher-priority layer (`zIndex`, then insertion order);
 - never solve playback by duplicating nested media as fake root timeline clips;
 - if a scene contains a video/image layer, preserve its `sourceBinding.assetId`
   and timing so the host can project it into real preview/scrub media
