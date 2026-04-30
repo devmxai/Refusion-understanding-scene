@@ -952,6 +952,16 @@ Root timeline:
 - hold master audio when needed;
 - hold transition clips between scenes.
 
+Root `Add > New Scene`:
+
+- creates a new empty Scene Clip container in the root composition;
+- when a Scene Clip is selected, inserts the new scene immediately after that
+  selected clip;
+- shifts later sequential Scene Clips forward to keep the story timeline
+  non-overlapping;
+- when no Scene Clip is selected, appends the new scene at the end of the
+  current scene sequence.
+
 Scene internals:
 
 - video layers;
