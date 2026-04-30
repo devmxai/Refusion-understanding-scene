@@ -985,6 +985,7 @@ Scene Contents Media:
 
 - belongs to the open source scene, not the root composition;
 - opens only video/image import for scene-local media layers;
+- treats video and image access as separate device-media permissions;
 - must not include Text, Shape, Audio, Null, or Adjustment in the media sheet;
 - Text and Shape are direct Scene Contents dock commands;
 - Audio, Null, and Adjustment are visible planned dock commands until their
