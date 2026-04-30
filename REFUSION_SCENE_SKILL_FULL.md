@@ -985,6 +985,10 @@ Layer scope:
 - do not reject video layer scope just because the source is playable media;
   instead, preserve the layer identity and make renderer/export parity explicit
   when an effect is not yet supported.
+- video preview is graph-aware: the active native video surface may be wrapped
+  with graph-evaluated transform/opacity/blur samples for preview/scrub/play.
+  Export must still declare whether the authored video surface renderer is
+  available instead of silently dropping those properties.
 - interpolation.
 
 Scene Contents Media:
