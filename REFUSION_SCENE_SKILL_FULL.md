@@ -1312,6 +1312,15 @@ such as Cross Dissolve or Fade Black. Do not ship a separate fallback for each
 transition. First complete the general compositor, then expose transitions above
 that compositor.
 
+Temporary diagnostic exception: `Zoom In Pro` may be visible in the preset
+picker as an explicit product-testing experiment before the full native
+compositor is complete. It is not a production transition, not a real Zoom In
+Camera implementation, and not permission to unlock any other preset, manual
+transition, or AI transition path. It may transform only the currently live
+native preview surface and must not use thumbnails, frozen frames, Gaussian
+transition blur, decorative speed lines, timeline overlays, or fake secondary
+video surfaces. Agents must describe it as an experiment only.
+
 ## Native Render Session Contract
 
 Every accepted `ProfessionalVideoTransitionRenderPlan` must become one strict
@@ -1697,6 +1706,12 @@ The current ReFusion engine intentionally gates all new video transition
 authoring out of the picker until a real professional video transition
 compositor exists. Existing saved Zoom transitions must not draw fake speed
 lines, frozen cards, or Gaussian transition blur.
+
+Exception for testing: `Zoom In Pro` may be opened as a temporary live-surface
+experiment. It exists to test authoring flow and rough zoom timing only. It does
+not satisfy dual-video sampling, temporal shutter motion blur, mirror-edge
+tiling, output-surface ownership, or parity readiness. Do not tell users or
+other agents that this means professional Zoom In Camera support is complete.
 
 The current app contains a strict `ProfessionalZoomCameraCompositorPlanner`
 contract for future native rendering. Agents must describe Zoom In Camera in
