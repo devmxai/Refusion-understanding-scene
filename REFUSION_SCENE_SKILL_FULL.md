@@ -118,6 +118,11 @@ rule file, and the example JSON in one document.
   rather than freezing boundary-frame thumbnails. Boundary frames are exact
   seeds/fallbacks for AI and non-live transitions, not a substitute for live
   playback.
+- New video transition authoring is locked until the native professional
+  compositor reports complete readiness: dual video sampling, temporal motion
+  blur, mirror-edge tiling, preview parity, Live Scrub parity, playback parity,
+  and export parity. Do not create preset, manual, or AI transition data before
+  that gate is open.
 
 ## Current Engine Boundary
 
@@ -1032,16 +1037,18 @@ Scene Contents Media:
   the media source start. A video starting at 17s inside a scene can still start
   at 0s inside its own file;
 - the transition bridge browser order is `Preset`, `Manual`, then
-  `AI Transition`. `Preset` should drill into a picker with a back action and
-  only list transitions the engine can currently evaluate (`Cross Dissolve`,
-  `Fade Black`, `Zoom In Camera` until more real effects are wired);
+  `AI Transition`. These entries are locked until the native professional
+  video transition compositor reports complete readiness: dual video sampling,
+  temporal motion blur, mirror-edge tiling, preview parity, Live Scrub parity,
+  playback parity, and export parity;
 - applying a Scene Contents preset should return directly to the timeline so
-  play and Live Scrub remain available. Open an inspector only when the user
-  taps an existing transition or explicitly chooses an edit/manual path;
-- manual/preset/AI transition choices may be staged before full renderer parity,
-  but the authored scene must preserve a clear boundary, stable left/right
-  layer IDs, and enough timing for the host app to open a future transition
-  scope without guessing;
+  play and Live Scrub remain available after the compositor is ready. Open an
+  inspector only when the user taps an existing transition or explicitly
+  chooses an edit/manual path;
+- manual/preset/AI transition choices must not be staged before full renderer
+  parity. Before parity, preserve only explicit transition intent in planning
+  text; do not create an authored transition lane, AI transition draft, or
+  preset instance in the app data;
 - must not be confused with Layer Scope keyframe/property Add tools.
 
 Playback and scrub projection:
@@ -1278,6 +1285,29 @@ capabilities exist. Treat registry statuses literally: unsupported definition,
 missing capabilities, or renderer not implemented are blockers, not invitations
 to invent a visual fallback.
 
+## Strict Authoring Gate
+
+Do not create a new transition preset, manual transition lane, or AI-generated
+transition draft while the native compositor reports the foundation/unavailable
+capability set.
+
+The app may show `Preset`, `Manual`, and `AI Transition` as locked roadmap
+entries, but they must not become clickable authoring paths until the native
+capability bridge reports all of these:
+
+- dual video sampling;
+- temporal motion blur;
+- mirror-edge tiling;
+- preview parity;
+- Live Scrub parity;
+- playback parity;
+- export parity.
+
+This rule applies to every video transition, including apparently simple ones
+such as Cross Dissolve or Fade Black. Do not ship a separate fallback for each
+transition. First complete the general compositor, then expose transitions above
+that compositor.
+
 ## Cross Dissolve Primitive Contract
 
 For `crossDissolve`, reason as a true two-source alpha blend:
@@ -1362,10 +1392,10 @@ bridge darkness: 0.12
 
 ## Current Engine Support
 
-The current ReFusion engine intentionally gates `Zoom In Camera` out of the
-preset picker until a real professional video transition compositor exists.
-Existing saved Zoom transitions must not draw fake speed lines, frozen cards, or
-Gaussian transition blur.
+The current ReFusion engine intentionally gates all new video transition
+authoring out of the picker until a real professional video transition
+compositor exists. Existing saved Zoom transitions must not draw fake speed
+lines, frozen cards, or Gaussian transition blur.
 
 The current app contains a strict `ProfessionalZoomCameraCompositorPlanner`
 contract for future native rendering. Agents must describe Zoom In Camera in
@@ -1375,11 +1405,11 @@ blurred thumbnail, or a decorative speed-line effect.
 
 The app also has a native capability bridge at
 `com.refusion.app/professional_video_transition_compositor.getCapabilities`.
-Zoom In Camera may appear in the preset browser only when that native response
-reports all required capabilities: dual video sampling, temporal motion blur,
-mirror-edge tiling, preview parity, live scrub parity, playback parity, and
-export parity. Current builds report these as unavailable until the real native
-renderer ships.
+No transition preset, manual transition path, or AI transition path may become
+clickable when that native response is missing any required capability: dual
+video sampling, temporal motion blur, mirror-edge tiling, preview parity, live
+scrub parity, playback parity, and export parity. Current builds report these
+as unavailable until the real native renderer ships.
 
 The current bridge defines generic `prepareRenderPlan`. Zoom In Camera is only
 one definition lowered into that general handoff shape: canvas dimensions, seam
@@ -1388,7 +1418,7 @@ overscan must be present. Current builds return `unsupported` from native code
 by design; do not work around that with a Flutter overlay, frozen frame,
 Gaussian blur, or speed-line decoration.
 
-Do not promise Zoom In Camera support until preview, live scrub, playback, and
+Do not promise transition support until preview, live scrub, playback, and
 export all use the same compositor contract.
 
 ---

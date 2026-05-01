@@ -87,6 +87,11 @@ rule file, and the example JSON in one document.
   rather than freezing boundary-frame thumbnails. Boundary frames are exact
   seeds/fallbacks for AI and non-live transitions, not a substitute for live
   playback.
+- New video transition authoring is locked until the native professional
+  compositor reports complete readiness: dual video sampling, temporal motion
+  blur, mirror-edge tiling, preview parity, Live Scrub parity, playback parity,
+  and export parity. Do not create preset, manual, or AI transition data before
+  that gate is open.
 
 ## Current Engine Boundary
 

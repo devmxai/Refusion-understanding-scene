@@ -46,6 +46,29 @@ capabilities exist. Treat registry statuses literally: unsupported definition,
 missing capabilities, or renderer not implemented are blockers, not invitations
 to invent a visual fallback.
 
+## Strict Authoring Gate
+
+Do not create a new transition preset, manual transition lane, or AI-generated
+transition draft while the native compositor reports the foundation/unavailable
+capability set.
+
+The app may show `Preset`, `Manual`, and `AI Transition` as locked roadmap
+entries, but they must not become clickable authoring paths until the native
+capability bridge reports all of these:
+
+- dual video sampling;
+- temporal motion blur;
+- mirror-edge tiling;
+- preview parity;
+- Live Scrub parity;
+- playback parity;
+- export parity.
+
+This rule applies to every video transition, including apparently simple ones
+such as Cross Dissolve or Fade Black. Do not ship a separate fallback for each
+transition. First complete the general compositor, then expose transitions above
+that compositor.
+
 ## Cross Dissolve Primitive Contract
 
 For `crossDissolve`, reason as a true two-source alpha blend:
@@ -130,10 +153,10 @@ bridge darkness: 0.12
 
 ## Current Engine Support
 
-The current ReFusion engine intentionally gates `Zoom In Camera` out of the
-preset picker until a real professional video transition compositor exists.
-Existing saved Zoom transitions must not draw fake speed lines, frozen cards, or
-Gaussian transition blur.
+The current ReFusion engine intentionally gates all new video transition
+authoring out of the picker until a real professional video transition
+compositor exists. Existing saved Zoom transitions must not draw fake speed
+lines, frozen cards, or Gaussian transition blur.
 
 The current app contains a strict `ProfessionalZoomCameraCompositorPlanner`
 contract for future native rendering. Agents must describe Zoom In Camera in
@@ -143,11 +166,11 @@ blurred thumbnail, or a decorative speed-line effect.
 
 The app also has a native capability bridge at
 `com.refusion.app/professional_video_transition_compositor.getCapabilities`.
-Zoom In Camera may appear in the preset browser only when that native response
-reports all required capabilities: dual video sampling, temporal motion blur,
-mirror-edge tiling, preview parity, live scrub parity, playback parity, and
-export parity. Current builds report these as unavailable until the real native
-renderer ships.
+No transition preset, manual transition path, or AI transition path may become
+clickable when that native response is missing any required capability: dual
+video sampling, temporal motion blur, mirror-edge tiling, preview parity, live
+scrub parity, playback parity, and export parity. Current builds report these
+as unavailable until the real native renderer ships.
 
 The current bridge defines generic `prepareRenderPlan`. Zoom In Camera is only
 one definition lowered into that general handoff shape: canvas dimensions, seam
@@ -156,5 +179,5 @@ overscan must be present. Current builds return `unsupported` from native code
 by design; do not work around that with a Flutter overlay, frozen frame,
 Gaussian blur, or speed-line decoration.
 
-Do not promise Zoom In Camera support until preview, live scrub, playback, and
+Do not promise transition support until preview, live scrub, playback, and
 export all use the same compositor contract.
