@@ -1288,6 +1288,8 @@ For `crossDissolve`, reason as a true two-source alpha blend:
   time;
 - both sources should cover the full transition window, not just their normal
   non-overlapping clip ranges;
+- use a two-second symmetric dissolve as the professional default. Very short
+  windows below about 600ms read as quick fades, not smooth cross dissolves;
 - progress is normalized from the transition start to the transition end;
 - outgoing opacity is `1 - progress`;
 - incoming opacity is `progress`;
@@ -1308,7 +1310,9 @@ preview bridge may use exact boundary frames only as seam anchors:
 - after the seam, live native playback is incoming B and the outgoing last
   boundary frame fades out;
 - the incoming boundary frame must be source B's first visible source frame, not
-  a late frame caused by B's placement on the composition timeline.
+  a late frame caused by B's placement on the composition timeline;
+- boundary-frame anchors should be requested at the composition canvas
+  resolution, not generic low-resolution thumbnail size.
 
 ## Zoom In Camera Contract
 
