@@ -258,6 +258,24 @@ Passing this stage proves dual-video sampling readiness only; it is not
 permission to expose a transition preset until temporal accumulation,
 mirror-edge tiling, output surface, and parity stages also pass.
 
+The decoder session must also prove a continuous live decode window. Exact
+decoded shutter samples are not enough. Outgoing must cover the leading
+transition window up to the seam, and incoming must cover the trailing window
+from the seam. Agents and renderers must look for:
+
+- `requiresContinuousFrameStream=true`;
+- `liveDecodeWindowTimelineStartMs`;
+- `liveDecodeWindowTimelineEndMs`;
+- `liveDecodeWindowSourceStartMs`;
+- `liveDecodeWindowSourceEndMs`;
+- `liveDecodeWindowReady=true`;
+- `continuousSampleCoverageReady=true`.
+
+If `continuousSampleCoverageReady` is false, the transition is still blocked
+with `native_dual_video_live_decode_not_ready`. Do not treat decoded center
+frames, boundary frames, thumbnails, poster frames, or shutter sample probes as
+a playing transition.
+
 ## Native Temporal Sample Accumulator Contract
 
 After a dual-video decoder session exists, the compositor must bind outgoing
