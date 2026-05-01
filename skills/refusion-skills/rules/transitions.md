@@ -61,8 +61,12 @@ capability bridge reports all of these:
 - mirror-edge tiling;
 - preview parity;
 - Live Scrub parity;
-- playback parity;
-- export parity.
+- playback parity.
+
+Export parity is a separate later release gate. Do not block interactive
+preview/scrub/playback transition authoring on export once the native
+interactive compositor is complete, but do not claim export support until the
+export renderer joins the same output contract.
 
 This rule applies to every video transition, including apparently simple ones
 such as Cross Dissolve or Fade Black. Do not ship a separate fallback for each
@@ -131,7 +135,7 @@ it must run the full readiness preflight. The readiness chain is: native
 capabilities, strict render-session preparation, concrete source binding,
 frame samples, exact decode requests, dual-video decoder, temporal accumulator,
 mirror-edge tiler, render-pass graph, output surface, and
-preview/live-scrub/playback/export parity. A single green stage is not
+preview/live-scrub/playback parity. A single green stage is not
 permission to ship a transition. Every stage must be able to advance.
 
 Any UI or agent-facing explanation of transition readiness must use the formal
@@ -139,7 +143,7 @@ readiness presentation model. Do not collapse readiness into a vague "not
 ready" or "missing capabilities" string. Name the blocked stages in order so a
 future agent can tell whether the problem is source binding, exact decode,
 temporal accumulation, mirror-edge tiling, output-surface ownership, or
-preview/live-scrub/playback/export parity.
+preview/live-scrub/playback parity.
 
 After source URI binding and before exact frame decode, every transition plan
 must pass a real video source probe. The probe must prove that each bound
@@ -154,7 +158,7 @@ The Android implementation probes `file://` and `content://` sources with
 rate. Passing the source probe is only source truth; it is not permission to
 render. Exact decode, dual-video decoder, temporal shutter accumulation,
 mirror-edge tiling, output-surface ownership, and preview/live-scrub/playback/
-export parity must still pass.
+parity must still pass. Export remains a later release gate.
 
 ## Native Frame Sample Contract
 
@@ -454,8 +458,8 @@ The app also has a native capability bridge at
 No transition preset, manual transition path, or AI transition path may become
 clickable when that native response is missing any required capability: dual
 video sampling, temporal motion blur, mirror-edge tiling, preview parity, live
-scrub parity, playback parity, and export parity. Current builds report these
-as unavailable until the real native renderer ships.
+scrub parity, and playback parity. Current builds report these as unavailable
+until the real native renderer ships. Export parity is tracked separately.
 
 The current bridge defines generic `prepareRenderPlan`. Zoom In Camera is only
 one definition lowered into that general handoff shape: canvas dimensions, seam
