@@ -324,6 +324,12 @@ that every shutter sample is decodable, it must also block with
 `native_temporal_sample_decode_not_ready`. If the decoder stage cannot prove
 readable decoded buffers for every decoded sample, it must also block with
 `native_temporal_sample_buffer_not_ready`.
+If the decoder stage cannot prove a live decode stream through the transition
+window, the accumulator must also block with
+`native_temporal_live_decode_stream_not_ready`. Temporal shutter accumulation
+cannot be considered professional when it only receives isolated decoded
+samples; the source stream itself must remain playable through the outgoing and
+incoming windows.
 
 This is a hard quality boundary. Gaussian blur, poster-frame blur, line overlays,
 radial decorative strokes, or any still-image substitute are not motion blur.
