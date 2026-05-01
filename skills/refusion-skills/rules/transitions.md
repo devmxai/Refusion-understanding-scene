@@ -159,6 +159,24 @@ the renderer is not implemented. Planning a graph is not permission to expose a
 transition preset. A preset becomes valid only when the concrete native renderer
 executes this graph for preview, Live Scrub, playback, and export parity.
 
+## Native Output Surface Contract
+
+After a render pass graph exists, the compositor must bind it to a single
+professional output target: a native transition canvas surface clipped to the
+preview/export canvas.
+
+The output-surface contract must explicitly forbid:
+
+- Flutter overlay rendering;
+- timeline overlay rendering;
+- transformed PlatformView fallback rendering;
+- drawing transition video into the timeline area;
+- any renderer path that is not canvas-clipped and native-owned.
+
+Planning an output surface is still not permission to expose a transition. The
+surface must report `rendererImplemented=false` until a concrete native renderer
+executes the graph for preview, Live Scrub, playback, and export parity.
+
 ## Cross Dissolve Primitive Contract
 
 For `crossDissolve`, reason as a true two-source alpha blend:
@@ -285,6 +303,12 @@ turns exact decode requests into a pass graph and keeps
 `rendererImplemented=false`. Agents must not treat a planned graph as a usable
 transition effect until the concrete renderer is implemented and the capability
 bridge reports full parity.
+
+The current native foundation also defines `planOutputSurface`. This endpoint
+binds the pass graph to a canvas-clipped native transition output target and
+forbids Flutter overlays, timeline overlays, and PlatformView transform
+fallbacks. It also keeps `rendererImplemented=false`, so it cannot unlock a
+transition preset by itself.
 
 Do not promise transition support until preview, live scrub, playback, and
 export all use the same compositor contract.
