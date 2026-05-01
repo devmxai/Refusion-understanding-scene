@@ -1308,6 +1308,25 @@ such as Cross Dissolve or Fade Black. Do not ship a separate fallback for each
 transition. First complete the general compositor, then expose transitions above
 that compositor.
 
+## Native Render Session Contract
+
+Every accepted `ProfessionalVideoTransitionRenderPlan` must become one strict
+native render session before rendering:
+
+- exactly two sources: outgoing A and incoming B;
+- positive canvas size;
+- non-negative seam timing and positive transition duration;
+- source roles must be `[outgoing, incoming]`;
+- every source needs a stable clip id, asset id, timeline range, source start,
+  and source duration;
+- outgoing A must reach the seam and cover the leading transition window;
+- incoming B must start at or before the seam and cover the trailing transition
+  window.
+
+If any of these are missing, the correct answer is an explicit invalid or
+unsupported result. Do not repair the plan by freezing a boundary frame,
+stretching a thumbnail, or inventing hidden source timing.
+
 ## Cross Dissolve Primitive Contract
 
 For `crossDissolve`, reason as a true two-source alpha blend:
