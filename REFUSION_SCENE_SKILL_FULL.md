@@ -1246,6 +1246,27 @@ from the seam:
 - the seam is normally at `0.5` unless an explicit alignment says otherwise;
 - all motion curves are evaluated from this one progress value.
 
+## General Video Transition Compositor Contract
+
+ReFusion's professional transition compositor is general. Do not describe or
+author a private renderer for each transition. Every transition should lower
+into one shared `ProfessionalVideoTransitionRenderPlan` with:
+
+- `definitionId`
+- stable transition id
+- canvas dimensions
+- seam timing and leading/trailing durations
+- source list with timeline/source ranges
+- required capabilities
+- transition parameters
+- sampling policy
+- edge policy
+- motion blur policy
+
+If a transition needs a new capability, declare the missing capability and
+extend the engine. Do not fake support with thumbnails, still frames, decorative
+lines, Gaussian blur, or transformed single-surface previews.
+
 ## Zoom In Camera Contract
 
 For a professional zoom-in camera transition:
@@ -1313,12 +1334,12 @@ mirror-edge tiling, preview parity, live scrub parity, playback parity, and
 export parity. Current builds report these as unavailable until the real native
 renderer ships.
 
-The current bridge also defines `prepareZoomInCameraRenderPlan`. Agents and
-tooling should treat this as the real handoff shape for future native rendering:
-canvas dimensions, seam timing, outgoing/incoming source ranges, shutter
-settings, and mirror-edge tile overscan must be present. Current builds return
-`unsupported` from native code by design; do not work around that with a
-Flutter overlay, frozen frame, Gaussian blur, or speed-line decoration.
+The current bridge defines generic `prepareRenderPlan`. Zoom In Camera is only
+one definition lowered into that general handoff shape: canvas dimensions, seam
+timing, outgoing/incoming source ranges, shutter settings, and mirror-edge tile
+overscan must be present. Current builds return `unsupported` from native code
+by design; do not work around that with a Flutter overlay, frozen frame,
+Gaussian blur, or speed-line decoration.
 
 Do not promise Zoom In Camera support until preview, live scrub, playback, and
 export all use the same compositor contract.
