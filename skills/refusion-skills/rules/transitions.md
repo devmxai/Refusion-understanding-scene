@@ -46,6 +46,25 @@ capabilities exist. Treat registry statuses literally: unsupported definition,
 missing capabilities, or renderer not implemented are blockers, not invitations
 to invent a visual fallback.
 
+## Cross Dissolve Primitive Contract
+
+For `crossDissolve`, reason as a true two-source alpha blend:
+
+- both outgoing A and incoming B must be real video sources;
+- both sources should cover the full transition window, not just their normal
+  non-overlapping clip ranges;
+- progress is normalized from the transition start to the transition end;
+- outgoing opacity is `1 - progress`;
+- incoming opacity is `progress`;
+- outgoing and incoming source times must be sampled from their real
+  timeline/source ranges.
+
+If either source does not cover the transition window, declare the missing
+source coverage. Do not solve it by freezing the first/last frame, stretching a
+thumbnail, or using a poster image. The host app now has a
+`ProfessionalCrossDissolveCompositorPlanner` that exposes this coverage truth,
+and a renderer must not enable the dissolve when coverage is false.
+
 ## Zoom In Camera Contract
 
 For a professional zoom-in camera transition:
