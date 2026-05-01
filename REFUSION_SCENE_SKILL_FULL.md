@@ -1490,6 +1490,8 @@ Each accumulator must preserve:
 - source role: `outgoing` or `incoming`;
 - input decoder track role;
 - sample count;
+- decoded sample count;
+- whether all input shutter samples are decodable;
 - deterministic sample weights;
 - normalization mode, initially `weightedAverage`;
 - `requiresTemporalShutter=true` when the render plan requests temporal shutter
@@ -1500,7 +1502,9 @@ Each accumulator must preserve:
 
 The accumulator session may be planned before a real implementation exists, but
 it must report `accumulatorImplemented=false` and block transition exposure with
-`native_temporal_sample_accumulator_missing`.
+`native_temporal_sample_accumulator_missing`. If the decoder stage cannot prove
+that every shutter sample is decodable, it must also block with
+`native_temporal_sample_decode_not_ready`.
 
 This is a hard quality boundary. Gaussian blur, poster-frame blur, line overlays,
 radial decorative strokes, or any still-image substitute are not motion blur.
