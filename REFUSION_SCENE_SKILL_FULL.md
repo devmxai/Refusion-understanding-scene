@@ -1772,22 +1772,54 @@ The renderer backend gate must preserve:
 - whether a real draw loop exists;
 - whether a concrete renderer writes pixels.
 
-The backend may report `rendererBackendImplemented=true` and
-`gpuContextAvailable=true` when the platform path exists, but this still does
-not unlock transitions. Until a concrete native draw loop submits the command
-buffer and writes pixels, it must report:
+The backend may report `rendererBackendImplemented=true`,
+`gpuContextAvailable=true`, `backendReady=true`, and `canSubmitCommands=true`
+when the platform path can accept the command buffer, but this still does not
+unlock transitions. A renderer backend is not a pixel renderer. Until the next
+draw-loop stage and pixel renderer exist, it must still report:
 
 - `drawLoopImplemented=false`;
 - `rendererImplemented=false`;
 - `rendersRealPixels=false`;
 - `drawsPixels=false`;
-- `canSubmitCommands=false`;
 - `canRenderFrame=false`.
 
-The required blockers are `native_transition_renderer_draw_loop_missing` and
-`native_transition_renderer_pixels_missing`. Do not replace this stage with a
-Flutter overlay, timeline-area drawing, transformed PlatformView, Gaussian blur,
-speed-line shapes, still-frame zoom, or any renderer-specific fake.
+Do not replace this stage with a Flutter overlay, timeline-area drawing,
+transformed PlatformView, Gaussian blur, speed-line shapes, still-frame zoom, or
+any renderer-specific fake.
+
+## Native Renderer Draw Loop Contract
+
+After the renderer backend accepts the command buffer, the compositor must create
+an ordered draw-loop submission plan before any shader or transition pixel
+program can run.
+
+The draw-loop contract must preserve:
+
+- renderer draw-loop id;
+- renderer backend id;
+- frame render command buffer id;
+- ordered draw submissions;
+- each submission's command id, pass id, pass type, output target, and whether it
+  writes to the final native transition canvas surface;
+- `requiresRealPixels=true` for every submission.
+
+This stage may report `drawLoopImplemented=true` and `canSubmitCommands=true`
+when commands are ordered and can be submitted to the backend. It still must not
+claim visual transition support until the shader/pixel renderer writes pixels.
+While the pixel renderer is missing it must report:
+
+- `shaderEvaluatorImplemented=false`;
+- `pixelRendererImplemented=false`;
+- `rendererImplemented=false`;
+- `rendersRealPixels=false`;
+- `drawsPixels=false`;
+- `canRenderFrame=false`.
+
+The required blockers are `native_transition_shader_evaluator_missing`,
+`native_transition_pixel_renderer_missing`, and
+`native_transition_renderer_pixels_missing`. A draw-loop submission plan is not a
+rendered transition; it is the final scheduling layer before real pixel work.
 
 ## Native Parity Output Contract
 
