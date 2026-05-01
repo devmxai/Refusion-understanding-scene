@@ -1378,6 +1378,26 @@ The decode request contract must explicitly forbid:
 If exact video frame decode is unavailable, the transition remains locked. Do
 not author or describe a visual workaround as if it were the real compositor.
 
+## Native Render Pass Graph Contract
+
+After exact decode requests exist, the compositor must lower the frame into a
+renderer-agnostic pass graph before any concrete transition implementation can
+claim support.
+
+The pass graph must include the general phases required by professional video
+transitions:
+
+- exact video frame decode;
+- temporal sample accumulation for outgoing and incoming sources;
+- mirror-edge tile when the edge policy requires it;
+- transition shader/effect evaluation;
+- composition to the transition output surface.
+
+The pass graph may be planned before a renderer exists, but it must report that
+the renderer is not implemented. Planning a graph is not permission to expose a
+transition preset. A preset becomes valid only when the concrete native renderer
+executes this graph for preview, Live Scrub, playback, and export parity.
+
 ## Cross Dissolve Primitive Contract
 
 For `crossDissolve`, reason as a true two-source alpha blend:
@@ -1498,6 +1518,12 @@ The current native foundation also defines `planFrameDecodeRequests`. This
 endpoint converts those samples into exact video decode requests for both
 sources, with thumbnail fallback and boundary freeze explicitly disabled. It is
 still planning only; it does not mean transitions are renderable.
+
+The current native foundation also defines `planRenderPassGraph`. This endpoint
+turns exact decode requests into a pass graph and keeps
+`rendererImplemented=false`. Agents must not treat a planned graph as a usable
+transition effect until the concrete renderer is implemented and the capability
+bridge reports full parity.
 
 Do not promise transition support until preview, live scrub, playback, and
 export all use the same compositor contract.
