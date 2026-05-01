@@ -122,10 +122,11 @@ path with `native_video_source_uri_missing`.
 
 Do not describe or author a transition that decodes from asset ids alone,
 generated proxies, cached thumbnails, timeline posters, or inferred media
-locations. The professional path is: source URI binding, exact frame samples,
-exact decode requests, dual-video decoder tracks, temporal accumulation,
-mirror-edge tiling when required, render-pass graph, output surface, and parity
-outputs.
+  locations. The professional path is: source URI binding, exact frame samples,
+  exact decode requests, dual-video decoder tracks, temporal accumulation,
+  mirror-edge tiling when required, render-pass graph, graph execution, output
+  surface, surface renderer, frame render commands, renderer backend, and parity
+  outputs.
 
 Flutter production code must not hand-assemble compositor source maps inside
 large editor screens. Use the source-bound render-plan adapter contract:
@@ -138,10 +139,11 @@ sampling.
 
 Before any UI, agent, or script claims that a video transition can be exposed,
 it must run the full readiness preflight. The readiness chain is: native
-capabilities, strict render-session preparation, concrete source binding,
-frame samples, exact decode requests, dual-video decoder, temporal accumulator,
-mirror-edge tiler, render-pass graph, output surface, and
-preview/live-scrub/playback parity. A single green stage is not
+  capabilities, strict render-session preparation, concrete source binding,
+  frame samples, exact decode requests, dual-video decoder, temporal accumulator,
+  mirror-edge tiler, render-pass graph, graph execution, output surface, surface
+  renderer, frame render commands, renderer backend, and
+  preview/live-scrub/playback parity. A single green stage is not
 permission to ship a transition. Every stage must be able to advance.
 
 Any UI or agent-facing explanation of transition readiness must use the formal
@@ -513,6 +515,40 @@ The required blocker is
 command graph as a visual transition. It is only the final planning layer before
 a real native renderer submits commands and writes pixels to the
 `nativeTransitionCanvasSurface`.
+
+## Native Renderer Backend Contract
+
+After frame render commands exist, the compositor must attach them to the native
+renderer backend before any transition can claim it can draw.
+
+The renderer backend gate must preserve:
+
+- renderer backend id;
+- frame render command buffer id;
+- output surface id;
+- output target, which must be `nativeTransitionCanvasSurface`;
+- GPU/OpenGL ES availability;
+- command-buffer readiness;
+- output-surface attachment;
+- whether a real draw loop exists;
+- whether a concrete renderer writes pixels.
+
+The backend may report `rendererBackendImplemented=true` and
+`gpuContextAvailable=true` when the platform path exists, but this still does
+not unlock transitions. Until a concrete native draw loop submits the command
+buffer and writes pixels, it must report:
+
+- `drawLoopImplemented=false`;
+- `rendererImplemented=false`;
+- `rendersRealPixels=false`;
+- `drawsPixels=false`;
+- `canSubmitCommands=false`;
+- `canRenderFrame=false`.
+
+The required blockers are `native_transition_renderer_draw_loop_missing` and
+`native_transition_renderer_pixels_missing`. Do not replace this stage with a
+Flutter overlay, timeline-area drawing, transformed PlatformView, Gaussian blur,
+speed-line shapes, still-frame zoom, or any renderer-specific fake.
 
 ## Native Parity Output Contract
 
