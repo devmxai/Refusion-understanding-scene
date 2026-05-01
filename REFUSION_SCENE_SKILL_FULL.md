@@ -1378,6 +1378,30 @@ The decode request contract must explicitly forbid:
 If exact video frame decode is unavailable, the transition remains locked. Do
 not author or describe a visual workaround as if it were the real compositor.
 
+## Native Dual-Video Decoder Session Contract
+
+After exact decode requests exist, the compositor must group them into a
+dual-video decoder session before any render pass can claim support.
+
+The decoder session must include exactly two video tracks:
+
+- outgoing;
+- incoming.
+
+Each track must preserve:
+
+- clip id;
+- asset id;
+- exact decode request ids;
+- sample count;
+- `requiresExactFrameDecode=true`;
+- `allowThumbnailFallback=false`;
+- `allowBoundaryFreeze=false`.
+
+The decoder session may be planned before the actual decoder exists, but it
+must report `decoderImplemented=false`. A planned decoder session is not
+permission to expose a transition preset.
+
 ## Native Render Pass Graph Contract
 
 After exact decode requests exist, the compositor must lower the frame into a
@@ -1551,6 +1575,12 @@ The current native foundation also defines `planFrameDecodeRequests`. This
 endpoint converts those samples into exact video decode requests for both
 sources, with thumbnail fallback and boundary freeze explicitly disabled. It is
 still planning only; it does not mean transitions are renderable.
+
+The current native foundation also defines `planDualVideoDecoderSession`. This
+endpoint groups exact outgoing/incoming decode requests into two native decoder
+tracks and keeps `decoderImplemented=false`. Agents must not substitute
+MediaMetadataRetriever thumbnails, cached posters, or frozen boundary stills
+for this contract.
 
 The current native foundation also defines `planRenderPassGraph`. This endpoint
 turns exact decode requests into a pass graph and keeps
