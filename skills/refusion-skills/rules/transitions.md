@@ -441,9 +441,21 @@ transition output contract is valid for every required mode:
 
 An agent must not describe a transition as implemented if one mode uses the
 native compositor while another mode uses a fallback. Preview, Live Scrub, and
-playback must share the same native transition output surface contract before a
-preset/manual/AI transition is exposed. Export must later attach to the same
-contract; it must not fork into a different renderer.
+playback must share the same native transition output surface contract and the
+same final `composeToTransitionSurface` output pass before a preset/manual/AI
+transition is exposed.
+
+Each parity output must carry:
+
+- output pass id;
+- output pass type;
+- output pass inputs;
+- `outputPassBound`;
+- `renderGraphOutputReady`.
+
+Mode-level `canRender` is false if the output pass binding is missing, even if
+the output surface id matches. Export must later attach to the same contract; it
+must not fork into a different renderer.
 
 ## Cross Dissolve Primitive Contract
 
