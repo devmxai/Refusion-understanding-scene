@@ -117,6 +117,15 @@ exact decode requests, dual-video decoder tracks, temporal accumulation,
 mirror-edge tiling when required, render-pass graph, output surface, and parity
 outputs.
 
+Flutter production code must not hand-assemble compositor source maps inside
+large editor screens. Use the source-bound render-plan adapter contract:
+adjacent `TimelineClipData` clips plus a `sourceUri` resolver become one strict
+`ProfessionalVideoTransitionRenderPlan`. If either side lacks a concrete
+`sourceUri`, enough visible/source handle for the leading/trailing window, or
+explicit source-rate support, the adapter must fail closed with a blocker
+instead of emitting a plan that would force frozen frames or ambiguous media
+sampling.
+
 ## Native Frame Sample Contract
 
 Every renderer must sample live source time through the shared native frame
