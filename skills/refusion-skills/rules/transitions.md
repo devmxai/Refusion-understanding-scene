@@ -78,5 +78,13 @@ terms of real outgoing/incoming source-time samples, shutter-angle temporal
 sampling, and mirror-edge tiling. Do not describe it as an overlay, a card, a
 blurred thumbnail, or a decorative speed-line effect.
 
+The app also has a native capability bridge at
+`com.refusion.app/professional_video_transition_compositor.getCapabilities`.
+Zoom In Camera may appear in the preset browser only when that native response
+reports all required capabilities: dual video sampling, temporal motion blur,
+mirror-edge tiling, preview parity, live scrub parity, playback parity, and
+export parity. Current builds report these as unavailable until the real native
+renderer ships.
+
 Do not promise Zoom In Camera support until preview, live scrub, playback, and
 export all use the same compositor contract.
