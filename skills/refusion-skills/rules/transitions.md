@@ -149,6 +149,13 @@ thumbnails, poster frames, or boundary-frame stills. If the probe is not
 implemented or fails for either source, the readiness blocker is
 `sourceMediaProbe` and the transition must remain unavailable.
 
+The Android implementation probes `file://` and `content://` sources with
+`MediaExtractor` and may report video MIME type, dimensions, duration, and frame
+rate. Passing the source probe is only source truth; it is not permission to
+render. Exact decode, dual-video decoder, temporal shutter accumulation,
+mirror-edge tiling, output-surface ownership, and preview/live-scrub/playback/
+export parity must still pass.
+
 ## Native Frame Sample Contract
 
 Every renderer must sample live source time through the shared native frame
