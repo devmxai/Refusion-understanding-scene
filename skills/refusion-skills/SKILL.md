@@ -82,10 +82,11 @@ rule file, and the example JSON in one document.
   scatter one scene across many root timeline clips.
 - Existing-scene or `@mention` edits must target stable existing IDs and must
   not create unrelated new elements.
-- Transitions must be seam-aware boundary effects: outgoing uses the last
-  visible frame of A, incoming uses the first visible frame of B, and zoom
-  transitions must use speed, blur, and deterministic impact motion rather than
-  generic thumbnails.
+- Transitions must be seam-aware boundary effects. For live video presets such
+  as Zoom In Camera, animate the live video surface over the transition window
+  rather than freezing boundary-frame thumbnails. Boundary frames are exact
+  seeds/fallbacks for AI and non-live transitions, not a substitute for live
+  playback.
 
 ## Current Engine Boundary
 
