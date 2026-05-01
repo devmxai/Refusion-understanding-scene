@@ -1026,6 +1026,11 @@ Scene Contents Media:
   may expose video timing, drag, and transition bridges, but they must not be
   authored as fake root media clips or force the source scene timeline to become
   the compact native media program;
+- when a Scene Contents video proxy is projected into a preview/timeline clip,
+  its `sourceStartTime` and `sourceDurationTime` must describe the underlying
+  media file's real source range. Never use the layer's scene-local placement as
+  the media source start. A video starting at 17s inside a scene can still start
+  at 0s inside its own file;
 - the transition bridge browser order is `Preset`, `Manual`, then
   `AI Transition`. `Preset` should drill into a picker with a back action and
   only list transitions the engine can currently evaluate (`Cross Dissolve`,
@@ -1278,6 +1283,9 @@ to invent a visual fallback.
 For `crossDissolve`, reason as a true two-source alpha blend:
 
 - both outgoing A and incoming B must be real video sources;
+- outgoing A must sample the playing end of A, and incoming B must sample the
+  playing beginning of B. Do not confuse scene placement time with media source
+  time;
 - both sources should cover the full transition window, not just their normal
   non-overlapping clip ranges;
 - progress is normalized from the transition start to the transition end;
@@ -1291,6 +1299,16 @@ source coverage. Do not solve it by freezing the first/last frame, stretching a
 thumbnail, or using a poster image. The host app now has a
 `ProfessionalCrossDissolveCompositorPlanner` that exposes this coverage truth,
 and a renderer must not enable the dissolve when coverage is false.
+
+Until the full dual-video native compositor renders both streams directly, the
+preview bridge may use exact boundary frames only as seam anchors:
+
+- before the seam, live native playback is outgoing A and the incoming first
+  boundary frame fades in;
+- after the seam, live native playback is incoming B and the outgoing last
+  boundary frame fades out;
+- the incoming boundary frame must be source B's first visible source frame, not
+  a late frame caused by B's placement on the composition timeline.
 
 ## Zoom In Camera Contract
 

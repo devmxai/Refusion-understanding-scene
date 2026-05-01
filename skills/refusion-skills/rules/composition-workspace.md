@@ -101,6 +101,11 @@ Scene Contents Media:
   may expose video timing, drag, and transition bridges, but they must not be
   authored as fake root media clips or force the source scene timeline to become
   the compact native media program;
+- when a Scene Contents video proxy is projected into a preview/timeline clip,
+  its `sourceStartTime` and `sourceDurationTime` must describe the underlying
+  media file's real source range. Never use the layer's scene-local placement as
+  the media source start. A video starting at 17s inside a scene can still start
+  at 0s inside its own file;
 - the transition bridge browser order is `Preset`, `Manual`, then
   `AI Transition`. `Preset` should drill into a picker with a back action and
   only list transitions the engine can currently evaluate (`Cross Dissolve`,
