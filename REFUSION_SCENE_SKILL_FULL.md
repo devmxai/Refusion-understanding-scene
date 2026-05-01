@@ -1402,11 +1402,37 @@ The decoder session may be planned before the actual decoder exists, but it
 must report `decoderImplemented=false`. A planned decoder session is not
 permission to expose a transition preset.
 
+## Native Temporal Sample Accumulator Contract
+
+After a dual-video decoder session exists, the compositor must bind outgoing
+and incoming decoder tracks into temporal sample accumulators before any
+transition can claim real motion blur support.
+
+Each accumulator must preserve:
+
+- source role: `outgoing` or `incoming`;
+- input decoder track role;
+- sample count;
+- deterministic sample weights;
+- normalization mode, initially `weightedAverage`;
+- `requiresTemporalShutter=true` when the render plan requests temporal shutter
+  motion blur;
+- `requiresExactFrameDecode=true`;
+- `allowGaussianFallback=false`;
+- `allowDecorativeSpeedLines=false`.
+
+The accumulator session may be planned before a real implementation exists, but
+it must report `accumulatorImplemented=false` and block transition exposure with
+`native_temporal_sample_accumulator_missing`.
+
+This is a hard quality boundary. Gaussian blur, poster-frame blur, line overlays,
+radial decorative strokes, or any still-image substitute are not motion blur.
+
 ## Native Render Pass Graph Contract
 
-After exact decode requests exist, the compositor must lower the frame into a
-renderer-agnostic pass graph before any concrete transition implementation can
-claim support.
+After exact decode requests and temporal accumulators exist, the compositor must
+lower the frame into a renderer-agnostic pass graph before any concrete
+transition implementation can claim support.
 
 The pass graph must include the general phases required by professional video
 transitions:
