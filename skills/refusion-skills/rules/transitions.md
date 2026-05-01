@@ -480,6 +480,40 @@ draws real transition pixels through this attached graph and surface. Flutter
 overlays, timeline-area drawing, transformed PlatformViews, still frames, fake
 motion blur, and decorative substitutes remain forbidden.
 
+## Native Frame Render Command Contract
+
+Before a concrete renderer draws, the compositor must lower the ordered render
+graph into explicit per-frame native render commands.
+
+Each command must preserve:
+
+- command id;
+- source pass id;
+- source pass type;
+- source pass role;
+- pass index;
+- input pass ids;
+- output target;
+- whether it writes to the final native transition canvas surface;
+- `requiresRealPixels=true`;
+- command-level blockers.
+
+The command buffer may exist before the renderer exists. In that state it must
+report:
+
+- `rendererCommandBufferImplemented=true`;
+- `rendererImplemented=false`;
+- `rendersRealPixels=false`;
+- `drawsPixels=false`;
+- `canSubmitCommands=false`;
+- `canRenderFrame=false`.
+
+The required blocker is
+`native_transition_frame_command_renderer_missing`. Do not treat a complete
+command graph as a visual transition. It is only the final planning layer before
+a real native renderer submits commands and writes pixels to the
+`nativeTransitionCanvasSurface`.
+
 ## Native Parity Output Contract
 
 After the output surface exists, the compositor must prove that the same
