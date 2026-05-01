@@ -88,6 +88,31 @@ If any of these are missing, the correct answer is an explicit invalid or
 unsupported result. Do not repair the plan by freezing a boundary frame,
 stretching a thumbnail, or inventing hidden source timing.
 
+## Native Frame Sample Contract
+
+Every renderer must sample live source time through the shared native frame
+sample contract before it draws pixels.
+
+For any requested timeline frame inside the transition window, the compositor
+must resolve:
+
+- normalized transition progress;
+- outgoing source time from source A's real source range;
+- incoming source time from source B's real source range;
+- temporal shutter sample timeline times;
+- outgoing temporal source sample times;
+- incoming temporal source sample times;
+- source roles `[outgoing, incoming]`.
+
+If the requested frame time is outside the transition window, reject it. If the
+render plan does not cover the full source window, reject it. Do not clamp the
+missing interval into a frozen image and call it motion blur.
+
+Temporal motion blur means multiple real temporal samples from the outgoing and
+incoming videos, derived from shutter angle, frame rate, and sample count.
+Gaussian blur, poster-frame blur, speed-line shapes, or thumbnail stretching are
+not valid substitutes.
+
 ## Cross Dissolve Primitive Contract
 
 For `crossDissolve`, reason as a true two-source alpha blend:
@@ -197,6 +222,12 @@ timing, outgoing/incoming source ranges, shutter settings, and mirror-edge tile
 overscan must be present. Current builds return `unsupported` from native code
 by design; do not work around that with a Flutter overlay, frozen frame,
 Gaussian blur, or speed-line decoration.
+
+The current native foundation also defines `planFrameSamples`. This endpoint is
+not a renderer and does not unlock transitions. It proves that the engine can
+turn a timeline frame inside a transition window into exact outgoing/incoming
+source samples and temporal shutter samples. Agents should treat this as the
+mandatory sampling truth for every future transition renderer.
 
 Do not promise transition support until preview, live scrub, playback, and
 export all use the same compositor contract.
