@@ -91,8 +91,10 @@ rule file, and the example JSON in one document.
   professional compositor reports complete interactive readiness: dual video
   sampling, temporal motion blur, mirror-edge tiling, preview parity, Live
   Scrub parity, and playback parity. Manual may open only as an authoring
-  scope in the existing focused TimelinePanel; do not claim preview/playback/
-  Live Scrub/export parity for manual lanes until the compositor consumes them.
+  scope in the existing focused TimelinePanel. Manual transform preview may use
+  the native `manualTransform` compositor path for real video pixels, but do not
+  claim playback, Live Scrub, or export parity until those modes consume the
+  same compositor output.
 
 ## Current Engine Boundary
 

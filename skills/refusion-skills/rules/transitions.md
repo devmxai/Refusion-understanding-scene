@@ -1289,3 +1289,14 @@ empty authored transition.
 Do not promise interactive transition support until preview, live scrub, and
 playback use the same compositor contract. Do not promise export support until
 the export renderer later joins that same contract.
+
+Manual Transition Scope now has a native preview-only transform slice. When a
+Manual transition contains authored Animate/FX lanes, the app must build a
+`manualTransform` professional render plan and render through
+`ProfessionalVideoTransitionSurface`, not through Flutter thumbnail overlays.
+The first supported transform parameter is signed `Scale`: `0%` is normal video
+size, `+100%` is 2x zoom, and negative values shrink the sampled video above a
+safe native minimum. This preview samples real outgoing/incoming source video
+frames at the current transition time. Playback, Live Scrub, and export remain
+unclaimed until the same manual transform compositor path is made nonblocking
+and mode-parity safe.
