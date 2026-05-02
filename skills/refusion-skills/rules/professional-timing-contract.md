@@ -61,6 +61,16 @@ Rules:
   models, mappers, registries, adapters, tests, and docs, but it must not touch
   Stage5 native files, Live Scrub handoff paths, preview surface ownership,
   GPU/Media3 effects, or transition pixel rendering.
+- use the explicit foundation files as authoritative references:
+  - `lib/features/editor/domain/models/master_time_models.dart`
+  - `lib/features/editor/domain/services/master_time_domain_mapper.dart`
+  - `lib/features/editor/domain/services/master_value_truth_registry.dart`
+  - `lib/features/editor/domain/services/master_keyframe_value_evaluator.dart`
+  - `lib/features/editor/domain/models/master_frame_evaluation_models.dart`
+  - `lib/features/editor/presentation/services/master_frame_evaluation_read_adapter.dart`
+- keep preview-time clock-source guardrails active through:
+  - `scripts/master_clock_guard_check.sh`
+  - `docs/master_clock_guard_allowlist.txt`
 
 If an agent cannot explain an effect, transition, keyframe, or scrub result
 through this chain, it must stop and document the missing mapper/value
