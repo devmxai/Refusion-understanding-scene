@@ -92,6 +92,9 @@ Rules:
   methods; do not write those notifiers ad-hoc from feature-specific flows.
 - when setting idle timeline time from UI, synchronize paused master-clock time
   through the bridge first so derived views and master truth stay in lockstep.
+- avoid direct `_currentTime` assignment in editor feature flows; route timeline
+  time changes through the centralized setter path so bridge sync policies run
+  consistently.
 
 If an agent cannot explain an effect, transition, keyframe, or scrub result
 through this chain, it must stop and document the missing mapper/value
