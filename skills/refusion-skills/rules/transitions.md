@@ -1235,6 +1235,13 @@ V1`. Do not ask agents to expose `Fade Black`, legacy `Zoom In Camera`, or any
 other named transition until each one has its own renderer definition that
 produces real source-derived pixels through the same surface contract.
 
+Root and Scene Contents transition bridges must preflight zoom-family
+professional presets before staging them. If the outgoing/incoming source URI,
+source handle window, transition boundary, or native definition binding cannot
+build a real render plan, the app must block with a visible diagnostic. Do not
+convert that failure into a Flutter thumbnail zoom, poster-frame fallback, or
+empty authored transition.
+
 Do not promise interactive transition support until preview, live scrub, and
 playback use the same compositor contract. Do not promise export support until
 the export renderer later joins that same contract.
