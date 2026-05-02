@@ -95,6 +95,9 @@ Rules:
 - avoid direct `_currentTime` assignment in editor feature flows; route timeline
   time changes through the centralized setter path so bridge sync policies run
   consistently.
+- enforce `_currentTime` assignment anchors through
+  `master_clock_current_time_guard_check.sh` + allowlist policy; any new write
+  path must be intentional and reviewed.
 
 If an agent cannot explain an effect, transition, keyframe, or scrub result
 through this chain, it must stop and document the missing mapper/value
