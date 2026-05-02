@@ -1366,8 +1366,8 @@ generated proxies, cached thumbnails, timeline posters, or inferred media
   mirror-edge tiling when required, render-pass graph, graph execution, output
   surface, surface renderer, frame render commands, renderer backend, renderer
   draw loop, transition shader evaluation, transition pixel workload, transition
-  pixel frame buffer, pixel render execution, native pixel output proof, and
-  parity outputs.
+  pixel frame buffer, transition pixel frame-buffer writer, pixel render
+  execution, native pixel output proof, and parity outputs.
 
 Flutter production code must not hand-assemble compositor source maps inside
 large editor screens. Use the source-bound render-plan adapter contract:
@@ -1385,13 +1385,14 @@ it must run the full readiness preflight. The readiness chain is: native
   mirror-edge tiler, render-pass graph, graph execution, output surface, surface
   renderer, frame render commands, renderer backend, renderer draw loop,
   transition shader evaluation, transition pixel workload, transition pixel
-  frame buffer, transition pixel render execution, native pixel output proof, and
-  preview/live-scrub/playback parity. A single green stage is not
+  frame buffer, transition pixel frame-buffer writer, transition pixel render
+  execution, native pixel output proof, and preview/live-scrub/playback parity.
+  A single green stage is not
 permission to ship a transition. Every stage must be able to advance.
 
 Before preview, playback, or Live Scrub parity can claim success, the native
-pixel frame-buffer and pixel output proof gates must pass. The frame-buffer
-gate must prove a native canvas-sized `rgba8888` buffer exists for
+pixel frame-buffer, frame-buffer writer, and pixel output proof gates must pass.
+The frame-buffer gate must prove a native canvas-sized `rgba8888` buffer exists for
 `nativeTransitionCanvasSurface`, and must explicitly forbid synthetic pixels,
 poster frames, thumbnails, and boundary-frame freezes. The output proof must
 prove that a real frame was written into `nativeTransitionCanvasSurface`, and it
@@ -1904,8 +1905,9 @@ If the workload is bound, the gate may advance while still reporting:
 
 Do not expose any transition preset, manual transition editor, or AI-generated
 transition just because shader inputs and pixel workload are bound. The next
-professional milestone is a native pixel frame buffer followed by pixel render
-execution and native pixel output proof.
+professional milestone is a native pixel frame buffer, a native frame-buffer
+writer that writes temporal video pixels, followed by pixel render execution and
+native pixel output proof.
 
 ## Native Transition Pixel Frame Buffer Contract
 
@@ -1914,7 +1916,8 @@ frame buffer for the final transition canvas before it attempts pixel execution.
 This is the contract that prevents a renderer from treating thumbnails, poster
 frames, cached boundary images, or synthetic placeholders as renderable video.
 The current Android foundation allocates bounded `DirectByteBuffer` storage for
-valid canvas-sized `rgba8888` buffers; allocation alone is not rendering.
+valid canvas-sized `rgba8888` buffers; allocation alone is not rendering and
+must not be treated as temporal pixel output.
 
 The pixel-frame-buffer gate must preserve:
 
@@ -1934,7 +1937,6 @@ The pixel-frame-buffer gate must preserve:
 - `outputFramebufferBound`;
 - `frameBufferAllocated`;
 - `frameBufferReady`;
-- `frameBufferContainsRealPixels`;
 - `allowsSyntheticPixels=false`;
 - `allowsPosterFrame=false`;
 - `allowsThumbnailFallback=false`;
@@ -1945,6 +1947,54 @@ this gate must report:
 
 - `frameBufferAllocated=true`;
 - `frameBufferReady=true`;
+- `rendererImplemented=false`;
+- `canRenderPixels=false`;
+- `rendersRealPixels=false`;
+- `drawsPixels=false`;
+- `canRenderFrame=false`.
+
+The frame-buffer allocation stage may advance once allocation succeeds, but the
+next writer gate must remain blocked until real temporal video pixels are
+written. If allocation itself fails, use the specific allocation blocker such as
+`native_transition_pixel_frame_buffer_invalid_size`,
+`native_transition_pixel_frame_buffer_too_large`, or
+`native_transition_pixel_frame_buffer_allocation_failed`. Do not let a later
+stage skip this gate.
+
+## Native Transition Pixel Frame Buffer Writer Contract
+
+After the native pixel frame buffer is allocated, the compositor must bind a
+native writer to that exact buffer before pixel execution. This gate exists so
+agents cannot call an allocated buffer "rendered" while no live video pixels
+were copied, mixed, or accumulated into it.
+
+The writer gate must preserve:
+
+- transition pixel frame-buffer writer id;
+- transition pixel frame buffer id;
+- transition pixel renderer id;
+- output framebuffer target, which must be `nativeTransitionCanvasSurface`;
+- frame buffer width, height, format, byte count, and memory class;
+- `writerBoundToFrameBuffer`;
+- `requiresTemporalSamples=true`;
+- `requiresDualSourceSamples=true` for two-clip transitions;
+- `allowsStillFrameWrite=false`;
+- `allowsSyntheticPixels=false`;
+- `allowsPosterFrame=false`;
+- `allowsThumbnailFallback=false`;
+- `allowsBoundaryFreeze=false`;
+- `writerImplemented`;
+- `writerReady`;
+- `canWriteTemporalPixels`;
+- `wroteTemporalPixels`;
+- `frameBufferContainsRealPixels`.
+
+Until a concrete native writer exists, this gate must report:
+
+- `writerImplemented=false`;
+- `writerReady=false`;
+- `canWriteTemporalPixels=false`;
+- `wroteTemporalPixels=false`;
 - `frameBufferContainsRealPixels=false`;
 - `rendererImplemented=false`;
 - `canRenderPixels=false`;
@@ -1952,22 +2002,19 @@ this gate must report:
 - `drawsPixels=false`;
 - `canRenderFrame=false`.
 
-The required blockers after successful allocation are
-`native_transition_pixel_frame_buffer_pixels_missing` and
-`native_transition_pixel_frame_buffer_renderer_missing`. If allocation itself
-fails, use the specific allocation blocker such as
-`native_transition_pixel_frame_buffer_invalid_size`,
-`native_transition_pixel_frame_buffer_too_large`, or
-`native_transition_pixel_frame_buffer_allocation_failed`. Do not let a later
-stage skip this gate; if this gate has no real pixels, pixel execution and
-parity must remain blocked.
+The required blockers after successful frame-buffer allocation are
+`native_transition_pixel_frame_buffer_writer_missing`,
+`native_transition_pixel_frame_buffer_temporal_pixels_missing`, and
+`native_transition_pixel_frame_buffer_pixels_missing`. Pixel render execution
+must depend on this writer gate. It may not read a poster, thumbnail, boundary
+still, or single frozen sample.
 
 ## Native Transition Pixel Render Execution Contract
 
-After the native pixel frame buffer is allocated and filled with real temporal
-video pixels, the compositor must bind that workload to the native output
-framebuffer and attempt the concrete pixel-render execution path. This is the
-stage that remains blocked until real pixels are written.
+After the native pixel frame buffer is allocated and the writer has filled it
+with real temporal video pixels, the compositor must bind that workload to the
+native output framebuffer and attempt the concrete pixel-render execution path.
+This is the stage that remains blocked until real pixels are written.
 
 The pixel-render execution gate must preserve:
 
@@ -1981,6 +2028,8 @@ The pixel-render execution gate must preserve:
 - `pixelWorkloadBound`;
 - `outputFramebufferBound`;
 - `frameBufferReady`;
+- `writerReady`;
+- `wroteTemporalPixels`;
 - `frameBufferContainsRealPixels`;
 - whether pixel output was written.
 
@@ -1998,6 +2047,8 @@ Until a concrete native renderer exists, this gate must report:
 - `canRenderFrame=false`.
 
 The required blockers include `native_transition_pixel_frame_buffer_not_ready`,
+`native_transition_pixel_frame_buffer_writer_missing`,
+`native_transition_pixel_frame_buffer_temporal_pixels_missing`,
 `native_transition_pixel_frame_buffer_pixels_missing`,
 `native_transition_pixel_renderer_missing`,
 `native_transition_pixel_output_missing`, and
