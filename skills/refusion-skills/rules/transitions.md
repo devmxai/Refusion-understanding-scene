@@ -126,8 +126,8 @@ generated proxies, cached thumbnails, timeline posters, or inferred media
   exact decode requests, dual-video decoder tracks, temporal accumulation,
   mirror-edge tiling when required, render-pass graph, graph execution, output
   surface, surface renderer, frame render commands, renderer backend, renderer
-  draw loop, transition shader evaluation, transition pixel renderer, and parity
-  outputs.
+  draw loop, transition shader evaluation, transition pixel workload, transition
+  pixel render execution, and parity outputs.
 
 Flutter production code must not hand-assemble compositor source maps inside
 large editor screens. Use the source-bound render-plan adapter contract:
@@ -144,7 +144,8 @@ it must run the full readiness preflight. The readiness chain is: native
   frame samples, exact decode requests, dual-video decoder, temporal accumulator,
   mirror-edge tiler, render-pass graph, graph execution, output surface, surface
   renderer, frame render commands, renderer backend, renderer draw loop,
-  transition shader evaluation, transition pixel renderer, and
+  transition shader evaluation, transition pixel workload, transition pixel
+  render execution, and
   preview/live-scrub/playback parity. A single green stage is not
 permission to ship a transition. Every stage must be able to advance.
 
@@ -624,11 +625,10 @@ speed lines, Flutter overlays, and timeline-area rendering remain forbidden.
 ## Native Transition Pixel Renderer Contract
 
 After shader evaluation is ready, the compositor must bind shader inputs into a
-pixel-renderer workload for the final native transition canvas surface. This is
-the first stage that is allowed to talk about rendering pixels, but it is still
-only a gate until a concrete native renderer exists.
+pixel workload for the final native transition canvas surface. This is a
+workload-binding gate, not proof that pixels were rendered.
 
-The pixel-renderer gate must preserve:
+The pixel-workload gate must preserve:
 
 - transition pixel renderer id;
 - pixel program id;
@@ -640,8 +640,7 @@ The pixel-renderer gate must preserve:
 - `pixelWorkloadBound`;
 - temporal shutter and mirror-edge requirements inherited from the shader plan.
 
-If the workload is bound but no concrete pixel renderer exists, the gate must
-report:
+If the workload is bound, the gate may advance while still reporting:
 
 - `pixelRendererImplemented=false`;
 - `pixelRendererReady=false`;
@@ -651,12 +650,46 @@ report:
 - `drawsPixels=false`;
 - `canRenderFrame=false`.
 
-The required blockers are `native_transition_pixel_renderer_missing` and
-`native_transition_renderer_pixels_missing`. Do not expose any transition preset,
-manual transition editor, or AI-generated transition just because shader inputs
-and pixel workload are bound. The next professional milestone is a concrete
-native renderer that writes real pixels to `nativeTransitionCanvasSurface` for
-preview, Live Scrub, and playback parity.
+Do not expose any transition preset, manual transition editor, or AI-generated
+transition just because shader inputs and pixel workload are bound. The next
+professional milestone is pixel render execution.
+
+## Native Transition Pixel Render Execution Contract
+
+After pixel workload binding, the compositor must bind that workload to the
+native output framebuffer and attempt the concrete pixel-render execution path.
+This is the stage that remains blocked until real pixels are written.
+
+The pixel-render execution gate must preserve:
+
+- transition pixel render execution id;
+- pixel output frame id;
+- transition pixel renderer id;
+- pixel program id;
+- output surface id;
+- output target and output framebuffer target, which must be
+  `nativeTransitionCanvasSurface`;
+- `pixelWorkloadBound`;
+- `outputFramebufferBound`;
+- whether pixel output was written.
+
+Until a concrete native renderer exists, this gate must report:
+
+- `pixelRendererImplemented=false`;
+- `pixelRendererReady=false`;
+- `pixelRenderExecutionReady=false`;
+- `pixelOutputWritten=false`;
+- `pixelOutputReady=false`;
+- `rendererImplemented=false`;
+- `canRenderPixels=false`;
+- `rendersRealPixels=false`;
+- `drawsPixels=false`;
+- `canRenderFrame=false`.
+
+The required blockers are `native_transition_pixel_renderer_missing`,
+`native_transition_pixel_output_missing`, and
+`native_transition_renderer_pixels_missing`. Do not expose transitions before
+this gate can render real pixels for preview, Live Scrub, and playback parity.
 
 ## Native Parity Output Contract
 
