@@ -1296,7 +1296,7 @@ Manual transition contains authored Animate/FX lanes, the app must build a
 `ProfessionalVideoTransitionSurface`, not through Flutter thumbnail overlays.
 The first supported transform parameter is signed `Scale`: `0%` is normal video
 size, `+100%` is 2x zoom, and negative values shrink the sampled video above a
-safe native minimum. This preview samples real outgoing/incoming source video
-frames at the current transition time. Playback, Live Scrub, and export remain
-unclaimed until the same manual transform compositor path is made nonblocking
-and mode-parity safe.
+safe native minimum. The same `manualTransform` interactive path may render
+preview, Live Scrub, and playback frames because `renderInteractiveFrame` runs
+on the transition render executor, not on the Android UI thread. Export remains
+unclaimed until it consumes the same compositor output.
