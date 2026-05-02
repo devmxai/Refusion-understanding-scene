@@ -1422,6 +1422,16 @@ must expose a mode-specific blocker such as
 `native_transition_liveScrub_interactive_surface_missing`, or
 `native_transition_playback_interactive_surface_missing`.
 
+Each interactive parity mode must also receive a source-derived frame-buffer
+packet through its own `interactiveNativeTransitionSurface`. The readiness
+report must record delivered frame state, byte count, checksum, and reason for
+preview, Live Scrub, and playback independently. Missing delivery is a blocker
+such as `native_transition_preview_interactive_surface_frame_missing`,
+`native_transition_liveScrub_interactive_surface_frame_missing`, or
+`native_transition_playback_interactive_surface_frame_missing`. A shared
+offscreen proof frame or endpoint upload is not enough to expose or describe a
+transition preset.
+
 Any UI or agent-facing explanation of transition readiness must use the formal
 readiness presentation model. Do not collapse readiness into a vague "not
 ready" or "missing capabilities" string. Name the blocked stages in order so a
