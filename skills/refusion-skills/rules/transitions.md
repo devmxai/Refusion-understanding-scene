@@ -210,6 +210,13 @@ mode binds and presents through its own production interactive transition
 surface. Do not expose, describe, or recommend any transition preset based on a
 proof endpoint, even if byte counts and checksums match.
 
+Production interactive surfaces must be explicit render-plan data. Use
+`interactiveSurfaceBindings` with one binding for each mode: `preview`,
+`liveScrub`, and `playback`. Each binding must carry a stable `surfaceId`, set
+`attached=true`, and declare `surfaceKind=interactiveNativeTransitionSurface`.
+Missing bindings, unknown modes, proof-surface kinds, or detached surfaces are
+not professional parity and must remain blocked.
+
 Any UI or agent-facing explanation of transition readiness must use the formal
 readiness presentation model. Do not collapse readiness into a vague "not
 ready" or "missing capabilities" string. Name the blocked stages in order so a
