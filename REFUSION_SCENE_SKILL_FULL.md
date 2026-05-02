@@ -2331,11 +2331,12 @@ The `Zoom In Pro` test path is closed. It did not satisfy dual-video sampling,
 temporal shutter motion blur, mirror-edge tiling, output-surface ownership, or
 parity readiness, and it must not be used as a replacement for Zoom In Camera.
 
-The current app contains a strict `ProfessionalZoomCameraCompositorPlanner`
-contract for future native rendering. Agents must describe Zoom In Camera in
-terms of real outgoing/incoming source-time samples, shutter-angle temporal
-sampling, and mirror-edge tiling. Do not describe it as an overlay, a card, a
-blurred thumbnail, or a decorative speed-line effect.
+The current app contains a strict professional transition compositor contract
+for native rendering. Agents must describe Zoom In Camera and future video
+transitions in terms of real outgoing/incoming source-time samples,
+shutter-angle temporal sampling, mirror-edge tiling, a render plan, and a real
+interactive output surface. Do not describe any professional transition as an
+overlay, a card, a blurred thumbnail, or a decorative speed-line effect.
 
 The app also has a native capability bridge at
 `com.refusion.app/professional_video_transition_compositor.getCapabilities`.
@@ -2406,6 +2407,24 @@ requires preview, Live Scrub, and playback to share the same output surface
 contract and keeps every interactive mode blocked until a concrete native
 renderer can render without fallback divergence. Export remains a later phase
 and must join the same contract before export support is claimed.
+
+The current interactive foundation also defines a real Flutter-to-Android
+surface binding. Flutter creates `ProfessionalVideoTransitionSurface` as a
+dedicated Android PlatformView inside the preview canvas and calls
+`renderInteractiveFrame` with the active render plan, timeline time, mode, and
+surface id. Android accepts a bound surface id only when it was registered by
+that visible PlatformView as an `interactiveNativeTransitionSurface`; it must
+not allocate an offscreen `ImageReader` for production-bound preview, Live
+Scrub, or playback. If the surface is missing, the correct behavior is a hard
+blocker such as `native_transition_interactive_surface_not_registered`, not a
+fake still-frame preview.
+
+The first selectable transition on this path is intentionally `Cross
+Dissolve` only. It is the current real-pixel vertical slice for verifying the
+registered surface path. Do not ask agents to expose `Fade Black`, `Zoom In
+Camera`, or other named transitions until each one has its own renderer
+definition that produces real source-derived pixels through the same surface
+contract.
 
 Do not promise interactive transition support until preview, live scrub, and
 playback use the same compositor contract. Do not promise export support until
