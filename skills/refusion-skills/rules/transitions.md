@@ -749,10 +749,27 @@ The writer gate must preserve:
 - `canWriteTemporalPixels`;
 - `wroteTemporalPixels`;
 - `frameBufferContainsRealPixels`.
+- writer temporal sample count;
+- writer extracted frame count;
+- writer frame-buffer write byte count;
+- writer frame-buffer checksum;
+- writer source-frame extractor;
+- writer canvas fill mode;
+- writer reason when blocked.
 
-Until a concrete native writer exists, this gate must report:
+The current Android foundation binds a native writer and writes real
+outgoing/incoming source-frame pixels into the allocated `DirectByteBuffer`.
+The writer extracts temporal shutter samples with
+`MediaMetadataRetriever.getFrameAtTime`, composites them into a canvas-sized
+`rgba8888` buffer with center-crop-fill, and records sample count,
+extracted-frame count, write byte count, checksum, extractor, and fill mode.
+This is source-pixel proof only. It is not final transition rendering and must
+not unlock presets, manual transitions, AI transitions, preview parity, Live
+Scrub parity, or playback parity by itself.
 
-- `writerImplemented=false`;
+If the source-frame writer cannot extract temporal pixels, this gate must
+report:
+
 - `writerReady=false`;
 - `canWriteTemporalPixels=false`;
 - `wroteTemporalPixels=false`;
@@ -763,9 +780,11 @@ Until a concrete native writer exists, this gate must report:
 - `drawsPixels=false`;
 - `canRenderFrame=false`.
 
-The required blockers after successful frame-buffer allocation are
+The required blockers after successful frame-buffer allocation are whichever
+specific writer reasons apply, such as
 `native_transition_pixel_frame_buffer_writer_missing`,
-`native_transition_pixel_frame_buffer_temporal_pixels_missing`, and
+`native_transition_temporal_dual_source_pixels_missing`,
+`native_transition_pixel_frame_buffer_write_failed`, or
 `native_transition_pixel_frame_buffer_pixels_missing`. Pixel render execution
 must depend on this writer gate. It may not read a poster, thumbnail, boundary
 still, or single frozen sample.
