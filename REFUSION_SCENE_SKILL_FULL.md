@@ -1364,7 +1364,8 @@ generated proxies, cached thumbnails, timeline posters, or inferred media
   locations. The professional path is: source URI binding, exact frame samples,
   exact decode requests, dual-video decoder tracks, temporal accumulation,
   mirror-edge tiling when required, render-pass graph, graph execution, output
-  surface, surface renderer, frame render commands, renderer backend, and parity
+  surface, surface renderer, frame render commands, renderer backend, renderer
+  draw loop, transition shader evaluation, transition pixel renderer, and parity
   outputs.
 
 Flutter production code must not hand-assemble compositor source maps inside
@@ -1382,7 +1383,7 @@ it must run the full readiness preflight. The readiness chain is: native
   frame samples, exact decode requests, dual-video decoder, temporal accumulator,
   mirror-edge tiler, render-pass graph, graph execution, output surface, surface
   renderer, frame render commands, renderer backend, renderer draw loop,
-  transition shader evaluation, and
+  transition shader evaluation, transition pixel renderer, and
   preview/live-scrub/playback parity. A single green stage is not
 permission to ship a transition. Every stage must be able to advance.
 
@@ -1858,6 +1859,43 @@ next professional milestone is a concrete native pixel renderer that consumes
 the shader inputs and writes real pixels to `nativeTransitionCanvasSurface`.
 Still-frame zoom, transformed native preview surfaces, Gaussian blur, fake
 speed lines, Flutter overlays, and timeline-area rendering remain forbidden.
+
+## Native Transition Pixel Renderer Contract
+
+After shader evaluation is ready, the compositor must bind shader inputs into a
+pixel-renderer workload for the final native transition canvas surface. This is
+the first stage that is allowed to talk about rendering pixels, but it is still
+only a gate until a concrete native renderer exists.
+
+The pixel-renderer gate must preserve:
+
+- transition pixel renderer id;
+- pixel program id;
+- transition shader evaluation id;
+- transition shader program id;
+- shader family / transition definition id;
+- every pixel input with its shader input id, draw submission id, command id,
+  pass id, pass type, output target, and `requiresRealPixels=true`;
+- `pixelWorkloadBound`;
+- temporal shutter and mirror-edge requirements inherited from the shader plan.
+
+If the workload is bound but no concrete pixel renderer exists, the gate must
+report:
+
+- `pixelRendererImplemented=false`;
+- `pixelRendererReady=false`;
+- `rendererImplemented=false`;
+- `canRenderPixels=false`;
+- `rendersRealPixels=false`;
+- `drawsPixels=false`;
+- `canRenderFrame=false`.
+
+The required blockers are `native_transition_pixel_renderer_missing` and
+`native_transition_renderer_pixels_missing`. Do not expose any transition preset,
+manual transition editor, or AI-generated transition just because shader inputs
+and pixel workload are bound. The next professional milestone is a concrete
+native renderer that writes real pixels to `nativeTransitionCanvasSurface` for
+preview, Live Scrub, and playback parity.
 
 ## Native Parity Output Contract
 
