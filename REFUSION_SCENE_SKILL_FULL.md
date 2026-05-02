@@ -2050,14 +2050,21 @@ The pixel-render execution gate must preserve:
 - `writerReady`;
 - `wroteTemporalPixels`;
 - `frameBufferContainsRealPixels`;
+- pixel output source frame-buffer id;
+- pixel output write mode;
+- pixel output byte count;
+- pixel output checksum;
+- pixel output reason;
 - whether pixel output was written.
 
-Until a concrete native renderer exists, this gate must report:
+The current Android foundation can consume the temporal frame-buffer writer
+output into an offscreen native pixel-output frame. This removes only the
+"nothing was written to an output frame" gap when source-derived temporal
+pixels exist. It must not unlock a transition preset, because an offscreen frame
+is not the same as writing the final native preview/playback surface.
 
-- `pixelRendererImplemented=false`;
-- `pixelRendererReady=false`;
-- `pixelRenderExecutionReady=false`;
-- `pixelOutputWritten=false`;
+Until a concrete native surface renderer exists, this gate must report:
+
 - `pixelOutputReady=false`;
 - `rendererImplemented=false`;
 - `canRenderPixels=false`;
@@ -2070,7 +2077,8 @@ The required blockers include `native_transition_pixel_frame_buffer_not_ready`,
 `native_transition_pixel_frame_buffer_temporal_pixels_missing`,
 `native_transition_pixel_frame_buffer_pixels_missing`,
 `native_transition_pixel_renderer_missing`,
-`native_transition_pixel_output_missing`, and
+`native_transition_pixel_output_missing`,
+`native_transition_pixel_output_not_ready`, and
 `native_transition_renderer_pixels_missing`. Do not expose transitions before
 this gate can render real pixels and the pixel output proof can verify that the
 result is written to the native output surface.
