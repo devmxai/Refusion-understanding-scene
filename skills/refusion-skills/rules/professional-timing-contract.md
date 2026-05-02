@@ -85,6 +85,9 @@ Rules:
 - keep direct coordinator access blocked in presentation code through:
   - `scripts/master_clock_bridge_guard_check.sh`
   - `docs/master_clock_bridge_guard_allowlist.txt`
+- where transition/preview diagnostics are emitted, include a
+  `MasterFrameEvaluation` read snapshot for the active mode so debugging stays
+  tied to the same time/value truth chain.
 
 If an agent cannot explain an effect, transition, keyframe, or scrub result
 through this chain, it must stop and document the missing mapper/value
