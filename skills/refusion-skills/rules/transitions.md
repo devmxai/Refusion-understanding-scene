@@ -929,6 +929,22 @@ blocker is `native_transition_<mode>_surface_endpoint_missing` until the real
 native endpoint exists. Export must later attach to the same contract; it must
 not fork into a different renderer.
 
+## Native Surface Endpoint Preflight Stage
+
+The readiness preflight must expose a dedicated `transitionSurfaceEndpoint`
+stage between `transitionPixelOutputProof` and `parityOutputs`.
+
+This stage advances only when all of the following are true:
+
+- `outputSurfaceUploadPacketReady=true`;
+- `surfaceUploadRendererReady=true`;
+- `outputSurfaceEndpointAttached=true`.
+
+If the endpoint is missing, the blocker must be
+`native_transition_surface_endpoint_missing`. Do not hide this state inside a
+generic parity failure, and do not expose any preset/manual/AI transition while
+this stage is blocked.
+
 ## Cross Dissolve Primitive Contract
 
 For `crossDissolve`, reason as a true two-source alpha blend:
