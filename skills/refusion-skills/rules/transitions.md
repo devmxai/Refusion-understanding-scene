@@ -193,6 +193,14 @@ such as `native_transition_preview_interactive_surface_frame_missing`,
 offscreen proof frame or endpoint upload is not enough to expose or describe a
 transition preset.
 
+Accepted delivery is still not enough. Each interactive endpoint must present
+an acquired native frame after delivery. The readiness report must record
+presented image count, byte count, checksum, and reason for preview, Live
+Scrub, and playback independently. Missing presentation is a blocker such as
+`native_transition_preview_interactive_surface_presentation_missing`,
+`native_transition_liveScrub_interactive_surface_presentation_missing`, or
+`native_transition_playback_interactive_surface_presentation_missing`.
+
 Any UI or agent-facing explanation of transition readiness must use the formal
 readiness presentation model. Do not collapse readiness into a vague "not
 ready" or "missing capabilities" string. Name the blocked stages in order so a
