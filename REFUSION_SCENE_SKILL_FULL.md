@@ -2154,11 +2154,19 @@ Each parity output must carry:
 - output pass type;
 - output pass inputs;
 - `outputPassBound`;
-- `renderGraphOutputReady`.
+- `renderGraphOutputReady`;
+- pixel output proof id;
+- `outputProofReady`;
+- upload packet readiness;
+- surface-upload renderer readiness;
+- final surface endpoint attachment state.
 
 Mode-level `canRender` is false if the output pass binding is missing, even if
-the output surface id matches. Export must later attach to the same contract; it
-must not fork into a different renderer.
+the output surface id matches. Mode-level `canRender` is also false while
+`outputProofReady=false` or `outputSurfaceEndpointAttached=false`; the expected
+blocker is `native_transition_<mode>_surface_endpoint_missing` until the real
+native endpoint exists. Export must later attach to the same contract; it must
+not fork into a different renderer.
 
 ## Cross Dissolve Primitive Contract
 
