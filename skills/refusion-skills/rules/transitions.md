@@ -1081,12 +1081,61 @@ bridge darkness: 0.12
   Gaussian blur and decorative speed-line shapes are not valid motion blur for
   this preset.
 
+## Distortion Zoom Transition In V1 Contract
+
+`Distortion Zoom Transition In V1` is the first zoom/distortion preset on the
+native transition renderer path.
+
+Canonical ids:
+
+- built-in transition definition: `distortion_zoom_in_v1`;
+- native compositor definition: `distortionZoomInV1`;
+- display label: `Distortion Zoom Transition In V1`.
+
+Default timing:
+
+- duration: `4000ms`;
+- seam: center of the transition window;
+- outgoing A contributes the playing tail before the seam;
+- incoming B contributes the playing head after the seam;
+- the transition must never jump to the middle or end of incoming B.
+
+Required parameters:
+
+- `outgoingBoostScale`: default `3.0`;
+- `incomingStartScale`: default `0.25`;
+- `lensDistortionPeak`: default around `0.32`;
+- `chromaticAberrationPeak`: default around `0.08`;
+- `motionTileOutputScaleX`: default `4.0`;
+- `motionTileOutputScaleY`: default `4.0`.
+
+Required rendering behavior:
+
+- sample real source video frames from A and B over the transition window;
+- accumulate temporal shutter samples for motion blur;
+- apply mirror-edge tiling before transform/distortion so scaled-down B never
+  reveals black canvas edges;
+- apply lens-style distortion from source pixels;
+- optional RGB/chromatic split must be derived from source pixels, not drawn as
+  decorative lines;
+- output must go through the native transition surface contract used by
+  preview, Live Scrub, and playback.
+
+Forbidden behavior:
+
+- no thumbnail zoom;
+- no frozen poster-frame zoom;
+- no boundary-frame freeze;
+- no fake radial speed lines;
+- no Gaussian-only blur pretending to be motion blur;
+- no Flutter overlay or timeline-area rendering;
+- no transformed single Android video surface as the transition.
+
 ## Current Engine Support
 
-The current ReFusion engine intentionally gates all new video transition
-authoring out of the picker until a real professional video transition
-compositor exists. Existing saved Zoom transitions must not draw fake speed
-lines, frozen cards, or Gaussian transition blur.
+The current ReFusion engine intentionally gates new video transition authoring
+through the professional native compositor. Existing saved Zoom transitions must
+not draw fake speed lines, frozen cards, or Gaussian transition blur.
 
 The `Zoom In Pro` test path is closed. It did not satisfy dual-video sampling,
 temporal shutter motion blur, mirror-edge tiling, output-surface ownership, or
@@ -1180,12 +1229,11 @@ Scrub, or playback. If the surface is missing, the correct behavior is a hard
 blocker such as `native_transition_interactive_surface_not_registered`, not a
 fake still-frame preview.
 
-The first selectable transition on this path is intentionally `Cross
-Dissolve` only. It is the current real-pixel vertical slice for verifying the
-registered surface path. Do not ask agents to expose `Fade Black`, `Zoom In
-Camera`, or other named transitions until each one has its own renderer
-definition that produces real source-derived pixels through the same surface
-contract.
+The first selectable transition on this path was `Cross Dissolve`. The first
+zoom/distortion preset on the same path is now `Distortion Zoom Transition In
+V1`. Do not ask agents to expose `Fade Black`, legacy `Zoom In Camera`, or any
+other named transition until each one has its own renderer definition that
+produces real source-derived pixels through the same surface contract.
 
 Do not promise interactive transition support until preview, live scrub, and
 playback use the same compositor contract. Do not promise export support until
