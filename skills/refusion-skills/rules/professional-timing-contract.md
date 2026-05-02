@@ -80,6 +80,8 @@ Rules:
 - apply the same rule to scrub lifecycle mutations (`scrubStart`,
   `scrubUpdate`, `scrubEnd`, `confirmScrubSettled`) so timeline scrub state
   enters the master clock through one adapter boundary.
+- read timeline-clock time for UI time-sync through that same boundary whenever
+  possible; do not bypass the bridge for routine screen-level time reads.
 
 If an agent cannot explain an effect, transition, keyframe, or scrub result
 through this chain, it must stop and document the missing mapper/value
