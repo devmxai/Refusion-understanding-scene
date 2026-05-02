@@ -1913,6 +1913,8 @@ After pixel workload binding, the compositor must allocate and own a native
 frame buffer for the final transition canvas before it attempts pixel execution.
 This is the contract that prevents a renderer from treating thumbnails, poster
 frames, cached boundary images, or synthetic placeholders as renderable video.
+The current Android foundation allocates bounded `DirectByteBuffer` storage for
+valid canvas-sized `rgba8888` buffers; allocation alone is not rendering.
 
 The pixel-frame-buffer gate must preserve:
 
@@ -1925,6 +1927,9 @@ The pixel-frame-buffer gate must preserve:
 - frame buffer width and height matching the composition canvas;
 - frame buffer format, currently `rgba8888`;
 - frame buffer byte count;
+- frame buffer memory class, currently `directByteBuffer` when allocation
+  succeeds;
+- frame buffer allocation reason when allocation fails;
 - `pixelWorkloadBound`;
 - `outputFramebufferBound`;
 - `frameBufferAllocated`;
@@ -1935,11 +1940,11 @@ The pixel-frame-buffer gate must preserve:
 - `allowsThumbnailFallback=false`;
 - `allowsBoundaryFreeze=false`.
 
-Until a concrete native renderer owns and fills that buffer, this gate must
-report:
+When allocation succeeds but no concrete native renderer has filled the buffer,
+this gate must report:
 
-- `frameBufferAllocated=false`;
-- `frameBufferReady=false`;
+- `frameBufferAllocated=true`;
+- `frameBufferReady=true`;
 - `frameBufferContainsRealPixels=false`;
 - `rendererImplemented=false`;
 - `canRenderPixels=false`;
@@ -1947,11 +1952,15 @@ report:
 - `drawsPixels=false`;
 - `canRenderFrame=false`.
 
-The required blockers are `native_transition_pixel_frame_buffer_missing`,
-`native_transition_pixel_frame_buffer_pixels_missing`, and
-`native_transition_pixel_frame_buffer_renderer_missing`. Do not let a later
-stage skip this gate; if this gate is false, pixel execution and parity must
-remain blocked.
+The required blockers after successful allocation are
+`native_transition_pixel_frame_buffer_pixels_missing` and
+`native_transition_pixel_frame_buffer_renderer_missing`. If allocation itself
+fails, use the specific allocation blocker such as
+`native_transition_pixel_frame_buffer_invalid_size`,
+`native_transition_pixel_frame_buffer_too_large`, or
+`native_transition_pixel_frame_buffer_allocation_failed`. Do not let a later
+stage skip this gate; if this gate has no real pixels, pixel execution and
+parity must remain blocked.
 
 ## Native Transition Pixel Render Execution Contract
 
