@@ -1384,9 +1384,17 @@ it must run the full readiness preflight. The readiness chain is: native
   mirror-edge tiler, render-pass graph, graph execution, output surface, surface
   renderer, frame render commands, renderer backend, renderer draw loop,
   transition shader evaluation, transition pixel workload, transition pixel
-  render execution, and
+  render execution, native pixel output proof, and
   preview/live-scrub/playback parity. A single green stage is not
 permission to ship a transition. Every stage must be able to advance.
+
+Before preview, playback, or Live Scrub parity can claim success, the native
+pixel output proof must pass. It must prove that a real frame was written into
+`nativeTransitionCanvasSurface`, and it must explicitly forbid Flutter overlays,
+timeline overlays, transformed platform-view previews, poster frames,
+thumbnails, or any other non-native output fallback. If shader inputs or pixel
+workloads exist but no real output frame has been written, the blocker is
+`native_transition_pixel_output_proof_missing`.
 
 Any UI or agent-facing explanation of transition readiness must use the formal
 readiness presentation model. Do not collapse readiness into a vague "not
@@ -1891,7 +1899,8 @@ If the workload is bound, the gate may advance while still reporting:
 
 Do not expose any transition preset, manual transition editor, or AI-generated
 transition just because shader inputs and pixel workload are bound. The next
-professional milestone is pixel render execution.
+professional milestone is pixel render execution followed by native pixel
+output proof.
 
 ## Native Transition Pixel Render Execution Contract
 
@@ -1928,11 +1937,38 @@ Until a concrete native renderer exists, this gate must report:
 The required blockers are `native_transition_pixel_renderer_missing`,
 `native_transition_pixel_output_missing`, and
 `native_transition_renderer_pixels_missing`. Do not expose transitions before
-this gate can render real pixels for preview, Live Scrub, and playback parity.
+this gate can render real pixels and the pixel output proof can verify that the
+result is written to the native output surface.
+
+## Native Transition Pixel Output Proof Contract
+
+After pixel render execution, the compositor must prove that the executed
+workload produced a real output frame on `nativeTransitionCanvasSurface`. This
+is the anti-fallback gate before preview, Live Scrub, and playback parity.
+
+The proof must preserve:
+
+- transition pixel output proof id;
+- transition pixel render execution id;
+- pixel output frame id;
+- output surface id;
+- output target and output framebuffer target;
+- `outputSurfaceIsNative`;
+- `writesOnlyToNativeSurface`;
+- `forbidsFlutterOverlay`;
+- `forbidsTimelineOverlay`;
+- `forbidsPlatformViewTransform`;
+- `pixelOutputWritten`;
+- `pixelOutputReady`;
+- `outputProofReady`.
+
+If no concrete frame has been written, the blocker is
+`native_transition_pixel_output_proof_missing`. Do not mark parity ready while
+this proof is false, even when every previous planning gate is green.
 
 ## Native Parity Output Contract
 
-After the output surface exists, the compositor must prove that the same
+After native pixel output proof passes, the compositor must prove that the same
 transition output contract is valid for every required mode:
 
 - preview;
