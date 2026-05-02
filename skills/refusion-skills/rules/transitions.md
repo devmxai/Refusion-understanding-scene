@@ -142,7 +142,8 @@ it must run the full readiness preflight. The readiness chain is: native
   capabilities, strict render-session preparation, concrete source binding,
   frame samples, exact decode requests, dual-video decoder, temporal accumulator,
   mirror-edge tiler, render-pass graph, graph execution, output surface, surface
-  renderer, frame render commands, renderer backend, and
+  renderer, frame render commands, renderer backend, renderer draw loop,
+  transition shader evaluation, and
   preview/live-scrub/playback parity. A single green stage is not
 permission to ship a transition. Every stage must be able to advance.
 
@@ -567,8 +568,8 @@ The draw-loop contract must preserve:
 
 This stage may report `drawLoopImplemented=true` and `canSubmitCommands=true`
 when commands are ordered and can be submitted to the backend. It still must not
-claim visual transition support until the shader/pixel renderer writes pixels.
-While the pixel renderer is missing it must report:
+claim visual transition support. This stage proves submission order only; shader
+evaluation and pixel rendering are separate downstream gates. It must report:
 
 - `shaderEvaluatorImplemented=false`;
 - `pixelRendererImplemented=false`;
@@ -577,10 +578,47 @@ While the pixel renderer is missing it must report:
 - `drawsPixels=false`;
 - `canRenderFrame=false`.
 
-The required blockers are `native_transition_shader_evaluator_missing`,
-`native_transition_pixel_renderer_missing`, and
-`native_transition_renderer_pixels_missing`. A draw-loop submission plan is not a
-rendered transition; it is the final scheduling layer before real pixel work.
+When the backend and commands are ready, the draw loop should not carry shader
+or pixel-renderer blockers. A draw-loop submission plan is not a rendered
+transition; it is the final scheduling layer before shader evaluation.
+
+## Native Transition Shader Evaluation Contract
+
+After ordered draw submissions exist, the compositor may evaluate the transition
+shader/effect program for the current transition frame. This is still not a
+pixel renderer.
+
+The shader-evaluation gate must preserve:
+
+- transition shader evaluation id;
+- transition shader program id;
+- shader family / transition definition id;
+- renderer draw-loop id;
+- every bound shader input with its submission id, command id, pass id, pass
+  type, output target, and `requiresRealPixels=true`;
+- whether temporal shutter samples are required;
+- whether mirror-edge tiling is required.
+
+This stage may report:
+
+- `shaderEvaluatorImplemented=true`;
+- `shaderProgramReady=true`;
+- `shaderInputsBound=true`;
+- `canEvaluateShader=true`.
+
+It still must report:
+
+- `pixelRendererImplemented=false`;
+- `rendererImplemented=false`;
+- `rendersRealPixels=false`;
+- `drawsPixels=false`;
+- `canRenderFrame=false`.
+
+Do not expose a transition preset just because the shader can be evaluated. The
+next professional milestone is a concrete native pixel renderer that consumes
+the shader inputs and writes real pixels to `nativeTransitionCanvasSurface`.
+Still-frame zoom, transformed native preview surfaces, Gaussian blur, fake
+speed lines, Flutter overlays, and timeline-area rendering remain forbidden.
 
 ## Native Parity Output Contract
 
