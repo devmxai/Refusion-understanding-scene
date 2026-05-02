@@ -2063,6 +2063,23 @@ output into an offscreen native pixel-output frame. This removes only the
 pixels exist. It must not unlock a transition preset, because an offscreen frame
 is not the same as writing the final native preview/playback surface.
 
+Pixel output proof must also build a surface-upload packet contract from that
+offscreen output. The packet must preserve:
+
+- output surface upload packet id;
+- output surface upload packet readiness;
+- output surface upload source frame-buffer id;
+- output surface upload byte count;
+- output surface upload checksum;
+- surface upload renderer implementation status;
+- output surface upload reason when blocked.
+
+This packet is still not final rendering. It only proves which native
+source-derived frame should be uploaded to `nativeTransitionCanvasSurface`.
+Transitions remain locked until a concrete surface-upload renderer writes that
+packet into the final native surface and parity confirms preview, Live Scrub,
+and playback all read the same output.
+
 Until a concrete native surface renderer exists, this gate must report:
 
 - `pixelOutputReady=false`;
