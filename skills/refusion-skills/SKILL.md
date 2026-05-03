@@ -92,13 +92,13 @@ rule file, and the example JSON in one document.
   sampling, temporal motion blur, mirror-edge tiling, preview parity, Live
   Scrub parity, and playback parity. Manual may open only as an authoring
   scope in the existing focused TimelinePanel. Legacy native
-  `manualTransform` compositor rendering is preview-only. Manual lanes must not
-  activate the legacy compositor during playback or Live Scrub, and must not
-  suppress Stage5 native preview ownership in those modes. Manual transition
+  `manualTransform` compositor rendering must stay disabled for Manual
+  authoring in preview/liveScrub/playback. Manual lanes must not suppress
+  Stage5 native preview ownership in any interactive mode. Manual transition
   authoring still writes real graph/keyframe data; runtime visual execution for
-  playback/Live Scrub must come from the Stage5 master path before parity can
-  be claimed. Do not claim export parity until export consumes the same
-  compositor output.
+  preview/playback/Live Scrub must come from the Stage5 master path before
+  parity can be claimed. Do not claim export parity until export consumes the
+  same compositor output.
 
 ## Current Engine Boundary
 
