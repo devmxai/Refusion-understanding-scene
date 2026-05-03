@@ -250,6 +250,11 @@ stationary-preview only. Playback and Live Scrub must keep using the normal
 video preview path and must not repeatedly invoke the heavy transition renderer.
 Fail closed for unsupported modes rather than retrying until the app stalls.
 
+The same gate applies to legacy manual transition rendering (`manualTransform`).
+Manual transition keyframes are valid authoring data, but legacy
+`renderInteractiveFrame` execution is preview-only until Stage5 master runtime
+consumes manual transition values directly in playback and Live Scrub.
+
 Do not expose a Flutter-side `Zoom In Camera` surface transform as the
 replacement. Android preview is a native PlatformView, and applying Flutter
 scale/blur/opacity to that surface can leak the preview into the timeline
