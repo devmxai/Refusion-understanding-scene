@@ -122,6 +122,11 @@ Rules:
     explicit `latencyBudgetState`; missing native latency telemetry must be
     visible as `nativeMetricsUnavailable` or `nativeMetricsPending`, never
     silently treated as healthy parity.
+  - when available, ingest Stage5 runtime telemetry through
+    `getLiveScrubPerformanceSnapshot` and feed it into descriptor projection so
+    latency budget decisions are based on real native scrub metrics
+    (`estimatedFrameRequestRateFps`, decoder configure latency, render
+    presentation latency, dropped-frame estimate, cross-source warmup ready).
   - run `scripts/master_live_scrub_guard_check.sh` and keep
     `docs/master_live_scrub_guard_allowlist.txt` intentional; any new scrub
     bypass path (seek/media item/fallback/compositor coupling/clock source)
