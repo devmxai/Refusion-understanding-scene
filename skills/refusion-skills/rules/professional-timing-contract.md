@@ -137,6 +137,10 @@ Rules:
     `submitLiveScrubRuntimeBridgeSnapshot` and
     `getLiveScrubRuntimeBridgeSnapshot`; these are diagnostics contracts only
     and must not be treated as active scrub renderer ownership.
+  - do not reintroduce removed legacy naming
+    (`submitLiveScrubDescriptorPreflight`,
+    `getLiveScrubDescriptorPreflightSnapshot`,
+    `buildLiveScrubDescriptorPreflightPayload`) in runtime scrub code paths.
   - runtime bridge submissions from `FusionXCleanUiScreen` must stay nonblocking and
     key-throttled; missing capability/snapshot issues should surface through
     parity diagnostics, not by pausing editor playback/scrub flows.
