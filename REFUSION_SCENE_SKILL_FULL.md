@@ -2583,16 +2583,23 @@ Do not promise interactive transition support until preview, live scrub, and
 playback use the same compositor contract. Do not promise export support until
 the export renderer later joins that same contract.
 
-Manual Transition Scope now has a native preview-only transform slice. When a
-Manual transition contains authored Animate/FX lanes, the app must build a
-`manualTransform` professional render plan and render through
-`ProfessionalVideoTransitionSurface`, not through Flutter thumbnail overlays.
-The first supported transform parameter is signed `Scale`: `0%` is normal video
-size, `+100%` is 2x zoom, and negative values shrink the sampled video above a
-safe native minimum. The same `manualTransform` interactive path may render
-preview, Live Scrub, and playback frames because `renderInteractiveFrame` runs
-on the transition render executor, not on the Android UI thread. Export remains
-unclaimed until it consumes the same compositor output.
+Manual Transition Scope is authoring-only and must not reactivate legacy
+parallel compositor ownership. When a Manual transition contains authored
+Animate/FX lanes, authoring must remain on real graph/keyframe data and runtime
+visual application must flow through the Stage5 master runtime path:
+Master Clock -> Master frame evaluation -> Live Scrub visual program ->
+Stage5 visual runtime state submission.
+
+For transform authoring (Scale/Opacity/Position/Rotation), runtime state must be
+applied to the real visible Stage5 surfaces (scrub overlay during active scrub,
+and player-surface ownership path during preview/play/settle). Manual lanes must
+not suppress `NativePreviewSurface`, must not rely on
+`ProfessionalVideoTransitionSurfaceOverlay`, and must not call legacy
+`renderInteractiveFrame` to emulate animation.
+
+Signed `Scale` remains: `0%` is normal video size, `+100%` is 2x zoom, and
+negative values shrink above a safe native minimum. Export remains unclaimed
+until export consumes the same runtime-compositor contract.
 
 Manual transform lanes must use one real video sample per output frame unless a
 dedicated nonblocking motion-blur renderer exists. Do not inherit the 7/9-sample

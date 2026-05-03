@@ -99,9 +99,11 @@ rule file, and the example JSON in one document.
   preview/playback/Live Scrub must come from the Stage5 master path before
   parity can be claimed. Do not claim export parity until export consumes the
   same compositor output.
-  Current runtime status: Stage5 scrub path can consume manual transition
-  transform/opacity descriptor metadata; playback transform/opacity parity and
-  FX programs still require dedicated native/media3 implementation slices.
+  Current runtime status: Manual Transition transform/opacity now route through a
+  dedicated Stage5 visual runtime state bridge (Master Clock -> master
+  evaluation -> live scrub program -> Stage5 runtime state), and the runtime
+  state is applied to both scrub overlay and visible player-surface ownership
+  paths. Manual FX shader parity still requires dedicated native/Media3 slices.
 
 ## Current Engine Boundary
 
