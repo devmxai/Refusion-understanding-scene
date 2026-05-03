@@ -112,6 +112,9 @@ Rules:
   - `LiveScrubDescriptorCapabilities` must gate descriptor parity claims; if a
     native capability is missing, projection must emit explicit blockers instead
     of pretending transform/effect/transition support.
+  - when `supportsEffectProgramIds` is true, native must publish an explicit
+    `supportedEffectProgramIds` catalog; any effect outside that catalog must be
+    blocked as `unsupported_effect_program:<id>`.
   This contract is domain-only in the current slice and does not authorize
   Stage5 behavior changes.
 
