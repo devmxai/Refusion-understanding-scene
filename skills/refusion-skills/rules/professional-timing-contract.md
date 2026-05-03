@@ -132,6 +132,9 @@ Rules:
     `submitLiveScrubDescriptorPreflight` and
     `getLiveScrubDescriptorPreflightSnapshot`; these are diagnostics contracts
     only and must not be treated as active scrub renderer ownership.
+  - preflight submissions from `FusionXCleanUiScreen` must stay nonblocking and
+    key-throttled; missing capability/snapshot issues should surface through
+    parity diagnostics, not by pausing editor playback/scrub flows.
   This contract is domain-only in the current slice and does not authorize
   Stage5 behavior changes.
 
