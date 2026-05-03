@@ -109,6 +109,10 @@ rule file, and the example JSON in one document.
   scrub end), and reject Add Key when the playhead is outside the real active
   transition window (no silent clamp). Manual FX shader parity still requires
   dedicated native/Media3 slices.
+  Transition-focus runtime rule: when Manual Transition scope is active, seam
+  time and source-window descriptors must resolve in root timeline time before
+  runtime projection to avoid local/root drift in Stage5 visual state
+  application.
 - Professional Canva layer unification is the next binding architecture rule:
   video, image, text, shape, masks, and future generated objects must all
   resolve to composition-layer truth before Animate/FX/Key/Value/Graph can
