@@ -113,8 +113,11 @@ Rules:
     native capability is missing, projection must emit explicit blockers instead
     of pretending transform/effect/transition support.
   - when `supportsEffectProgramIds` is true, native must publish an explicit
-    `supportedEffectProgramIds` catalog; any effect outside that catalog must be
-    blocked as `unsupported_effect_program:<id>`.
+  `supportedEffectProgramIds` catalog; any effect outside that catalog must be
+  blocked as `unsupported_effect_program:<id>`.
+  - transition-role descriptors must include explicit real transition window
+    binding and progress; if binding is missing or the playhead is outside the
+    real window, projection must block with transition-window diagnostics.
   This contract is domain-only in the current slice and does not authorize
   Stage5 behavior changes.
 
