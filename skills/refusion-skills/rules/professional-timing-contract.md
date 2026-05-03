@@ -103,6 +103,11 @@ Rules:
   through an explicit adapter before it reaches Stage5 descriptors; it must not
   create another clock, value registry, keyframe evaluator, transition-only
   compositor, or still-frame fallback.
+- the current domain contract for that handoff is:
+  - `lib/features/editor/domain/models/master_live_scrub_visual_program_models.dart`
+  - `lib/features/editor/domain/services/master_live_scrub_program_adapter.dart`
+  This contract is domain-only in the current slice and does not authorize
+  Stage5 behavior changes.
 
 If an agent cannot explain an effect, transition, keyframe, or scrub result
 through this chain, it must stop and document the missing mapper/value
