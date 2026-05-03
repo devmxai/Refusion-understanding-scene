@@ -103,7 +103,12 @@ rule file, and the example JSON in one document.
   dedicated Stage5 visual runtime state bridge (Master Clock -> master
   evaluation -> live scrub program -> Stage5 runtime state), and the runtime
   state is applied to both scrub overlay and visible player-surface ownership
-  paths. Manual FX shader parity still requires dedicated native/Media3 slices.
+  paths. Runtime follow-up rule: evaluate Manual Transition visuals against the
+  effective motion project plus explicit preview-time clock override, push
+  runtime visual source config during active scrub sessions (do not wait for
+  scrub end), and reject Add Key when the playhead is outside the real active
+  transition window (no silent clamp). Manual FX shader parity still requires
+  dedicated native/Media3 slices.
 
 ## Current Engine Boundary
 
