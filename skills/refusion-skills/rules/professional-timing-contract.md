@@ -135,6 +135,13 @@ Rules:
   - preflight submissions from `FusionXCleanUiScreen` must stay nonblocking and
     key-throttled; missing capability/snapshot issues should surface through
     parity diagnostics, not by pausing editor playback/scrub flows.
+  - runtime scrub linkage may merge transition-scoped projected descriptors into
+    Stage5 `previewSources` config via a dedicated adapter
+    (`LiveScrubRuntimeSurfaceConfigAdapter`), but this must remain a data-path
+    projection step, not a parallel renderer or second clock.
+  - when runtime merge is active, source-window mapping must stay deterministic
+    (`targetId -> timeline/source window`) and reversible; descriptors without a
+    valid source window must be ignored rather than guessed.
   This contract is domain-only in the current slice and does not authorize
   Stage5 behavior changes.
 
