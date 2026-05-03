@@ -126,6 +126,8 @@ Rules:
     `docs/master_live_scrub_guard_allowlist.txt` intentional; any new scrub
     bypass path (seek/media item/fallback/compositor coupling/clock source)
     must fail guardrails by default.
+  - prefer `scripts/master_live_scrub_preflight_verify.sh` as the standard
+    preflight bundle before checkpointing Master Live Scrub slices.
   This contract is domain-only in the current slice and does not authorize
   Stage5 behavior changes.
 
