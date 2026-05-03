@@ -113,6 +113,10 @@ rule file, and the example JSON in one document.
   time and source-window descriptors must resolve in root timeline time before
   runtime projection to avoid local/root drift in Stage5 visual state
   application.
+  Transition-focus keyframe-time rule: Manual Transition keyframe authoring
+  must use the same visible active transition window shown in the focused
+  timeline. Do not expose a wider editor range that can scrub visually while
+  Add Key validates against a narrower hidden window.
 - Professional Canva layer unification is the next binding architecture rule:
   video, image, text, shape, masks, and future generated objects must all
   resolve to composition-layer truth before Animate/FX/Key/Value/Graph can
