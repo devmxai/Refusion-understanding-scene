@@ -40,6 +40,10 @@ Mask
   movingMaskReveal
 
 Effects
+  gaussianBlur
+  motionBlur
+  motionTile
+  edgeFill
   blur
   shadow
   glow
@@ -69,6 +73,17 @@ Choreography
   leaderFollower
   completionPolicy
   contrastPolicy
+
+Timing
+  SpeedyGraph
+  BezierExecutionTruth
+  easyEase
+  slowFastSlow
+  fastSlow
+  slowFast
+  fastSlowFast
+  whip
+  customSpeedGraph
 ```
 
 ## Capability Entry Contract
@@ -114,6 +129,9 @@ Preview/editing support changes over time. Treat this list as conservative.
 Supported basics:
 
 - transform position/scale/rotation/opacity;
+- SpeedyGraph preset names and Bezier-based timing are the preferred authoring
+  language for professional motion. If a build cannot consume a SpeedyGraph
+  value, the agent must not silently fall back to linear timing;
 - width/height/cornerRadius for shapes;
 - shape morph aliases `morphSize` and `roundness` lower to editable
   width/height/cornerRadius channels;
@@ -122,7 +140,12 @@ Supported basics:
 - `mask` scene elements and `movingMaskReveal`/`maskReveal` lower to editable
   `mask.revealProgress` graph channels with preserved mask metadata;
 - color;
-- blur;
+- Gaussian blur / blur as an editable scalar where supported;
+- Motion Blur as a velocity-aware effect concept tied to authored motion
+  velocity when supported by the app build;
+- Motion Tile / Edge Fill as the professional blank-edge fill concept for
+  rotation, scale-down, zoom-out, and blur sampling, when supported by the app
+  build;
 - soft shadow/drop shadow for shape/icon preview and editable scalar shape
   scope controls;
 - typewriter progress;
@@ -138,6 +161,8 @@ Supported basics:
 
 Needs dedicated engine work before being treated as real:
 
+- unsupported Motion Blur/Motion Tile export parity in builds that do not
+  publish explicit effect support;
 - trim path export parity, circular progress, arcs, dashed paths, and
   wraparound offset rendering;
 - advanced per-word/per-character transform offsets beyond the current visible
@@ -192,3 +217,17 @@ Composition > nullTransform
 ```
 
 Do not build these as `tutorial001Gradient` or `designRevealSpecialLine`.
+
+## Open Design / Remotion Mapping
+
+Open Design and Remotion references are allowed as teaching material only.
+
+Map them into official ReFusion categories:
+
+```text
+Remotion Sequence -> Beat / layer startMs + durationMs
+Remotion interpolate/easing -> SpeedyGraph / channel keyframes
+Open Design template -> motion recipe
+Open Design DESIGN.md -> ReFusion design token guidance
+HTML/CSS/JS/React -> forbidden as SceneProgram output
+```

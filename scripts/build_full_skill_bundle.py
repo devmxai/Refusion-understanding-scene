@@ -8,6 +8,27 @@ ROOT = Path(__file__).resolve().parents[1]
 
 SOURCES = [
     ("Skill Entry Point", "skills/refusion-skills/SKILL.md"),
+    (
+        "Native Motion Scene Author Rule",
+        "skills/refusion-skills/rules/native-motion-scene-author.md",
+    ),
+    ("SpeedyGraph Rule", "skills/refusion-skills/rules/speedygraph.md"),
+    (
+        "Effects And Renderer Rule",
+        "skills/refusion-skills/rules/effects-and-renderer.md",
+    ),
+    (
+        "Modern Motion Design Rule",
+        "skills/refusion-skills/rules/modern-motion-design.md",
+    ),
+    (
+        "Remotion Principles For ReFusion Rule",
+        "skills/refusion-skills/rules/remotion-principles-for-refusion.md",
+    ),
+    (
+        "Open Design Adaptation Rule",
+        "skills/refusion-skills/rules/open-design-adaptation.md",
+    ),
     ("Scene Program JSON Rule", "skills/refusion-skills/rules/scene-program-json.md"),
     (
         "Professional Timing Contract Rule",
@@ -22,6 +43,10 @@ SOURCES = [
     (
         "Basic Typewriter Intro Example",
         "skills/refusion-skills/examples/basic-typewriter-intro.json",
+    ),
+    (
+        "Premium App Promo Example",
+        "skills/refusion-skills/examples/premium-app-promo-scene.json",
     ),
 ]
 

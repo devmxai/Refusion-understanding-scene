@@ -18,7 +18,8 @@ Use this checklist before returning ReFusion JSON.
 Forbidden keys anywhere:
 
 ```text
-code, script, function, eval, imports, remoteImports, shaderSource
+code, script, function, eval, imports, remoteImports, shaderSource, html, css,
+jsx, react, gsap
 ```
 
 No URLs unless the user and engine explicitly support that asset path.
@@ -41,6 +42,9 @@ No URLs unless the user and engine explicitly support that asset path.
 - No empty channels. Remove channels without keyframes.
 - No same-target/same-property overlap unless deliberately authored as one
   ordered channel.
+- Important motion does not silently use linear timing when the user asked for
+  cinematic, professional, smooth, Easy Ease, Speed Graph, or After Effects-like
+  motion.
 - Scene does not end before all child motion completes.
 - Visible component final motion should not land exactly on the final scene
   boundary without a resolve/hold moment.
@@ -112,6 +116,11 @@ Wrong unless deletion/backspace is explicitly requested:
 Reject and rewrite if:
 
 - animation feels random;
+- scene looks like a web page translation rather than a native motion
+  composition;
+- the output contains HTML/CSS/JS/React/Remotion code;
+- timing bypasses SpeedyGraph when professional movement was requested;
+- effects are invented or unsupported;
 - next motion starts before the prior motion resolves;
 - text appears in the wrong contrast;
 - visible motion is not editable;

@@ -1,0 +1,261 @@
+{
+  "directorPlan": {
+    "schemaVersion": "refusion.motion-director/v1",
+    "name": "Premium App Promo Plan",
+    "durationMs": 3600,
+    "frameRate": 30,
+    "canvasWidth": 1080,
+    "canvasHeight": 1920,
+    "beats": [
+      {
+        "id": "establish",
+        "label": "Establish premium canvas",
+        "startMs": 0,
+        "endMs": 520,
+        "intent": "Fade in a restrained dark background while the scene prepares.",
+        "componentRefs": ["background"]
+      },
+      {
+        "id": "card-enter",
+        "label": "Hero app card enters",
+        "startMs": 260,
+        "endMs": 1120,
+        "intent": "Bring the central app card into focus with cinematic slow-fast-slow motion.",
+        "componentRefs": ["hero-card"]
+      },
+      {
+        "id": "headline-reveal",
+        "label": "Headline types on",
+        "startMs": 980,
+        "endMs": 2050,
+        "intent": "Reveal the primary message after the card is visually established.",
+        "componentRefs": ["headline"]
+      },
+      {
+        "id": "cta-settle",
+        "label": "CTA settles",
+        "startMs": 1880,
+        "endMs": 2520,
+        "intent": "Show the action button with a confident soft landing.",
+        "componentRefs": ["cta"]
+      },
+      {
+        "id": "final-hold",
+        "label": "Final readable hold",
+        "startMs": 2520,
+        "endMs": 3600,
+        "intent": "Hold the finished composition for readability.",
+        "componentRefs": ["hero-card", "headline", "cta"]
+      }
+    ],
+    "components": [
+      { "id": "background", "role": "background.canvas", "label": "Dark background" },
+      { "id": "hero-card", "role": "product.card", "label": "Central app card" },
+      { "id": "headline", "role": "text.headline", "label": "Headline" },
+      { "id": "cta", "role": "button.cta", "label": "Call to action" }
+    ],
+    "primitives": [
+      {
+        "id": "bg-fade",
+        "beatId": "establish",
+        "targetComponentId": "background",
+        "kind": "fade",
+        "property": "opacity",
+        "startMs": 0,
+        "endMs": 520,
+        "fromValue": 0.0,
+        "toValue": 1.0,
+        "easing": "linear"
+      },
+      {
+        "id": "card-y",
+        "beatId": "card-enter",
+        "targetComponentId": "hero-card",
+        "kind": "move",
+        "property": "position",
+        "startMs": 260,
+        "endMs": 1120,
+        "fromValue": { "x": 0, "y": 160 },
+        "toValue": { "x": 0, "y": 80 },
+        "easing": "slowFastSlow"
+      },
+      {
+        "id": "headline-type",
+        "beatId": "headline-reveal",
+        "targetComponentId": "headline",
+        "kind": "typewriter",
+        "property": "typewriterProgress",
+        "startMs": 980,
+        "endMs": 2050,
+        "fromValue": 0.0,
+        "toValue": 1.0,
+        "easing": "linear"
+      },
+      {
+        "id": "cta-pop",
+        "beatId": "cta-settle",
+        "targetComponentId": "cta",
+        "kind": "scale",
+        "property": "scale",
+        "startMs": 1880,
+        "endMs": 2520,
+        "fromValue": 0.92,
+        "toValue": 1.0,
+        "easing": "fastSlow"
+      }
+    ]
+  },
+  "sceneProgram": {
+    "schemaVersion": "refusion.scene-program/v1",
+    "name": "Premium App Promo",
+    "durationMs": 3600,
+    "frameRate": 30,
+    "layers": [
+      {
+        "id": "background-layer",
+        "name": "Background",
+        "kind": "shape",
+        "startMs": 0,
+        "durationMs": 3600,
+        "elements": [
+          {
+            "id": "background",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "rectangle",
+              "position": { "x": 0, "y": 0 },
+              "width": 1080,
+              "height": 1920,
+              "color": "#070A12",
+              "opacity": 1
+            },
+            "channels": [
+              {
+                "property": "opacity",
+                "keyframes": [
+                  { "timeMs": 0, "value": 0.0, "easing": "linear" },
+                  { "timeMs": 520, "value": 1.0, "easing": "linear" }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "hero-card-layer",
+        "name": "Hero App Card",
+        "kind": "shape",
+        "startMs": 0,
+        "durationMs": 3600,
+        "elements": [
+          {
+            "id": "hero-card",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "roundedRectangle",
+              "position": { "x": 0, "y": 80 },
+              "width": 760,
+              "height": 880,
+              "cornerRadius": 64,
+              "color": "#111827",
+              "opacity": 1,
+              "shadowOpacity": 0.32,
+              "shadowBlur": 42,
+              "shadowOffset": { "x": 0, "y": 28 },
+              "shadowColor": "#000000"
+            },
+            "channels": [
+              {
+                "property": "position",
+                "keyframes": [
+                  { "timeMs": 260, "value": { "x": 0, "y": 160 }, "easing": "slowFastSlow" },
+                  { "timeMs": 1120, "value": { "x": 0, "y": 80 }, "easing": "slowFastSlow" }
+                ]
+              },
+              {
+                "property": "opacity",
+                "keyframes": [
+                  { "timeMs": 260, "value": 0.0, "easing": "linear" },
+                  { "timeMs": 760, "value": 1.0, "easing": "fastSlow" }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "headline-layer",
+        "name": "Headline",
+        "kind": "text",
+        "startMs": 0,
+        "durationMs": 3600,
+        "elements": [
+          {
+            "id": "headline",
+            "kind": "text",
+            "text": "Design motion that feels alive.",
+            "properties": {
+              "position": { "x": 0, "y": -520 },
+              "fontSize": 62,
+              "fontWeight": 800,
+              "lineHeight": 1.05,
+              "textAlign": "center",
+              "letterSpacing": 0,
+              "color": "#F8FAFC",
+              "opacity": 1,
+              "typewriterProgress": 0
+            },
+            "channels": [
+              {
+                "property": "typewriterProgress",
+                "keyframes": [
+                  { "timeMs": 980, "value": 0.0, "easing": "linear" },
+                  { "timeMs": 2050, "value": 1.0, "easing": "linear" }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "cta-layer",
+        "name": "CTA",
+        "kind": "shape",
+        "startMs": 0,
+        "durationMs": 3600,
+        "elements": [
+          {
+            "id": "cta",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "roundedRectangle",
+              "position": { "x": 0, "y": 690 },
+              "width": 430,
+              "height": 104,
+              "cornerRadius": 52,
+              "color": "#7DD3FC",
+              "opacity": 1,
+              "scale": 1.0
+            },
+            "channels": [
+              {
+                "property": "scale",
+                "keyframes": [
+                  { "timeMs": 1880, "value": 0.92, "easing": "fastSlow" },
+                  { "timeMs": 2520, "value": 1.0, "easing": "fastSlow" }
+                ]
+              },
+              {
+                "property": "opacity",
+                "keyframes": [
+                  { "timeMs": 1880, "value": 0.0, "easing": "linear" },
+                  { "timeMs": 2220, "value": 1.0, "easing": "fastSlow" }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -9,6 +9,12 @@ ReFusion motion scenes. It is intentionally structured like a skill pack:
 skills/refusion-skills/
 ├── SKILL.md
 ├── rules/
+│   ├── native-motion-scene-author.md
+│   ├── speedygraph.md
+│   ├── effects-and-renderer.md
+│   ├── modern-motion-design.md
+│   ├── remotion-principles-for-refusion.md
+│   ├── open-design-adaptation.md
 │   ├── scene-program-json.md
 │   ├── professional-timing-contract.md
 │   ├── choreography.md
@@ -18,7 +24,8 @@ skills/refusion-skills/
 │   ├── tutorial-intake.md
 │   └── validation.md
 └── examples/
-    └── basic-typewriter-intro.json
+    ├── basic-typewriter-intro.json
+    └── premium-app-promo-scene.json
 ```
 
 Give `skills/refusion-skills/SKILL.md` to any coding or design agent before
@@ -62,6 +69,12 @@ Direct browser links:
 
 - [Skill entry](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/SKILL.md)
 - [All-in-one fallback](https://github.com/devmxai/refusion-skills/blob/main/REFUSION_SCENE_SKILL_FULL.md)
+- [Native Motion Scene Author](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/native-motion-scene-author.md)
+- [SpeedyGraph](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/speedygraph.md)
+- [Effects And Renderer](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/effects-and-renderer.md)
+- [Modern Motion Design](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/modern-motion-design.md)
+- [Remotion Principles For ReFusion](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/remotion-principles-for-refusion.md)
+- [Open Design Adaptation](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/open-design-adaptation.md)
 - [Scene Program JSON](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/scene-program-json.md)
 - [Professional Timing Contract](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/professional-timing-contract.md)
 - [Choreography](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/choreography.md)
@@ -75,13 +88,23 @@ Direct browser links:
 
 The target is not merely valid JSON. The target is professional motion:
 
+- ReFusion-native scenes, not HTML artifacts;
 - real editable layers, elements, channels, and keyframes;
+- DirectorPlan-first creative and motion direction;
+- SpeedyGraph / Bezier timing truth;
+- official editable effects only;
 - deterministic timing;
 - readable holds;
 - no random overlap;
 - no early cuts;
 - no hidden UI-only motion;
 - Scene Program output that can be inspected and edited after import.
+
+This repository intentionally borrows useful discipline from Open Design and
+Remotion while excluding their execution surfaces. Open Design contributes
+design brief, taste, critique, and anti-slop thinking. Remotion contributes
+composition, sequence, frame-accurate timing, and reusable-scene thinking.
+Neither HTML/CSS/JS nor React/Remotion code is valid ReFusion output.
 
 ## Mandatory Maintenance Rule
 

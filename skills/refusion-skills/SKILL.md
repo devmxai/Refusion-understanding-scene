@@ -8,14 +8,21 @@ metadata:
 # ReFusion Skills
 
 Use this skill whenever a task involves ReFusion scene generation, motion
-script authoring, tutorial-to-capability extraction, timing review, or JSON
-repair.
+script authoring, tutorial-to-capability extraction, timing review, JSON
+repair, modern motion design, SpeedyGraph timing, effects authoring, or
+external-agent scene direction for the ReFusion engine.
 
 ## Core Rule
 
 Return complete ReFusion JSON only when the user asks for a scene. Do not return
 Markdown around the JSON. Do not use executable code, JSX, CSS, functions,
 imports, shader code, remote code, or comments.
+
+ReFusion is not an HTML design surface. It is a native editable video/motion
+scene engine. Use Shapes, Text, Image, Video, Scene Program layers, channels,
+keyframes, SpeedyGraph, and official effects. Treat Open Design and Remotion as
+sources of design/motion discipline only; do not copy their HTML/React execution
+surface into ReFusion output.
 
 Preferred root shape:
 
@@ -32,17 +39,37 @@ executable scene.
 ## Required Workflow
 
 1. Understand the visual goal.
-2. Plan ordered beats.
-3. Define semantic components.
-4. Define motion primitives inside beats.
-5. Compile those primitives into real layers, elements, channels, and keyframes.
-6. Validate timing, holds, contrast, and editability.
-7. Return only complete JSON.
+2. Run the Creative Director role: define visual thesis, hierarchy, mood, and
+   semantic components.
+3. Run the Motion Director role: plan ordered beats, primitives, holds,
+   handoffs, and timing.
+4. Run the Technical Scene Writer role: compile primitives into real layers,
+   elements, channels, keyframes, SpeedyGraph timing, and official effects.
+5. Run the QA Critic role: validate timing, holds, contrast, effects,
+   editability, and professional taste.
+6. Return only complete JSON.
 
 ## Load Rules As Needed
 
 - For schema, coordinates, supported properties, icons, and examples, read
   [rules/scene-program-json.md](rules/scene-program-json.md).
+- For the ReFusion-native authoring pipeline, four internal production roles,
+  JSON-only output, and Open Design/Remotion exclusion rules, read
+  [rules/native-motion-scene-author.md](rules/native-motion-scene-author.md).
+- For SpeedyGraph, Bezier execution truth, Easy Ease/F9, Slow-Fast-Slow,
+  velocity/influence, and Motion Blur velocity semantics, read
+  [rules/speedygraph.md](rules/speedygraph.md).
+- For official effects such as Motion Blur, Motion Tile / Edge Fill, Gaussian
+  Blur, and shader/renderer boundaries, read
+  [rules/effects-and-renderer.md](rules/effects-and-renderer.md).
+- For modern After Effects/Alight Motion style scene recipes, social ads,
+  app promos, kinetic titles, prompt scenes, and premium motion language, read
+  [rules/modern-motion-design.md](rules/modern-motion-design.md).
+- For translating useful Remotion ideas into ReFusion without React/HTML,
+  read [rules/remotion-principles-for-refusion.md](rules/remotion-principles-for-refusion.md).
+- For adapting Open Design skills/design systems into ReFusion-native shapes
+  and motion scenes, read
+  [rules/open-design-adaptation.md](rules/open-design-adaptation.md).
 - For professional time ownership, holds, completion, layer lifetime, and
   future contract requirements, read
   [rules/professional-timing-contract.md](rules/professional-timing-contract.md).
@@ -69,6 +96,14 @@ rule file, and the example JSON in one document.
 ## Non-Negotiable Professional Rules
 
 - Do not create random simultaneous animation.
+- Do not output HTML, CSS, JSX, JavaScript, GSAP, Remotion code, or Open Design
+  artifacts as the ReFusion scene source of truth.
+- Do not translate a website template directly. Translate design intelligence
+  into editable Shapes/Text/Image/Video layers.
+- Do not bypass SpeedyGraph or MotionInterpolation truth when authoring timing.
+- Do not write velocity metadata without executable Bezier or approved timing
+  truth.
+- Do not invent unsupported effects or claim parity for planned effects.
 - Do not let a scene end before all child motion completes.
 - Important text must have a readable hold unless the user asks for kinetic
   typography.
@@ -167,5 +202,8 @@ Use numeric startMs, endMs, durationMs, timeMs, and frameRate.
 Use center-origin 1080x1920 canvas unless asked otherwise.
 Plan ordered beats, semantic components, primitives, then editable layers,
 elements, channels, and keyframes.
-Do not use executable code, Markdown, comments, URLs, JSX, CSS, or imports.
+Use SpeedyGraph timing for cinematic motion.
+Use official ReFusion effects only when needed.
+Do not use executable code, Markdown, comments, URLs, JSX, CSS, React,
+Remotion code, GSAP, or imports.
 ```

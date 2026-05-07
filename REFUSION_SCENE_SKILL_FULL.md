@@ -13,6 +13,12 @@ python3 scripts/build_full_skill_bundle.py
 ## Included Sources
 
 - `skills/refusion-skills/SKILL.md`
+- `skills/refusion-skills/rules/native-motion-scene-author.md`
+- `skills/refusion-skills/rules/speedygraph.md`
+- `skills/refusion-skills/rules/effects-and-renderer.md`
+- `skills/refusion-skills/rules/modern-motion-design.md`
+- `skills/refusion-skills/rules/remotion-principles-for-refusion.md`
+- `skills/refusion-skills/rules/open-design-adaptation.md`
 - `skills/refusion-skills/rules/scene-program-json.md`
 - `skills/refusion-skills/rules/professional-timing-contract.md`
 - `skills/refusion-skills/rules/choreography.md`
@@ -22,6 +28,7 @@ python3 scripts/build_full_skill_bundle.py
 - `skills/refusion-skills/rules/tutorial-intake.md`
 - `skills/refusion-skills/rules/validation.md`
 - `skills/refusion-skills/examples/basic-typewriter-intro.json`
+- `skills/refusion-skills/examples/premium-app-promo-scene.json`
 
 ---
 
@@ -39,14 +46,21 @@ metadata:
 # ReFusion Skills
 
 Use this skill whenever a task involves ReFusion scene generation, motion
-script authoring, tutorial-to-capability extraction, timing review, or JSON
-repair.
+script authoring, tutorial-to-capability extraction, timing review, JSON
+repair, modern motion design, SpeedyGraph timing, effects authoring, or
+external-agent scene direction for the ReFusion engine.
 
 ## Core Rule
 
 Return complete ReFusion JSON only when the user asks for a scene. Do not return
 Markdown around the JSON. Do not use executable code, JSX, CSS, functions,
 imports, shader code, remote code, or comments.
+
+ReFusion is not an HTML design surface. It is a native editable video/motion
+scene engine. Use Shapes, Text, Image, Video, Scene Program layers, channels,
+keyframes, SpeedyGraph, and official effects. Treat Open Design and Remotion as
+sources of design/motion discipline only; do not copy their HTML/React execution
+surface into ReFusion output.
 
 Preferred root shape:
 
@@ -63,17 +77,37 @@ executable scene.
 ## Required Workflow
 
 1. Understand the visual goal.
-2. Plan ordered beats.
-3. Define semantic components.
-4. Define motion primitives inside beats.
-5. Compile those primitives into real layers, elements, channels, and keyframes.
-6. Validate timing, holds, contrast, and editability.
-7. Return only complete JSON.
+2. Run the Creative Director role: define visual thesis, hierarchy, mood, and
+   semantic components.
+3. Run the Motion Director role: plan ordered beats, primitives, holds,
+   handoffs, and timing.
+4. Run the Technical Scene Writer role: compile primitives into real layers,
+   elements, channels, keyframes, SpeedyGraph timing, and official effects.
+5. Run the QA Critic role: validate timing, holds, contrast, effects,
+   editability, and professional taste.
+6. Return only complete JSON.
 
 ## Load Rules As Needed
 
 - For schema, coordinates, supported properties, icons, and examples, read
   [rules/scene-program-json.md](rules/scene-program-json.md).
+- For the ReFusion-native authoring pipeline, four internal production roles,
+  JSON-only output, and Open Design/Remotion exclusion rules, read
+  [rules/native-motion-scene-author.md](rules/native-motion-scene-author.md).
+- For SpeedyGraph, Bezier execution truth, Easy Ease/F9, Slow-Fast-Slow,
+  velocity/influence, and Motion Blur velocity semantics, read
+  [rules/speedygraph.md](rules/speedygraph.md).
+- For official effects such as Motion Blur, Motion Tile / Edge Fill, Gaussian
+  Blur, and shader/renderer boundaries, read
+  [rules/effects-and-renderer.md](rules/effects-and-renderer.md).
+- For modern After Effects/Alight Motion style scene recipes, social ads,
+  app promos, kinetic titles, prompt scenes, and premium motion language, read
+  [rules/modern-motion-design.md](rules/modern-motion-design.md).
+- For translating useful Remotion ideas into ReFusion without React/HTML,
+  read [rules/remotion-principles-for-refusion.md](rules/remotion-principles-for-refusion.md).
+- For adapting Open Design skills/design systems into ReFusion-native shapes
+  and motion scenes, read
+  [rules/open-design-adaptation.md](rules/open-design-adaptation.md).
 - For professional time ownership, holds, completion, layer lifetime, and
   future contract requirements, read
   [rules/professional-timing-contract.md](rules/professional-timing-contract.md).
@@ -100,6 +134,14 @@ rule file, and the example JSON in one document.
 ## Non-Negotiable Professional Rules
 
 - Do not create random simultaneous animation.
+- Do not output HTML, CSS, JSX, JavaScript, GSAP, Remotion code, or Open Design
+  artifacts as the ReFusion scene source of truth.
+- Do not translate a website template directly. Translate design intelligence
+  into editable Shapes/Text/Image/Video layers.
+- Do not bypass SpeedyGraph or MotionInterpolation truth when authoring timing.
+- Do not write velocity metadata without executable Bezier or approved timing
+  truth.
+- Do not invent unsupported effects or claim parity for planned effects.
 - Do not let a scene end before all child motion completes.
 - Important text must have a readable hold unless the user asks for kinetic
   typography.
@@ -122,13 +164,59 @@ rule file, and the example JSON in one document.
   professional compositor reports complete interactive readiness: dual video
   sampling, temporal motion blur, mirror-edge tiling, preview parity, Live
   Scrub parity, and playback parity. Manual may open only as an authoring
-  scope in the existing focused TimelinePanel. Manual transform preview,
-  playback, and Live Scrub may use the native `manualTransform` compositor path
-  for real video pixels because interactive frame rendering is dispatched
-  through the transition render executor. Basic manual transform lanes must use
-  a single real source sample per output frame until a dedicated nonblocking
-  motion-blur renderer exists. Do not claim export parity until export consumes
-  the same compositor output.
+  scope in the existing focused TimelinePanel. Legacy native
+  `manualTransform` compositor rendering must stay disabled for Manual
+  authoring in preview/liveScrub/playback. Manual lanes must not suppress
+  Stage5 native preview ownership in any interactive mode. Manual transition
+  authoring still writes real graph/keyframe data; runtime visual execution for
+  preview/playback/Live Scrub must come from the Stage5 master path before
+  parity can be claimed. Do not claim export parity until export consumes the
+  same compositor output.
+  Current runtime status: Manual Transition transform/opacity now route through a
+  dedicated Stage5 visual runtime state bridge (Master Clock -> master
+  evaluation -> live scrub program -> Stage5 runtime state), and the runtime
+  state is applied to both scrub overlay and visible player-surface ownership
+  paths. Runtime follow-up rule: evaluate Manual Transition visuals against the
+  effective motion project plus explicit preview-time clock override, push
+  runtime visual source config during active scrub sessions (do not wait for
+  scrub end), and reject Add Key when the playhead is outside the real active
+  transition window (no silent clamp). Manual FX shader parity still requires
+  dedicated native/Media3 slices.
+  Transition-focus runtime rule: when Manual Transition scope is active, seam
+  time and source-window descriptors must resolve in root timeline time before
+  runtime projection to avoid local/root drift in Stage5 visual state
+  application.
+  Transition-focus keyframe-time rule: Manual Transition keyframe authoring
+  must use the same visible active transition window shown in the focused
+  timeline. Do not expose a wider editor range that can scrub visually while
+  Add Key validates against a narrower hidden window.
+  Transition-focus value-write rule: keyframe value edits in Manual Transition
+  scope must resolve and persist through scoped transition identity
+  (`transitionId + sourceSceneId`) rather than root-track-only lookup. UI value
+  changes that bypass scoped transition identity are invalid.
+  Transition-focus compact-clip rule: when manual transition windows become
+  very narrow, timeline clip chrome must degrade gracefully without `RenderFlex`
+  overflow banners or hidden hit areas; preserve time truth and keep Add Key
+  scoped to the exact visible transition window.
+  Transition-focus visual-width rule: narrow transition windows may use
+  minimum clip visual width in UI layout for legibility, but this must never
+  alter active transition start/end times or keyframe time truth.
+  Scene-scope video truth rule: scene-scope video timeline entries used by
+  manual transition authoring must remain real media clips (not placeholder
+  shells) so scoped outgoing/incoming preview-source windows bind to actual
+  media and Stage5 runtime state applies to the correct sources.
+- Professional Canva layer unification is the next binding architecture rule:
+  video, image, text, shape, masks, and future generated objects must all
+  resolve to composition-layer truth before Animate/FX/Key/Value/Graph can
+  claim parity. Video must resolve through `MotionLayerKind.video` +
+  `MotionElementKind.videoClip` + source binding, not raw transport/player clip
+  identity. Manual Transition Add Key must use the same transition-local time
+  domain shown to the user. Manual Transition Scale/Opacity/Position/Rotation
+  must target outgoing/incoming/both layer instances through a unified target
+  resolver, then flow through Master Clock, Value Truth, and a shared Visual
+  Layer Program before preview/playback/Live Scrub/export renderer adapters.
+  Do not treat a PlayerView transform, thumbnail, poster, or boundary-frame
+  preview as final layer parity.
 
 ## Current Engine Boundary
 
@@ -152,8 +240,640 @@ Use numeric startMs, endMs, durationMs, timeMs, and frameRate.
 Use center-origin 1080x1920 canvas unless asked otherwise.
 Plan ordered beats, semantic components, primitives, then editable layers,
 elements, channels, and keyframes.
-Do not use executable code, Markdown, comments, URLs, JSX, CSS, or imports.
+Use SpeedyGraph timing for cinematic motion.
+Use official ReFusion effects only when needed.
+Do not use executable code, Markdown, comments, URLs, JSX, CSS, React,
+Remotion code, GSAP, or imports.
 ```
+
+---
+
+# Native Motion Scene Author Rule
+
+Source: `skills/refusion-skills/rules/native-motion-scene-author.md`
+
+# Native Motion Scene Author
+
+Use this rule when an agent must create a professional ReFusion scene from a
+prompt.
+
+## Core Identity
+
+ReFusion is a native editable video/motion scene engine, not an HTML design
+surface.
+
+Think like:
+
+```text
+After Effects / Alight Motion / Premiere-style editable composition
+```
+
+Do not think like:
+
+```text
+web page -> HTML artifact -> rendered iframe
+```
+
+## Final Output
+
+For scene creation, output a single complete JSON object:
+
+```json
+{
+  "directorPlan": {},
+  "sceneProgram": {}
+}
+```
+
+Do not output:
+
+- HTML
+- CSS
+- JavaScript
+- JSX
+- React / Remotion code
+- GSAP
+- shader source
+- remote imports
+- Markdown wrapped around the JSON
+- rendered video as the source of truth
+
+## Four Internal Roles
+
+If you are one agent, run these roles internally. If a system supports multiple
+agents, assign one role per agent.
+
+### 1. Creative Director
+
+Define:
+
+- scene thesis;
+- audience and format;
+- mood and visual language;
+- hierarchy of attention;
+- semantic components;
+- what must not happen.
+
+Output should sound like:
+
+```text
+A premium vertical app-promo scene where a dark product card floats into view,
+the headline types on, and the CTA settles with one controlled pulse.
+```
+
+Not:
+
+```text
+A modern webpage with cards and gradients.
+```
+
+### 2. Motion Director
+
+Define:
+
+- beats;
+- component lifetimes;
+- motion primitives;
+- overlaps and handoffs;
+- readable holds;
+- timing style.
+
+Good beat pattern:
+
+```text
+0-420ms      establish background
+220-980ms    hero card enters
+860-1700ms   title reveals
+1580-2200ms  CTA settles
+2200-3200ms  readable hold
+```
+
+### 3. Technical Scene Writer
+
+Write:
+
+- `directorPlan`;
+- `sceneProgram`;
+- shape/text/image/video layers;
+- elements;
+- channels;
+- keyframes;
+- SpeedyGraph timing;
+- official effects.
+
+Every visible motion must be editable.
+
+### 4. QA Critic
+
+Reject and revise if:
+
+- DirectorPlan and SceneProgram disagree;
+- important text has no readable hold;
+- motion feels random;
+- keyframes are hidden or non-editable;
+- effects are unsupported;
+- timing is accidentally linear;
+- scene depends on HTML/CSS/JS behavior.
+
+## Translation Mental Model
+
+| Web/Open Design idea | ReFusion-native equivalent |
+|---|---|
+| page | composition/canvas |
+| section | beat |
+| div/card | shape/text/image/video layer |
+| CSS token | ReFusion design token |
+| CSS animation | channel/keyframes/SpeedyGraph |
+| HTML artifact | DirectorPlan + SceneProgram JSON |
+| critique | DirectorPlan/SceneProgram QA |
+| template | motion recipe |
+
+## Professional Bar
+
+The result must feel inspectable by a motion designer:
+
+- clear component names;
+- stable IDs;
+- intentional timing;
+- few strong motions;
+- readable final frame;
+- editable layers;
+- no black-box runtime tricks.
+
+---
+
+# SpeedyGraph Rule
+
+Source: `skills/refusion-skills/rules/speedygraph.md`
+
+# SpeedyGraph
+
+Use this rule for animation timing, easing, Speed Graph behavior, or Motion Blur
+velocity semantics.
+
+## Principle
+
+Bezier control points are the cubic timing execution truth.
+
+Speed, velocity, influence, preset names, and graph handles are authoring inputs
+or computed views. They must compile into executable Bezier timing through the
+official ReFusion timing contract.
+
+Forbidden state:
+
+```text
+UI/agent writes velocity metadata
+but the evaluator consumes a different Bezier
+```
+
+## Required Presets
+
+Use these names when authoring timing:
+
+| Preset | Meaning | Use |
+|---|---|---|
+| `linear` | constant progress | typewriter, progress, mechanical loops |
+| `easyEase` / `f9` | AE-like smooth ease | default natural motion |
+| `slowFastSlow` | slow start, fast middle, slow end | cinematic hero motion |
+| `fastSlow` / `easeOut` | fast start, soft landing | arrivals, settling |
+| `slowFast` / `easeIn` | slow start, fast end | exits, launches |
+| `fastSlowFast` | fast, plateau, fast | hover/hold-in-middle motion |
+| `whip` / `snap` | punchy accent | badge, button, fast UI action |
+| `customSpeedGraph` | authored curve | exact motion design |
+
+## Timing Taste
+
+- Hero card entrance: `slowFastSlow`.
+- Landing motion: `fastSlow`.
+- Exit or throw: `slowFast`.
+- Button press: `whip`.
+- Typewriter: `linear`.
+- Large spin/rotation: `slowFastSlow` plus Motion Tile and Motion Blur if
+  blank edges or speed trails are likely.
+
+## Motion Blur
+
+Motion Blur must follow authored velocity:
+
+- `slowFastSlow`: blur weak at start/end, strongest near middle.
+- `fastSlow`: blur strongest near start.
+- `slowFast`: blur strongest near end.
+- `linear`: stable blur strength.
+
+Do not fake Motion Blur with Gaussian Blur. Gaussian Blur is a separate visual
+effect, not velocity blur.
+
+## Agent Authoring Rules
+
+When asked for professional motion:
+
+1. choose a timing preset for every important segment;
+2. use linear only when it is semantically correct;
+3. keep one property in one ordered channel;
+4. avoid many micro-keyframes when one Bezier segment is sufficient;
+5. never use random timing labels unknown to ReFusion.
+
+## Clip Speed Ramp Boundary
+
+SpeedyGraph controls property interpolation such as position, rotation, scale,
+opacity, blur, and effect amount.
+
+It does not control media playback time, clip speed ramp, time remapping,
+reverse playback, or freeze-frame logic. Those require separate contracts.
+
+---
+
+# Effects And Renderer Rule
+
+Source: `skills/refusion-skills/rules/effects-and-renderer.md`
+
+# Effects And Renderer Contract
+
+Use this rule when a scene uses effects or when a prompt asks for professional
+visual treatment.
+
+## Principle
+
+Effects are editable scene data. They are not hidden overlays, HTML filters,
+CSS filters, bitmap tricks, or renderer-only hacks.
+
+If the engine does not support an effect, do not pretend it does. Either omit
+it, approximate with supported editable primitives, or state the limitation.
+
+## Current Important Effects
+
+### Motion Blur
+
+Use for visible high-speed movement:
+
+- fast swipe;
+- spin transition;
+- zoom push;
+- scale burst;
+- fast product-card movement;
+- kinetic title arcs.
+
+Motion Blur should be driven by SpeedyGraph velocity, not only by a static
+amount.
+
+### Motion Tile / Edge Fill
+
+Use when rotation, scale-down, zoom-out, position movement, or Motion Blur may
+expose blank canvas areas.
+
+Expected meaning:
+
+- fills blank areas outside the original source;
+- supports mirrored continuation when requested;
+- does not change the transform anchor;
+- does not mutate rotation center;
+- should feed Motion Blur so black gaps are not repeated.
+
+### Gaussian Blur
+
+Use for:
+
+- soft background separation;
+- depth;
+- intentional defocus.
+
+Do not use Gaussian Blur as fake Motion Blur.
+
+## Preferred Visual Chain
+
+When combining these effects:
+
+```text
+Motion Tile / Edge Fill
+-> Motion Blur
+-> Gaussian Blur
+```
+
+## Safe Authoring Behavior
+
+When an effect is used, document it as an editable effect instance or animatable
+effect parameter in the SceneProgram style accepted by ReFusion docs.
+
+If uncertain about exact effect serialization, keep the scene valid using
+supported transform/opacity/shape channels and mention the effect in
+DirectorPlan intent rather than inventing unsupported JSON keys.
+
+## Stop List
+
+Do not:
+
+- use CSS filters;
+- use HTML canvas;
+- use hidden code;
+- use remote assets as effect processors;
+- create overlay-only effects;
+- claim export parity for an unsupported effect;
+- use Motion Tile in a way that changes rotation pivot;
+- use bitmap/proof/media-retriever concepts as realtime output.
+
+---
+
+# Modern Motion Design Rule
+
+Source: `skills/refusion-skills/rules/modern-motion-design.md`
+
+# Modern Motion Design Recipes
+
+Use this rule when the user asks for a professional modern scene, ad, intro,
+app promo, title card, social post, or motion graphic.
+
+## Design First, Then Motion
+
+Build the hero frame mentally before animating:
+
+1. What should the viewer see at the strongest frame?
+2. What is the main subject?
+3. What is the text hierarchy?
+4. What is the one accent move?
+5. What needs a readable hold?
+
+Then animate into that frame.
+
+## Premium App Promo
+
+Components:
+
+- background canvas;
+- phone/card/device-like shape;
+- product area;
+- headline;
+- subtitle;
+- CTA;
+- accent shape or ring.
+
+Motion:
+
+- card enters with y + scale, `slowFastSlow`;
+- headline reveals after card is understandable;
+- CTA lands with `fastSlow`;
+- final hold 700-1200ms;
+- optional Motion Blur on fast card entrance.
+
+## Social Ad Scene
+
+Components:
+
+- high-contrast background;
+- product object or abstract hero shape;
+- short headline;
+- proof badge;
+- CTA strip.
+
+Motion:
+
+- establish background;
+- hero object enters first;
+- headline follows;
+- proof badge snaps with `whip`;
+- CTA lands softly;
+- final frame reads as a complete social poster.
+
+## Kinetic Title
+
+Components:
+
+- oversized title;
+- mask/reveal shape;
+- accent line or trim path;
+- optional secondary caption.
+
+Motion:
+
+- title uses word or letter range reveal when supported;
+- mask/wipe uses one matte-like shape or mask element;
+- accent line uses trimEnd when supported;
+- avoid one layer per letter unless specifically requested.
+
+## Prompt / AI Scene
+
+Components:
+
+- prompt shell;
+- prompt text;
+- send button;
+- reveal shape or circle;
+- result card.
+
+Motion:
+
+- shell enters;
+- text uses one `typewriterProgress` channel;
+- send button press uses scale with `whip`;
+- reveal shape expands using `slowFastSlow`;
+- result card holds.
+
+## Spin / Rotation Scene
+
+Components:
+
+- source visual;
+- optional mirrored fill;
+- optional blur;
+- target/final state.
+
+Motion:
+
+- rotate around visual center;
+- use `slowFastSlow`;
+- add Motion Tile before Motion Blur when blank corners are possible;
+- do not let Motion Tile change the pivot;
+- final state must settle.
+
+## Anti-AI-Slop Rules
+
+Avoid:
+
+- generic purple-blue gradient;
+- too many rounded cards;
+- emoji as icons;
+- random metrics;
+- text with no readable hold;
+- all layers animating at once;
+- same easing on every object;
+- decorative motion with no story purpose.
+
+Use:
+
+- one strong visual idea;
+- restrained palette;
+- stable geometry;
+- intentional typography;
+- controlled staggering;
+- readable final frame.
+
+---
+
+# Remotion Principles For ReFusion Rule
+
+Source: `skills/refusion-skills/rules/remotion-principles-for-refusion.md`
+
+# Remotion Principles For ReFusion
+
+Use this rule when borrowing ideas from Remotion-style programmatic video.
+
+Sources consulted:
+
+- Remotion skills repository: `https://github.com/remotion-dev/skills`
+- Remotion docs concepts: compositions, frame-based animation, Sequence,
+  interpolation, spring, width/height/fps/duration metadata.
+
+## What To Borrow
+
+Borrow the mental model:
+
+- a composition has width, height, fps, and duration;
+- visible elements have explicit time spans;
+- frame/time is deterministic;
+- animations derive values from the current frame/time;
+- sequences organize timing and reuse;
+- assets are explicit;
+- render output should match preview semantics.
+
+## What Not To Borrow
+
+Do not output:
+
+- React;
+- JSX;
+- Remotion components;
+- HTML;
+- CSS;
+- `useCurrentFrame()`;
+- `interpolate()`;
+- `<Sequence>`;
+- `<Composition>`;
+- `<Img>`;
+- `<Video>`.
+
+Those are Remotion execution surfaces. ReFusion execution is SceneProgram JSON.
+
+## Translation Table
+
+| Remotion idea | ReFusion-native equivalent |
+|---|---|
+| Composition width/height/fps/duration | `sceneProgram.canvasWidth/canvasHeight/frameRate/durationMs` via wrapper |
+| Sequence from/duration | layer `startMs` and `durationMs`, or Director beat |
+| useCurrentFrame | timeline `timeMs` evaluated by ReFusion |
+| interpolate | channel keyframes + SpeedyGraph |
+| Easing.bezier | SpeedyGraph Bezier timing |
+| AbsoluteFill/layering | layer stack + full-canvas shapes |
+| Img/Video component | image/video layer/element where supported |
+| reusable component | semantic component + recipe |
+| render check | ReFusion import/preview/export validation |
+
+## Practical Rules
+
+- Convert frame counts to milliseconds using `1000 / fps`.
+- Prefer reusable scene recipes over raw copied code.
+- Explicitly declare duration and holds.
+- Keep timing deterministic.
+- Use SpeedyGraph instead of ad-hoc interpolation formulas.
+- Use Director beats instead of nested JSX sequences.
+
+## Professional Lesson
+
+Remotion's strength is not React itself. Its useful lesson for ReFusion is:
+
+```text
+deterministic timeline -> reusable scene blocks -> frame-accurate values
+```
+
+ReFusion should express the same discipline through editable DirectorPlan and
+SceneProgram data.
+
+---
+
+# Open Design Adaptation Rule
+
+Source: `skills/refusion-skills/rules/open-design-adaptation.md`
+
+# Open Design Adaptation
+
+Use this rule when adapting Open Design skills, design briefs, visual systems,
+or critique methods into ReFusion scenes.
+
+## What To Borrow
+
+Borrow:
+
+- skill structure;
+- design brief thinking;
+- mood/density/palette/typography decisions;
+- anti-AI-slop rules;
+- design-system tokens;
+- critique rubrics;
+- layout-before-animation;
+- progressive disclosure;
+- template-as-recipe thinking.
+
+## What Not To Borrow
+
+Do not output:
+
+- HTML artifacts;
+- CSS;
+- JavaScript;
+- GSAP;
+- iframe previews;
+- web templates as final scenes;
+- website sections as direct ReFusion structures.
+
+## Translation Table
+
+| Open Design | ReFusion |
+|---|---|
+| skill prompt | agent authoring rule |
+| DESIGN.md | ReFusion design token guidance |
+| section layout | beat/component recipe |
+| card/div | shape/text/image/video layer |
+| CSS animation | keyframes + SpeedyGraph |
+| artifact | DirectorPlan + SceneProgram JSON |
+| critique report | QA of DirectorPlan/SceneProgram |
+| template | reusable motion recipe |
+
+## Design Token Guidance
+
+When a prompt gives brand/style information, resolve:
+
+- canvas background;
+- text primary/secondary;
+- accent color;
+- display/body/mono typography intent;
+- density: compact, balanced, spacious;
+- mood: editorial, cinematic, utility, brutalist, soft, premium, playful;
+- constraints: no gradients, no stock images, no busy motion, etc.
+
+Then express these as SceneProgram shape/text properties and motion decisions,
+not CSS variables.
+
+## Critique Criteria
+
+Before returning a scene, review:
+
+- philosophy consistency;
+- hierarchy;
+- detail execution;
+- functionality/editability;
+- innovation.
+
+Translate critique into scene fixes:
+
+- adjust shapes;
+- adjust text size/position;
+- adjust timing;
+- add holds;
+- reduce layer noise;
+- improve SpeedyGraph;
+- remove unsupported effects.
+
+## Main Rule
+
+Open Design improves taste. ReFusion contracts control execution.
 
 ---
 
@@ -236,6 +956,9 @@ Supported layer kinds:
 - `shape`
 - `text`
 - `image`
+- `video` when the active ReFusion build exposes video layers through the
+  composition layer model. If uncertain, prefer shape/text/image and do not
+  invent video source bindings.
 
 Layer shape:
 
@@ -555,10 +1278,30 @@ Safe easing values:
 - `easeInOutCubic`
 - `easeOutQuint`
 - `spring`
+- `easyEase`
+- `f9`
+- `slowFastSlow`
+- `fastSlow`
+- `slowFast`
+- `fastSlowFast`
+- `whip`
+- `snap`
+- `customSpeedGraph`
 
 Use `linear` for typewriter progress. Use `easeOutCubic` for entrances.
 Use `easeInOutCubic` for press/transform moments. Use `easeOutQuint` for large
-final cover/reveal motion.
+final cover/reveal motion. For modern authoring, prefer the SpeedyGraph names:
+`easyEase`, `slowFastSlow`, `fastSlow`, `slowFast`, `fastSlowFast`, and `whip`
+when the target agent/application build supports the SpeedyGraph truth
+compiler.
+
+SpeedyGraph rule:
+
+- use `slowFastSlow` for cinematic hero movement;
+- use `fastSlow` for soft landing;
+- use `slowFast` for launch/exit;
+- use `whip`/`snap` for tiny accent pulses;
+- use `linear` for typewriter/progress only unless linear motion is requested.
 
 ## Core Icon Pack
 
@@ -664,9 +1407,95 @@ Rules:
   - `lib/features/editor/domain/services/master_keyframe_value_evaluator.dart`
   - `lib/features/editor/domain/models/master_frame_evaluation_models.dart`
   - `lib/features/editor/presentation/services/master_frame_evaluation_read_adapter.dart`
+  - `lib/features/editor/domain/services/master_clock_native_bridge.dart`
 - keep preview-time clock-source guardrails active through:
   - `scripts/master_clock_guard_check.sh`
   - `docs/master_clock_guard_allowlist.txt`
+- route native playback sample handoff through the master-clock bridge adapter
+  instead of ad-hoc UI phase bootstrapping logic.
+- route pause-time clock writes (transport/player stop points) through the same
+  bridge adapter path; avoid direct screen-level coordinator mutations for
+  transport-owned time updates.
+- apply the same rule to scrub lifecycle mutations (`scrubStart`,
+  `scrubUpdate`, `scrubEnd`, `confirmScrubSettled`) so timeline scrub state
+  enters the master clock through one adapter boundary.
+- read timeline-clock time for UI time-sync through that same boundary whenever
+  possible; do not bypass the bridge for routine screen-level time reads.
+- keep direct coordinator access blocked in presentation code through:
+  - `scripts/master_clock_bridge_guard_check.sh`
+  - `docs/master_clock_bridge_guard_allowlist.txt`
+- where transition/preview diagnostics are emitted, include a
+  `MasterFrameEvaluation` read snapshot for the active mode so debugging stays
+  tied to the same time/value truth chain.
+- keep display/sample timeline notifier writes centralized in dedicated setter
+  methods; do not write those notifiers ad-hoc from feature-specific flows.
+- when setting idle timeline time from UI, synchronize paused master-clock time
+  through the bridge first so derived views and master truth stay in lockstep.
+- avoid direct `_currentTime` assignment in editor feature flows; route timeline
+  time changes through the centralized setter path so bridge sync policies run
+  consistently.
+- enforce `_currentTime` assignment anchors through
+  `master_clock_current_time_guard_check.sh` + allowlist policy; any new write
+  path must be intentional and reviewed.
+- Master Live Scrub Professional is a connected continuation of this chain, not
+  a separate scrub engine. Live Scrub work must consume `MasterFrameEvaluation`
+  through an explicit adapter before it reaches Stage5 descriptors; it must not
+  create another clock, value registry, keyframe evaluator, transition-only
+  compositor, or still-frame fallback.
+- the current domain contract for that handoff is:
+  - `lib/features/editor/domain/models/master_live_scrub_visual_program_models.dart`
+  - `lib/features/editor/domain/services/master_live_scrub_program_adapter.dart`
+  - `lib/features/editor/domain/models/master_live_scrub_descriptor_models.dart`
+  - `lib/features/editor/domain/services/master_live_scrub_descriptor_projection.dart`
+  - `lib/core/engine/stage5_native_transport_controller.dart` (`getLiveScrubCapabilities`)
+  - `LiveScrubDescriptorCapabilities` must gate descriptor parity claims; if a
+    native capability is missing, projection must emit explicit blockers instead
+    of pretending transform/effect/transition support.
+  - when `supportsEffectProgramIds` is true, native must publish an explicit
+  `supportedEffectProgramIds` catalog; any effect outside that catalog must be
+  blocked as `unsupported_effect_program:<id>`.
+  - transition-role descriptors must include explicit real transition window
+    binding and progress; if binding is missing or the playhead is outside the
+    real window, projection must block with transition-window diagnostics.
+  - descriptor projection results must emit `LiveScrubParityReport` with
+    explicit `latencyBudgetState`; missing native latency telemetry must be
+    visible as `nativeMetricsUnavailable` or `nativeMetricsPending`, never
+    silently treated as healthy parity.
+  - when available, ingest Stage5 runtime telemetry through
+    `getLiveScrubPerformanceSnapshot` and feed it into descriptor projection so
+    latency budget decisions are based on real native scrub metrics
+    (`estimatedFrameRequestRateFps`, decoder configure latency, render
+    presentation latency, dropped-frame estimate, cross-source warmup ready).
+  - run `scripts/master_live_scrub_guard_check.sh` and keep
+    `docs/master_live_scrub_guard_allowlist.txt` intentional; any new scrub
+    bypass path (seek/media item/fallback/compositor coupling/clock source)
+    must fail guardrails by default.
+  - prefer `scripts/master_live_scrub_preflight_verify.sh` as the standard
+    preflight bundle before checkpointing Master Live Scrub slices.
+  - bridge validation may use read-only payload methods
+    `submitLiveScrubRuntimeBridgeSnapshot` and
+    `getLiveScrubRuntimeBridgeSnapshot`; these are diagnostics contracts only
+    and must not be treated as active scrub renderer ownership.
+  - do not reintroduce removed legacy naming
+    (`submitLiveScrubDescriptorPreflight`,
+    `getLiveScrubDescriptorPreflightSnapshot`,
+    `buildLiveScrubDescriptorPreflightPayload`) in runtime scrub code paths.
+  - runtime bridge submissions from `FusionXCleanUiScreen` must stay nonblocking and
+    key-throttled; missing capability/snapshot issues should surface through
+    parity diagnostics, not by pausing editor playback/scrub flows.
+  - runtime scrub linkage may merge transition-scoped projected descriptors into
+    Stage5 `previewSources` config via a dedicated adapter
+    (`LiveScrubRuntimeSurfaceConfigAdapter`), but this must remain a data-path
+    projection step, not a parallel renderer or second clock.
+  - treat transition descriptor projection as a runtime bridge contract (not
+    preflight naming), and keep bridge diagnostics/reasons explicit
+    (`transition_runtime_bridge_mode:*`, `runtime_descriptor_bridge_v1`) so
+    legacy fallback assumptions do not leak back into production scrub logic.
+  - when runtime merge is active, source-window mapping must stay deterministic
+    (`targetId -> timeline/source window`) and reversible; descriptors without a
+    valid source window must be ignored rather than guessed.
+  This contract is domain-only in the current slice and does not authorize
+  Stage5 behavior changes.
 
 If an agent cannot explain an effect, transition, keyframe, or scrub result
 through this chain, it must stop and document the missing mapper/value
@@ -1542,6 +2371,11 @@ has a cached, nonblocking native decoder/frame pipeline, this transition is
 stationary-preview only. Playback and Live Scrub must keep using the normal
 video preview path and must not repeatedly invoke the heavy transition renderer.
 Fail closed for unsupported modes rather than retrying until the app stalls.
+
+The same gate applies to legacy manual transition rendering (`manualTransform`).
+Manual transition keyframes are valid authoring data, but legacy
+`renderInteractiveFrame` execution is preview-only until Stage5 master runtime
+consumes manual transition values directly in playback and Live Scrub.
 
 Do not expose a Flutter-side `Zoom In Camera` surface transform as the
 replacement. Android preview is a native PlatformView, and applying Flutter
@@ -2655,6 +3489,10 @@ Mask
   movingMaskReveal
 
 Effects
+  gaussianBlur
+  motionBlur
+  motionTile
+  edgeFill
   blur
   shadow
   glow
@@ -2684,6 +3522,17 @@ Choreography
   leaderFollower
   completionPolicy
   contrastPolicy
+
+Timing
+  SpeedyGraph
+  BezierExecutionTruth
+  easyEase
+  slowFastSlow
+  fastSlow
+  slowFast
+  fastSlowFast
+  whip
+  customSpeedGraph
 ```
 
 ## Capability Entry Contract
@@ -2729,6 +3578,9 @@ Preview/editing support changes over time. Treat this list as conservative.
 Supported basics:
 
 - transform position/scale/rotation/opacity;
+- SpeedyGraph preset names and Bezier-based timing are the preferred authoring
+  language for professional motion. If a build cannot consume a SpeedyGraph
+  value, the agent must not silently fall back to linear timing;
 - width/height/cornerRadius for shapes;
 - shape morph aliases `morphSize` and `roundness` lower to editable
   width/height/cornerRadius channels;
@@ -2737,7 +3589,12 @@ Supported basics:
 - `mask` scene elements and `movingMaskReveal`/`maskReveal` lower to editable
   `mask.revealProgress` graph channels with preserved mask metadata;
 - color;
-- blur;
+- Gaussian blur / blur as an editable scalar where supported;
+- Motion Blur as a velocity-aware effect concept tied to authored motion
+  velocity when supported by the app build;
+- Motion Tile / Edge Fill as the professional blank-edge fill concept for
+  rotation, scale-down, zoom-out, and blur sampling, when supported by the app
+  build;
 - soft shadow/drop shadow for shape/icon preview and editable scalar shape
   scope controls;
 - typewriter progress;
@@ -2753,6 +3610,8 @@ Supported basics:
 
 Needs dedicated engine work before being treated as real:
 
+- unsupported Motion Blur/Motion Tile export parity in builds that do not
+  publish explicit effect support;
 - trim path export parity, circular progress, arcs, dashed paths, and
   wraparound offset rendering;
 - advanced per-word/per-character transform offsets beyond the current visible
@@ -2807,6 +3666,20 @@ Composition > nullTransform
 ```
 
 Do not build these as `tutorial001Gradient` or `designRevealSpecialLine`.
+
+## Open Design / Remotion Mapping
+
+Open Design and Remotion references are allowed as teaching material only.
+
+Map them into official ReFusion categories:
+
+```text
+Remotion Sequence -> Beat / layer startMs + durationMs
+Remotion interpolate/easing -> SpeedyGraph / channel keyframes
+Open Design template -> motion recipe
+Open Design DESIGN.md -> ReFusion design token guidance
+HTML/CSS/JS/React -> forbidden as SceneProgram output
+```
 
 ---
 
@@ -2926,7 +3799,8 @@ Use this checklist before returning ReFusion JSON.
 Forbidden keys anywhere:
 
 ```text
-code, script, function, eval, imports, remoteImports, shaderSource
+code, script, function, eval, imports, remoteImports, shaderSource, html, css,
+jsx, react, gsap
 ```
 
 No URLs unless the user and engine explicitly support that asset path.
@@ -2949,6 +3823,9 @@ No URLs unless the user and engine explicitly support that asset path.
 - No empty channels. Remove channels without keyframes.
 - No same-target/same-property overlap unless deliberately authored as one
   ordered channel.
+- Important motion does not silently use linear timing when the user asked for
+  cinematic, professional, smooth, Easy Ease, Speed Graph, or After Effects-like
+  motion.
 - Scene does not end before all child motion completes.
 - Visible component final motion should not land exactly on the final scene
   boundary without a resolve/hold moment.
@@ -3020,6 +3897,11 @@ Wrong unless deletion/backspace is explicitly requested:
 Reject and rewrite if:
 
 - animation feels random;
+- scene looks like a web page translation rather than a native motion
+  composition;
+- the output contains HTML/CSS/JS/React/Remotion code;
+- timing bypasses SpeedyGraph when professional movement was requested;
+- effects are invented or unsupported;
 - next motion starts before the prior motion resolves;
 - text appears in the wrong contrast;
 - visible motion is not editable;
@@ -3212,6 +4094,274 @@ Source: `skills/refusion-skills/examples/basic-typewriter-intro.json`
                 "keyframes": [
                   { "timeMs": 1100, "value": 0.0, "easing": "linear" },
                   { "timeMs": 2300, "value": 1.0, "easing": "linear" }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
+
+---
+
+# Premium App Promo Example
+
+Source: `skills/refusion-skills/examples/premium-app-promo-scene.json`
+
+{
+  "directorPlan": {
+    "schemaVersion": "refusion.motion-director/v1",
+    "name": "Premium App Promo Plan",
+    "durationMs": 3600,
+    "frameRate": 30,
+    "canvasWidth": 1080,
+    "canvasHeight": 1920,
+    "beats": [
+      {
+        "id": "establish",
+        "label": "Establish premium canvas",
+        "startMs": 0,
+        "endMs": 520,
+        "intent": "Fade in a restrained dark background while the scene prepares.",
+        "componentRefs": ["background"]
+      },
+      {
+        "id": "card-enter",
+        "label": "Hero app card enters",
+        "startMs": 260,
+        "endMs": 1120,
+        "intent": "Bring the central app card into focus with cinematic slow-fast-slow motion.",
+        "componentRefs": ["hero-card"]
+      },
+      {
+        "id": "headline-reveal",
+        "label": "Headline types on",
+        "startMs": 980,
+        "endMs": 2050,
+        "intent": "Reveal the primary message after the card is visually established.",
+        "componentRefs": ["headline"]
+      },
+      {
+        "id": "cta-settle",
+        "label": "CTA settles",
+        "startMs": 1880,
+        "endMs": 2520,
+        "intent": "Show the action button with a confident soft landing.",
+        "componentRefs": ["cta"]
+      },
+      {
+        "id": "final-hold",
+        "label": "Final readable hold",
+        "startMs": 2520,
+        "endMs": 3600,
+        "intent": "Hold the finished composition for readability.",
+        "componentRefs": ["hero-card", "headline", "cta"]
+      }
+    ],
+    "components": [
+      { "id": "background", "role": "background.canvas", "label": "Dark background" },
+      { "id": "hero-card", "role": "product.card", "label": "Central app card" },
+      { "id": "headline", "role": "text.headline", "label": "Headline" },
+      { "id": "cta", "role": "button.cta", "label": "Call to action" }
+    ],
+    "primitives": [
+      {
+        "id": "bg-fade",
+        "beatId": "establish",
+        "targetComponentId": "background",
+        "kind": "fade",
+        "property": "opacity",
+        "startMs": 0,
+        "endMs": 520,
+        "fromValue": 0.0,
+        "toValue": 1.0,
+        "easing": "linear"
+      },
+      {
+        "id": "card-y",
+        "beatId": "card-enter",
+        "targetComponentId": "hero-card",
+        "kind": "move",
+        "property": "position",
+        "startMs": 260,
+        "endMs": 1120,
+        "fromValue": { "x": 0, "y": 160 },
+        "toValue": { "x": 0, "y": 80 },
+        "easing": "slowFastSlow"
+      },
+      {
+        "id": "headline-type",
+        "beatId": "headline-reveal",
+        "targetComponentId": "headline",
+        "kind": "typewriter",
+        "property": "typewriterProgress",
+        "startMs": 980,
+        "endMs": 2050,
+        "fromValue": 0.0,
+        "toValue": 1.0,
+        "easing": "linear"
+      },
+      {
+        "id": "cta-pop",
+        "beatId": "cta-settle",
+        "targetComponentId": "cta",
+        "kind": "scale",
+        "property": "scale",
+        "startMs": 1880,
+        "endMs": 2520,
+        "fromValue": 0.92,
+        "toValue": 1.0,
+        "easing": "fastSlow"
+      }
+    ]
+  },
+  "sceneProgram": {
+    "schemaVersion": "refusion.scene-program/v1",
+    "name": "Premium App Promo",
+    "durationMs": 3600,
+    "frameRate": 30,
+    "layers": [
+      {
+        "id": "background-layer",
+        "name": "Background",
+        "kind": "shape",
+        "startMs": 0,
+        "durationMs": 3600,
+        "elements": [
+          {
+            "id": "background",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "rectangle",
+              "position": { "x": 0, "y": 0 },
+              "width": 1080,
+              "height": 1920,
+              "color": "#070A12",
+              "opacity": 1
+            },
+            "channels": [
+              {
+                "property": "opacity",
+                "keyframes": [
+                  { "timeMs": 0, "value": 0.0, "easing": "linear" },
+                  { "timeMs": 520, "value": 1.0, "easing": "linear" }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "hero-card-layer",
+        "name": "Hero App Card",
+        "kind": "shape",
+        "startMs": 0,
+        "durationMs": 3600,
+        "elements": [
+          {
+            "id": "hero-card",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "roundedRectangle",
+              "position": { "x": 0, "y": 80 },
+              "width": 760,
+              "height": 880,
+              "cornerRadius": 64,
+              "color": "#111827",
+              "opacity": 1,
+              "shadowOpacity": 0.32,
+              "shadowBlur": 42,
+              "shadowOffset": { "x": 0, "y": 28 },
+              "shadowColor": "#000000"
+            },
+            "channels": [
+              {
+                "property": "position",
+                "keyframes": [
+                  { "timeMs": 260, "value": { "x": 0, "y": 160 }, "easing": "slowFastSlow" },
+                  { "timeMs": 1120, "value": { "x": 0, "y": 80 }, "easing": "slowFastSlow" }
+                ]
+              },
+              {
+                "property": "opacity",
+                "keyframes": [
+                  { "timeMs": 260, "value": 0.0, "easing": "linear" },
+                  { "timeMs": 760, "value": 1.0, "easing": "fastSlow" }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "headline-layer",
+        "name": "Headline",
+        "kind": "text",
+        "startMs": 0,
+        "durationMs": 3600,
+        "elements": [
+          {
+            "id": "headline",
+            "kind": "text",
+            "text": "Design motion that feels alive.",
+            "properties": {
+              "position": { "x": 0, "y": -520 },
+              "fontSize": 62,
+              "fontWeight": 800,
+              "lineHeight": 1.05,
+              "textAlign": "center",
+              "letterSpacing": 0,
+              "color": "#F8FAFC",
+              "opacity": 1,
+              "typewriterProgress": 0
+            },
+            "channels": [
+              {
+                "property": "typewriterProgress",
+                "keyframes": [
+                  { "timeMs": 980, "value": 0.0, "easing": "linear" },
+                  { "timeMs": 2050, "value": 1.0, "easing": "linear" }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "cta-layer",
+        "name": "CTA",
+        "kind": "shape",
+        "startMs": 0,
+        "durationMs": 3600,
+        "elements": [
+          {
+            "id": "cta",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "roundedRectangle",
+              "position": { "x": 0, "y": 690 },
+              "width": 430,
+              "height": 104,
+              "cornerRadius": 52,
+              "color": "#7DD3FC",
+              "opacity": 1,
+              "scale": 1.0
+            },
+            "channels": [
+              {
+                "property": "scale",
+                "keyframes": [
+                  { "timeMs": 1880, "value": 0.92, "easing": "fastSlow" },
+                  { "timeMs": 2520, "value": 1.0, "easing": "fastSlow" }
+                ]
+              },
+              {
+                "property": "opacity",
+                "keyframes": [
+                  { "timeMs": 1880, "value": 0.0, "easing": "linear" },
+                  { "timeMs": 2220, "value": 1.0, "easing": "fastSlow" }
                 ]
               }
             ]

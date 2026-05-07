@@ -73,6 +73,9 @@ Supported layer kinds:
 - `shape`
 - `text`
 - `image`
+- `video` when the active ReFusion build exposes video layers through the
+  composition layer model. If uncertain, prefer shape/text/image and do not
+  invent video source bindings.
 
 Layer shape:
 
@@ -392,10 +395,30 @@ Safe easing values:
 - `easeInOutCubic`
 - `easeOutQuint`
 - `spring`
+- `easyEase`
+- `f9`
+- `slowFastSlow`
+- `fastSlow`
+- `slowFast`
+- `fastSlowFast`
+- `whip`
+- `snap`
+- `customSpeedGraph`
 
 Use `linear` for typewriter progress. Use `easeOutCubic` for entrances.
 Use `easeInOutCubic` for press/transform moments. Use `easeOutQuint` for large
-final cover/reveal motion.
+final cover/reveal motion. For modern authoring, prefer the SpeedyGraph names:
+`easyEase`, `slowFastSlow`, `fastSlow`, `slowFast`, `fastSlowFast`, and `whip`
+when the target agent/application build supports the SpeedyGraph truth
+compiler.
+
+SpeedyGraph rule:
+
+- use `slowFastSlow` for cinematic hero movement;
+- use `fastSlow` for soft landing;
+- use `slowFast` for launch/exit;
+- use `whip`/`snap` for tiny accent pulses;
+- use `linear` for typewriter/progress only unless linear motion is requested.
 
 ## Core Icon Pack
 
