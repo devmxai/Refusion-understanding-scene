@@ -25,7 +25,10 @@ skills/refusion-skills/
 │   └── validation.md
 └── examples/
     ├── basic-typewriter-intro.json
-    └── premium-app-promo-scene.json
+    ├── premium-app-promo-scene.json
+    └── revival-premium-app-demo-60s.json
+scripts/
+└── validate_scene_program.py
 ```
 
 Give `skills/refusion-skills/SKILL.md` to any coding or design agent before
@@ -41,6 +44,16 @@ REFUSION_SCENE_SKILL_FULL.md
 
 That file contains the skill entry point, every rule file, and the example JSON
 in one self-contained document.
+
+Before giving a scene to the app, validate it locally:
+
+```bash
+python3 scripts/validate_scene_program.py skills/refusion-skills/examples/revival-premium-app-demo-60s.json
+```
+
+The most common app rejection is incomplete paste: the text starts with `{` but
+does not include the final `}`. The validator catches that before a user sees
+`Scene program rejected`.
 
 Canonical GitHub paths:
 
@@ -63,6 +76,7 @@ skills/refusion-skills/rules/transitions.md
 skills/refusion-skills/rules/capability-registry.md
 skills/refusion-skills/rules/tutorial-intake.md
 skills/refusion-skills/rules/validation.md
+scripts/validate_scene_program.py
 ```
 
 Direct browser links:
@@ -83,6 +97,8 @@ Direct browser links:
 - [Capability Registry](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/capability-registry.md)
 - [Tutorial Intake](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/tutorial-intake.md)
 - [Validation](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/validation.md)
+- [Revival Premium App Demo 60s](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/examples/revival-premium-app-demo-60s.json)
+- [Scene Program Validator](https://github.com/devmxai/refusion-skills/blob/main/scripts/validate_scene_program.py)
 
 ## Mission
 

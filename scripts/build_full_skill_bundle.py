@@ -40,6 +40,7 @@ SOURCES = [
     ("Capability Registry Rule", "skills/refusion-skills/rules/capability-registry.md"),
     ("Tutorial Intake Rule", "skills/refusion-skills/rules/tutorial-intake.md"),
     ("Validation Rule", "skills/refusion-skills/rules/validation.md"),
+    ("Scene Program Validator Script", "scripts/validate_scene_program.py"),
     (
         "Basic Typewriter Intro Example",
         "skills/refusion-skills/examples/basic-typewriter-intro.json",
@@ -47,6 +48,10 @@ SOURCES = [
     (
         "Premium App Promo Example",
         "skills/refusion-skills/examples/premium-app-promo-scene.json",
+    ),
+    (
+        "Revival Premium App Demo 60s Example",
+        "skills/refusion-skills/examples/revival-premium-app-demo-60s.json",
     ),
 ]
 

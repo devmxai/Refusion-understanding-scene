@@ -5,10 +5,19 @@ Use this checklist before returning ReFusion JSON.
 ## JSON Integrity
 
 - Return one complete JSON object.
+- The first non-space character must be `{`.
+- The final non-space character must be `}`.
+- The closing `}` must belong to the same root object. A scene that starts with
+  `{` but does not end with `}` will be rejected by ReFusion as an incomplete
+  paste.
 - No Markdown around JSON.
 - No comments.
 - No trailing commas.
 - No truncated fragments.
+- Never split one scene across multiple chat messages.
+- For 50-60 second demos, write compact JSON or provide a `.json` artifact when
+  the environment supports files; do not rely on a long mobile paste that may be
+  cut off.
 - Root has `directorPlan` and `sceneProgram`.
 - `directorPlan.schemaVersion` is `refusion.motion-director/v1`.
 - `sceneProgram.schemaVersion` is `refusion.scene-program/v1`.
@@ -126,3 +135,16 @@ Reject and rewrite if:
 - visible motion is not editable;
 - the Director Plan and Scene Program disagree;
 - a scene relies on unsupported effects but presents them as real.
+
+## Local Validator
+
+When this repository is available, validate every generated scene before giving
+it to a user:
+
+```bash
+python3 scripts/validate_scene_program.py skills/refusion-skills/examples/revival-premium-app-demo-60s.json
+```
+
+The validator is intentionally stricter than casual JSON parsing. Passing it
+does not replace app import testing, but failing it means the scene is not ready
+to paste into ReFusion.

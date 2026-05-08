@@ -27,8 +27,10 @@ python3 scripts/build_full_skill_bundle.py
 - `skills/refusion-skills/rules/capability-registry.md`
 - `skills/refusion-skills/rules/tutorial-intake.md`
 - `skills/refusion-skills/rules/validation.md`
+- `scripts/validate_scene_program.py`
 - `skills/refusion-skills/examples/basic-typewriter-intro.json`
 - `skills/refusion-skills/examples/premium-app-promo-scene.json`
+- `skills/refusion-skills/examples/revival-premium-app-demo-60s.json`
 
 ---
 
@@ -55,6 +57,13 @@ external-agent scene direction for the ReFusion engine.
 Return complete ReFusion JSON only when the user asks for a scene. Do not return
 Markdown around the JSON. Do not use executable code, JSX, CSS, functions,
 imports, shader code, remote code, or comments.
+
+The most common app rejection is incomplete paste. Before returning a scene,
+verify the response starts with the first `{` and ends with the final `}` of the
+same JSON object. Never split a JSON scene across multiple chat messages. For
+long 50-60 second scenes, prefer a compact scene with reusable layers and, when
+the environment supports files, write a `.json` file rather than asking the user
+to copy a truncated chat fragment.
 
 ReFusion is not an HTML design surface. It is a native editable video/motion
 scene engine. Use Shapes, Text, Image, Video, Scene Program layers, channels,
@@ -86,6 +95,15 @@ executable scene.
 5. Run the QA Critic role: validate timing, holds, contrast, effects,
    editability, and professional taste.
 6. Return only complete JSON.
+
+If this repository is available locally, run this before delivery:
+
+```bash
+python3 scripts/validate_scene_program.py path/to/scene.json
+```
+
+If the validator fails, repair the JSON first. Do not tell the user to paste a
+scene that has not passed JSON integrity checks.
 
 ## Load Rules As Needed
 
@@ -298,6 +316,11 @@ Do not output:
 - Markdown wrapped around the JSON
 - rendered video as the source of truth
 
+For long product demos, do not let the platform truncate the response. A valid
+ReFusion scene must be complete from the first `{` to the final `}`. If you can
+write files, create a `.json` artifact and validate it with
+`scripts/validate_scene_program.py` before delivery.
+
 ## Four Internal Roles
 
 If you are one agent, run these roles internally. If a system supports multiple
@@ -367,6 +390,7 @@ Every visible motion must be editable.
 
 Reject and revise if:
 
+- JSON is incomplete or does not end with the final root `}`;
 - DirectorPlan and SceneProgram disagree;
 - important text has no readable hold;
 - motion feels random;
@@ -914,6 +938,11 @@ Always return this wrapper:
 
 Return complete JSON from the first `{` to the final `}`.
 
+Do not return partial snippets for app import. If a chat platform cuts long
+answers, the app will show `Scene program rejected` with an incomplete JSON
+message. For long demos, keep the structure compact, avoid one-layer-per-letter
+patterns, and validate the complete object before sharing.
+
 ## Numeric Timing
 
 Use numeric values, never strings:
@@ -975,6 +1004,10 @@ Layer shape:
 
 Keep scenes compact. Prefer 3 to 8 visible layers unless the prompt asks for a
 complex composition.
+
+For 50-60 second feature demos, use one persistent background/brand layer plus
+one feature layer per 8-10 second segment. This keeps the script paste-safe and
+editable while still feeling like a complete product film.
 
 ## Elements
 
@@ -3786,10 +3819,19 @@ Use this checklist before returning ReFusion JSON.
 ## JSON Integrity
 
 - Return one complete JSON object.
+- The first non-space character must be `{`.
+- The final non-space character must be `}`.
+- The closing `}` must belong to the same root object. A scene that starts with
+  `{` but does not end with `}` will be rejected by ReFusion as an incomplete
+  paste.
 - No Markdown around JSON.
 - No comments.
 - No trailing commas.
 - No truncated fragments.
+- Never split one scene across multiple chat messages.
+- For 50-60 second demos, write compact JSON or provide a `.json` artifact when
+  the environment supports files; do not rely on a long mobile paste that may be
+  cut off.
 - Root has `directorPlan` and `sceneProgram`.
 - `directorPlan.schemaVersion` is `refusion.motion-director/v1`.
 - `sceneProgram.schemaVersion` is `refusion.scene-program/v1`.
@@ -3907,6 +3949,298 @@ Reject and rewrite if:
 - visible motion is not editable;
 - the Director Plan and Scene Program disagree;
 - a scene relies on unsupported effects but presents them as real.
+
+## Local Validator
+
+When this repository is available, validate every generated scene before giving
+it to a user:
+
+```bash
+python3 scripts/validate_scene_program.py skills/refusion-skills/examples/revival-premium-app-demo-60s.json
+```
+
+The validator is intentionally stricter than casual JSON parsing. Passing it
+does not replace app import testing, but failing it means the scene is not ready
+to paste into ReFusion.
+
+---
+
+# Scene Program Validator Script
+
+Source: `scripts/validate_scene_program.py`
+
+#!/usr/bin/env python3
+"""Validate ReFusion Scene Program JSON before pasting it into the app."""
+
+from __future__ import annotations
+
+import argparse
+import json
+import sys
+from pathlib import Path
+from typing import Any
+
+
+SCENE_SCHEMA = "refusion.scene-program/v1"
+DIRECTOR_SCHEMA = "refusion.motion-director/v1"
+BLOCKED_KEYS = {
+    "code",
+    "script",
+    "function",
+    "eval",
+    "imports",
+    "remoteImports",
+    "shaderSource",
+    "html",
+    "css",
+    "jsx",
+    "react",
+    "gsap",
+}
+LAYER_KINDS = {"shape", "text", "image", "video", "group"}
+ELEMENT_KINDS = {"shape", "solid", "text", "image", "icon", "mask"}
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(
+        description="Preflight a ReFusion DirectorPlan + SceneProgram JSON file.",
+    )
+    parser.add_argument("path", help="Path to a .json scene file")
+    args = parser.parse_args()
+    path = Path(args.path)
+    errors: list[str] = []
+    warnings: list[str] = []
+
+    try:
+        source = path.read_text(encoding="utf-8")
+    except OSError as exc:
+        print(f"ERROR: could not read {path}: {exc}", file=sys.stderr)
+        return 2
+
+    text = source.strip()
+    if not text:
+        errors.append("file is empty")
+    if text.startswith("```") or text.endswith("```"):
+        errors.append("remove Markdown fences; paste JSON only")
+    if text.startswith("{") and not text.endswith("}"):
+        errors.append("JSON appears incomplete: copy from the first `{` through the final `}`")
+
+    try:
+        payload = json.loads(text)
+    except json.JSONDecodeError as exc:
+        errors.append(f"invalid JSON at line {exc.lineno}, column {exc.colno}: {exc.msg}")
+        payload = None
+
+    if isinstance(payload, dict):
+        check_blocked_keys(payload, errors)
+        director = payload.get("directorPlan")
+        scene = payload.get("sceneProgram")
+        if scene is None and payload.get("schemaVersion") == SCENE_SCHEMA:
+            scene = payload
+        if director is None:
+            warnings.append("missing directorPlan; agents should include one for professional planning")
+        elif isinstance(director, dict):
+            validate_director_plan(director, errors, warnings)
+        else:
+            errors.append("directorPlan must be an object")
+        if isinstance(scene, dict):
+            validate_scene_program(scene, errors, warnings)
+        else:
+            errors.append("missing sceneProgram object with schemaVersion refusion.scene-program/v1")
+    elif payload is not None:
+        errors.append("JSON root must be an object")
+
+    for warning in warnings:
+        print(f"WARNING: {warning}")
+    if errors:
+        for error in errors:
+            print(f"ERROR: {error}", file=sys.stderr)
+        return 1
+    print(f"OK: {path} is complete ReFusion Scene Program JSON")
+    return 0
+
+
+def check_blocked_keys(value: Any, errors: list[str], path: str = "") -> None:
+    if isinstance(value, dict):
+        for key, child in value.items():
+            child_path = f"{path}.{key}" if path else str(key)
+            if key in BLOCKED_KEYS:
+                errors.append(f"blocked executable/web key `{key}` at {child_path}")
+            check_blocked_keys(child, errors, child_path)
+    elif isinstance(value, list):
+        for index, child in enumerate(value):
+            check_blocked_keys(child, errors, f"{path}[{index}]")
+
+
+def validate_director_plan(
+    plan: dict[str, Any],
+    errors: list[str],
+    warnings: list[str],
+) -> None:
+    if plan.get("schemaVersion") != DIRECTOR_SCHEMA:
+        errors.append(f"directorPlan.schemaVersion must be {DIRECTOR_SCHEMA}")
+    require_positive_number(plan, "durationMs", errors, "directorPlan.durationMs")
+    require_positive_number(plan, "frameRate", errors, "directorPlan.frameRate")
+    for key in ("beats", "components", "primitives"):
+        if not isinstance(plan.get(key), list):
+            errors.append(f"directorPlan.{key} must be a list")
+    component_ids = {item.get("id") for item in plan.get("components", []) if isinstance(item, dict)}
+    beat_ids = {item.get("id") for item in plan.get("beats", []) if isinstance(item, dict)}
+    for index, primitive in enumerate(plan.get("primitives", [])):
+        if not isinstance(primitive, dict):
+            errors.append(f"directorPlan.primitives[{index}] must be an object")
+            continue
+        if primitive.get("beatId") not in beat_ids:
+            warnings.append(f"primitive {primitive.get('id', index)} references unknown beatId")
+        if primitive.get("targetComponentId") not in component_ids:
+            warnings.append(f"primitive {primitive.get('id', index)} references unknown targetComponentId")
+
+
+def validate_scene_program(
+    scene: dict[str, Any],
+    errors: list[str],
+    warnings: list[str],
+) -> None:
+    if scene.get("schemaVersion") != SCENE_SCHEMA:
+        errors.append(f"sceneProgram.schemaVersion must be {SCENE_SCHEMA}")
+    duration = require_positive_number(scene, "durationMs", errors, "sceneProgram.durationMs")
+    require_positive_number(scene, "frameRate", errors, "sceneProgram.frameRate")
+    layers = scene.get("layers")
+    if not isinstance(layers, list) or not layers:
+        errors.append("sceneProgram.layers must be a non-empty list")
+        return
+    layer_ids: set[str] = set()
+    for index, layer in enumerate(layers):
+        layer_path = f"sceneProgram.layers[{index}]"
+        if not isinstance(layer, dict):
+            errors.append(f"{layer_path} must be an object")
+            continue
+        layer_id = require_string(layer, "id", errors, f"{layer_path}.id")
+        require_string(layer, "name", errors, f"{layer_path}.name")
+        kind = require_string(layer, "kind", errors, f"{layer_path}.kind")
+        if kind and kind not in LAYER_KINDS:
+            errors.append(f"{layer_path}.kind `{kind}` is unsupported")
+        if layer_id in layer_ids:
+            errors.append(f"duplicate layer id `{layer_id}`")
+        layer_ids.add(layer_id)
+        start = require_non_negative_number(layer, "startMs", errors, f"{layer_path}.startMs")
+        layer_duration = require_positive_number(layer, "durationMs", errors, f"{layer_path}.durationMs")
+        if duration is not None and start is not None and layer_duration is not None:
+            if start + layer_duration > duration:
+                warnings.append(f"{layer_path} extends beyond scene duration")
+        elements = layer.get("elements")
+        if not isinstance(elements, list) or not elements:
+            errors.append(f"{layer_path}.elements must be a non-empty list")
+            continue
+        validate_elements(elements, errors, warnings, layer_path, layer_duration)
+        validate_channels(layer.get("channels"), errors, f"{layer_path}.channels", layer_duration, allow_missing=True)
+
+
+def validate_elements(
+    elements: list[Any],
+    errors: list[str],
+    warnings: list[str],
+    layer_path: str,
+    layer_duration: float | None,
+) -> None:
+    ids: set[str] = set()
+    for index, element in enumerate(elements):
+        path = f"{layer_path}.elements[{index}]"
+        if not isinstance(element, dict):
+            errors.append(f"{path} must be an object")
+            continue
+        element_id = require_string(element, "id", errors, f"{path}.id")
+        kind = require_string(element, "kind", errors, f"{path}.kind")
+        if kind and kind not in ELEMENT_KINDS:
+            errors.append(f"{path}.kind `{kind}` is unsupported")
+        if element_id in ids:
+            errors.append(f"duplicate element id `{element_id}` in {layer_path}")
+        ids.add(element_id)
+        if not isinstance(element.get("properties", {}), dict):
+            errors.append(f"{path}.properties must be an object")
+        validate_channels(element.get("channels"), errors, f"{path}.channels", layer_duration, allow_missing=True)
+        if kind == "text" and not element.get("text"):
+            warnings.append(f"{path} is text but has no text string")
+
+
+def validate_channels(
+    channels: Any,
+    errors: list[str],
+    path: str,
+    owner_duration: float | None,
+    *,
+    allow_missing: bool,
+) -> None:
+    if channels is None:
+        if not allow_missing:
+            errors.append(f"{path} must be a list")
+        return
+    if not isinstance(channels, list):
+        errors.append(f"{path} must be a list")
+        return
+    for index, channel in enumerate(channels):
+        channel_path = f"{path}[{index}]"
+        if not isinstance(channel, dict):
+            errors.append(f"{channel_path} must be an object")
+            continue
+        require_string(channel, "property", errors, f"{channel_path}.property")
+        keyframes = channel.get("keyframes")
+        if not isinstance(keyframes, list) or not keyframes:
+            errors.append(f"{channel_path}.keyframes must be a non-empty list")
+            continue
+        last_time = -1.0
+        for keyframe_index, keyframe in enumerate(keyframes):
+            keyframe_path = f"{channel_path}.keyframes[{keyframe_index}]"
+            if not isinstance(keyframe, dict):
+                errors.append(f"{keyframe_path} must be an object")
+                continue
+            time_ms = require_non_negative_number(keyframe, "timeMs", errors, f"{keyframe_path}.timeMs")
+            if time_ms is not None:
+                if time_ms < last_time:
+                    errors.append(f"{keyframe_path}.timeMs must be sorted")
+                last_time = time_ms
+                if owner_duration is not None and time_ms > owner_duration:
+                    errors.append(f"{keyframe_path}.timeMs exceeds owning layer duration")
+            if "value" not in keyframe:
+                errors.append(f"{keyframe_path}.value is required")
+
+
+def require_string(data: dict[str, Any], key: str, errors: list[str], path: str) -> str | None:
+    value = data.get(key)
+    if isinstance(value, str) and value.strip():
+        return value
+    errors.append(f"{path} is required")
+    return None
+
+
+def require_positive_number(
+    data: dict[str, Any],
+    key: str,
+    errors: list[str],
+    path: str,
+) -> float | None:
+    value = data.get(key)
+    if isinstance(value, (int, float)) and value > 0:
+        return float(value)
+    errors.append(f"{path} must be a positive number")
+    return None
+
+
+def require_non_negative_number(
+    data: dict[str, Any],
+    key: str,
+    errors: list[str],
+    path: str,
+) -> float | None:
+    value = data.get(key)
+    if isinstance(value, (int, float)) and value >= 0:
+        return float(value)
+    errors.append(f"{path} must be a non-negative number")
+    return None
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
 
 ---
 
@@ -4362,6 +4696,3938 @@ Source: `skills/refusion-skills/examples/premium-app-promo-scene.json`
                 "keyframes": [
                   { "timeMs": 1880, "value": 0.0, "easing": "linear" },
                   { "timeMs": 2220, "value": 1.0, "easing": "fastSlow" }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
+
+---
+
+# Revival Premium App Demo 60s Example
+
+Source: `skills/refusion-skills/examples/revival-premium-app-demo-60s.json`
+
+{
+  "directorPlan": {
+    "schemaVersion": "refusion.motion-director/v1",
+    "name": "Revival Premium App Demo Plan",
+    "durationMs": 60000,
+    "frameRate": 30,
+    "canvasWidth": 1080,
+    "canvasHeight": 1920,
+    "beats": [
+      {
+        "id": "beat-presentations-reveal",
+        "label": "Professional Presentations reveal",
+        "startMs": 0,
+        "endMs": 4400,
+        "intent": "Reveal Revival feature Professional Presentations with ordered panel entry and type-on copy.",
+        "componentRefs": [
+          "presentations-panel",
+          "presentations-title",
+          "presentations-subtitle",
+          "presentations-progress"
+        ]
+      },
+      {
+        "id": "beat-presentations-readable-hold",
+        "label": "Professional Presentations readable hold",
+        "startMs": 4400,
+        "endMs": 8600,
+        "intent": "Readable hold for Professional Presentations; let title, subtitle, and feature chips stay stable before the next handoff.",
+        "componentRefs": [
+          "presentations-panel",
+          "presentations-title",
+          "presentations-subtitle",
+          "presentations-progress"
+        ]
+      },
+      {
+        "id": "beat-presentations-exit",
+        "label": "Professional Presentations exit handoff",
+        "startMs": 8600,
+        "endMs": 10000,
+        "intent": "Clean handoff exit for Professional Presentations; fade and lift the panel so the next feature can enter.",
+        "componentRefs": [
+          "presentations-panel",
+          "presentations-title",
+          "presentations-subtitle",
+          "presentations-progress"
+        ]
+      },
+      {
+        "id": "beat-video-editing-reveal",
+        "label": "Video Editing Studio reveal",
+        "startMs": 10000,
+        "endMs": 14400,
+        "intent": "Reveal Revival feature Video Editing Studio with ordered panel entry and type-on copy.",
+        "componentRefs": [
+          "video-editing-panel",
+          "video-editing-title",
+          "video-editing-subtitle",
+          "video-editing-progress"
+        ]
+      },
+      {
+        "id": "beat-video-editing-readable-hold",
+        "label": "Video Editing Studio readable hold",
+        "startMs": 14400,
+        "endMs": 18600,
+        "intent": "Readable hold for Video Editing Studio; let title, subtitle, and feature chips stay stable before the next handoff.",
+        "componentRefs": [
+          "video-editing-panel",
+          "video-editing-title",
+          "video-editing-subtitle",
+          "video-editing-progress"
+        ]
+      },
+      {
+        "id": "beat-video-editing-exit",
+        "label": "Video Editing Studio exit handoff",
+        "startMs": 18600,
+        "endMs": 20000,
+        "intent": "Clean handoff exit for Video Editing Studio; fade and lift the panel so the next feature can enter.",
+        "componentRefs": [
+          "video-editing-panel",
+          "video-editing-title",
+          "video-editing-subtitle",
+          "video-editing-progress"
+        ]
+      },
+      {
+        "id": "beat-audio-engineering-reveal",
+        "label": "Audio Engineering reveal",
+        "startMs": 20000,
+        "endMs": 24400,
+        "intent": "Reveal Revival feature Audio Engineering with ordered panel entry and type-on copy.",
+        "componentRefs": [
+          "audio-engineering-panel",
+          "audio-engineering-title",
+          "audio-engineering-subtitle",
+          "audio-engineering-progress"
+        ]
+      },
+      {
+        "id": "beat-audio-engineering-readable-hold",
+        "label": "Audio Engineering readable hold",
+        "startMs": 24400,
+        "endMs": 28600,
+        "intent": "Readable hold for Audio Engineering; let title, subtitle, and feature chips stay stable before the next handoff.",
+        "componentRefs": [
+          "audio-engineering-panel",
+          "audio-engineering-title",
+          "audio-engineering-subtitle",
+          "audio-engineering-progress"
+        ]
+      },
+      {
+        "id": "beat-audio-engineering-exit",
+        "label": "Audio Engineering exit handoff",
+        "startMs": 28600,
+        "endMs": 30000,
+        "intent": "Clean handoff exit for Audio Engineering; fade and lift the panel so the next feature can enter.",
+        "componentRefs": [
+          "audio-engineering-panel",
+          "audio-engineering-title",
+          "audio-engineering-subtitle",
+          "audio-engineering-progress"
+        ]
+      },
+      {
+        "id": "beat-kinetic-text-reveal",
+        "label": "Kinetic Text Systems reveal",
+        "startMs": 30000,
+        "endMs": 34400,
+        "intent": "Reveal Revival feature Kinetic Text Systems with ordered panel entry and type-on copy.",
+        "componentRefs": [
+          "kinetic-text-panel",
+          "kinetic-text-title",
+          "kinetic-text-subtitle",
+          "kinetic-text-progress"
+        ]
+      },
+      {
+        "id": "beat-kinetic-text-readable-hold",
+        "label": "Kinetic Text Systems readable hold",
+        "startMs": 34400,
+        "endMs": 38600,
+        "intent": "Readable hold for Kinetic Text Systems; let title, subtitle, and feature chips stay stable before the next handoff.",
+        "componentRefs": [
+          "kinetic-text-panel",
+          "kinetic-text-title",
+          "kinetic-text-subtitle",
+          "kinetic-text-progress"
+        ]
+      },
+      {
+        "id": "beat-kinetic-text-exit",
+        "label": "Kinetic Text Systems exit handoff",
+        "startMs": 38600,
+        "endMs": 40000,
+        "intent": "Clean handoff exit for Kinetic Text Systems; fade and lift the panel so the next feature can enter.",
+        "componentRefs": [
+          "kinetic-text-panel",
+          "kinetic-text-title",
+          "kinetic-text-subtitle",
+          "kinetic-text-progress"
+        ]
+      },
+      {
+        "id": "beat-image-editing-reveal",
+        "label": "Image Editing & Retouch reveal",
+        "startMs": 40000,
+        "endMs": 44400,
+        "intent": "Reveal Revival feature Image Editing & Retouch with ordered panel entry and type-on copy.",
+        "componentRefs": [
+          "image-editing-panel",
+          "image-editing-title",
+          "image-editing-subtitle",
+          "image-editing-progress"
+        ]
+      },
+      {
+        "id": "beat-image-editing-readable-hold",
+        "label": "Image Editing & Retouch readable hold",
+        "startMs": 44400,
+        "endMs": 48600,
+        "intent": "Readable hold for Image Editing & Retouch; let title, subtitle, and feature chips stay stable before the next handoff.",
+        "componentRefs": [
+          "image-editing-panel",
+          "image-editing-title",
+          "image-editing-subtitle",
+          "image-editing-progress"
+        ]
+      },
+      {
+        "id": "beat-image-editing-exit",
+        "label": "Image Editing & Retouch exit handoff",
+        "startMs": 48600,
+        "endMs": 50000,
+        "intent": "Clean handoff exit for Image Editing & Retouch; fade and lift the panel so the next feature can enter.",
+        "componentRefs": [
+          "image-editing-panel",
+          "image-editing-title",
+          "image-editing-subtitle",
+          "image-editing-progress"
+        ]
+      },
+      {
+        "id": "beat-color-grading-reveal",
+        "label": "Color & Look Control reveal",
+        "startMs": 50000,
+        "endMs": 54400,
+        "intent": "Reveal Revival feature Color & Look Control with ordered panel entry and type-on copy.",
+        "componentRefs": [
+          "color-grading-panel",
+          "color-grading-title",
+          "color-grading-subtitle",
+          "color-grading-progress"
+        ]
+      },
+      {
+        "id": "beat-color-grading-readable-hold",
+        "label": "Color & Look Control readable hold",
+        "startMs": 54400,
+        "endMs": 56800,
+        "intent": "Readable hold for Color & Look Control; let title, subtitle, and feature chips stay stable before the next handoff.",
+        "componentRefs": [
+          "color-grading-panel",
+          "color-grading-title",
+          "color-grading-subtitle",
+          "color-grading-progress"
+        ]
+      },
+      {
+        "id": "beat-color-grading-exit",
+        "label": "Color & Look Control exit handoff",
+        "startMs": 56800,
+        "endMs": 58000,
+        "intent": "Clean handoff exit for Color & Look Control; fade and lift the panel so the next feature can enter.",
+        "componentRefs": [
+          "color-grading-panel",
+          "color-grading-title",
+          "color-grading-subtitle",
+          "color-grading-progress"
+        ]
+      },
+      {
+        "id": "beat-final-lockup",
+        "label": "Final Revival readable hold",
+        "startMs": 58000,
+        "endMs": 60000,
+        "intent": "Final readable hold for the Revival lockup after all feature segments complete.",
+        "componentRefs": [
+          "outro-panel",
+          "outro-title",
+          "outro-subtitle"
+        ]
+      }
+    ],
+    "components": [
+      {
+        "id": "revival-wordmark",
+        "role": "text.brand",
+        "label": "Revival product identity",
+        "layerId": "brand-layer",
+        "elementId": "revival-wordmark"
+      },
+      {
+        "id": "background-field",
+        "role": "background.canvas",
+        "label": "Premium dark editorial canvas",
+        "layerId": "background-layer",
+        "elementId": "background-field"
+      },
+      {
+        "id": "presentations-panel",
+        "role": "shape.panel",
+        "label": "Professional Presentations panel",
+        "layerId": "presentations-layer",
+        "elementId": "presentations-panel"
+      },
+      {
+        "id": "presentations-title",
+        "role": "text.title",
+        "label": "Professional Presentations title",
+        "layerId": "presentations-layer",
+        "elementId": "presentations-title"
+      },
+      {
+        "id": "presentations-subtitle",
+        "role": "text.copy",
+        "label": "Professional Presentations subtitle",
+        "layerId": "presentations-layer",
+        "elementId": "presentations-subtitle"
+      },
+      {
+        "id": "presentations-progress",
+        "role": "shape.line",
+        "label": "Professional Presentations progress line",
+        "layerId": "presentations-layer",
+        "elementId": "presentations-progress"
+      },
+      {
+        "id": "video-editing-panel",
+        "role": "shape.panel",
+        "label": "Video Editing Studio panel",
+        "layerId": "video-editing-layer",
+        "elementId": "video-editing-panel"
+      },
+      {
+        "id": "video-editing-title",
+        "role": "text.title",
+        "label": "Video Editing Studio title",
+        "layerId": "video-editing-layer",
+        "elementId": "video-editing-title"
+      },
+      {
+        "id": "video-editing-subtitle",
+        "role": "text.copy",
+        "label": "Video Editing Studio subtitle",
+        "layerId": "video-editing-layer",
+        "elementId": "video-editing-subtitle"
+      },
+      {
+        "id": "video-editing-progress",
+        "role": "shape.line",
+        "label": "Video Editing Studio progress line",
+        "layerId": "video-editing-layer",
+        "elementId": "video-editing-progress"
+      },
+      {
+        "id": "audio-engineering-panel",
+        "role": "shape.panel",
+        "label": "Audio Engineering panel",
+        "layerId": "audio-engineering-layer",
+        "elementId": "audio-engineering-panel"
+      },
+      {
+        "id": "audio-engineering-title",
+        "role": "text.title",
+        "label": "Audio Engineering title",
+        "layerId": "audio-engineering-layer",
+        "elementId": "audio-engineering-title"
+      },
+      {
+        "id": "audio-engineering-subtitle",
+        "role": "text.copy",
+        "label": "Audio Engineering subtitle",
+        "layerId": "audio-engineering-layer",
+        "elementId": "audio-engineering-subtitle"
+      },
+      {
+        "id": "audio-engineering-progress",
+        "role": "shape.line",
+        "label": "Audio Engineering progress line",
+        "layerId": "audio-engineering-layer",
+        "elementId": "audio-engineering-progress"
+      },
+      {
+        "id": "kinetic-text-panel",
+        "role": "shape.panel",
+        "label": "Kinetic Text Systems panel",
+        "layerId": "kinetic-text-layer",
+        "elementId": "kinetic-text-panel"
+      },
+      {
+        "id": "kinetic-text-title",
+        "role": "text.title",
+        "label": "Kinetic Text Systems title",
+        "layerId": "kinetic-text-layer",
+        "elementId": "kinetic-text-title"
+      },
+      {
+        "id": "kinetic-text-subtitle",
+        "role": "text.copy",
+        "label": "Kinetic Text Systems subtitle",
+        "layerId": "kinetic-text-layer",
+        "elementId": "kinetic-text-subtitle"
+      },
+      {
+        "id": "kinetic-text-progress",
+        "role": "shape.line",
+        "label": "Kinetic Text Systems progress line",
+        "layerId": "kinetic-text-layer",
+        "elementId": "kinetic-text-progress"
+      },
+      {
+        "id": "image-editing-panel",
+        "role": "shape.panel",
+        "label": "Image Editing & Retouch panel",
+        "layerId": "image-editing-layer",
+        "elementId": "image-editing-panel"
+      },
+      {
+        "id": "image-editing-title",
+        "role": "text.title",
+        "label": "Image Editing & Retouch title",
+        "layerId": "image-editing-layer",
+        "elementId": "image-editing-title"
+      },
+      {
+        "id": "image-editing-subtitle",
+        "role": "text.copy",
+        "label": "Image Editing & Retouch subtitle",
+        "layerId": "image-editing-layer",
+        "elementId": "image-editing-subtitle"
+      },
+      {
+        "id": "image-editing-progress",
+        "role": "shape.line",
+        "label": "Image Editing & Retouch progress line",
+        "layerId": "image-editing-layer",
+        "elementId": "image-editing-progress"
+      },
+      {
+        "id": "color-grading-panel",
+        "role": "shape.panel",
+        "label": "Color & Look Control panel",
+        "layerId": "color-grading-layer",
+        "elementId": "color-grading-panel"
+      },
+      {
+        "id": "color-grading-title",
+        "role": "text.title",
+        "label": "Color & Look Control title",
+        "layerId": "color-grading-layer",
+        "elementId": "color-grading-title"
+      },
+      {
+        "id": "color-grading-subtitle",
+        "role": "text.copy",
+        "label": "Color & Look Control subtitle",
+        "layerId": "color-grading-layer",
+        "elementId": "color-grading-subtitle"
+      },
+      {
+        "id": "color-grading-progress",
+        "role": "shape.line",
+        "label": "Color & Look Control progress line",
+        "layerId": "color-grading-layer",
+        "elementId": "color-grading-progress"
+      },
+      {
+        "id": "outro-panel",
+        "role": "shape.panel",
+        "label": "Final white card",
+        "layerId": "outro-layer",
+        "elementId": "outro-panel"
+      },
+      {
+        "id": "outro-title",
+        "role": "text.title",
+        "label": "Final title",
+        "layerId": "outro-layer",
+        "elementId": "outro-title"
+      },
+      {
+        "id": "outro-subtitle",
+        "role": "text.copy",
+        "label": "Final subtitle",
+        "layerId": "outro-layer",
+        "elementId": "outro-subtitle"
+      }
+    ],
+    "primitives": [
+      {
+        "id": "presentations-panel-position",
+        "beatId": "beat-presentations-reveal",
+        "targetComponentId": "presentations-panel",
+        "kind": "move",
+        "property": "position",
+        "startMs": 0,
+        "endMs": 1100,
+        "fromValue": {
+          "x": 0,
+          "y": 260
+        },
+        "toValue": {
+          "x": 0,
+          "y": 120
+        },
+        "easing": "slowFastSlow"
+      },
+      {
+        "id": "presentations-panel-opacity-in",
+        "beatId": "beat-presentations-reveal",
+        "targetComponentId": "presentations-panel",
+        "kind": "fade",
+        "property": "opacity",
+        "startMs": 0,
+        "endMs": 720,
+        "fromValue": 0.0,
+        "toValue": 1.0,
+        "easing": "fastSlow"
+      },
+      {
+        "id": "presentations-title-type",
+        "beatId": "beat-presentations-reveal",
+        "targetComponentId": "presentations-title",
+        "kind": "typewriter",
+        "property": "typewriterProgress",
+        "startMs": 900,
+        "endMs": 2600,
+        "fromValue": 0.0,
+        "toValue": 1.0,
+        "easing": "linear"
+      },
+      {
+        "id": "presentations-subtitle-type",
+        "beatId": "beat-presentations-reveal",
+        "targetComponentId": "presentations-subtitle",
+        "kind": "typewriter",
+        "property": "typewriterProgress",
+        "startMs": 2200,
+        "endMs": 4300,
+        "fromValue": 0.0,
+        "toValue": 1.0,
+        "easing": "linear"
+      },
+      {
+        "id": "presentations-panel-opacity-out",
+        "beatId": "beat-presentations-exit",
+        "targetComponentId": "presentations-panel",
+        "kind": "fade",
+        "property": "opacity",
+        "startMs": 8600,
+        "endMs": 10000,
+        "fromValue": 1.0,
+        "toValue": 0.0,
+        "easing": "fastSlow"
+      },
+      {
+        "id": "presentations-title-opacity-out",
+        "beatId": "beat-presentations-exit",
+        "targetComponentId": "presentations-title",
+        "kind": "fade",
+        "property": "opacity",
+        "startMs": 8600,
+        "endMs": 10000,
+        "fromValue": 1.0,
+        "toValue": 0.0,
+        "easing": "fastSlow"
+      },
+      {
+        "id": "presentations-subtitle-opacity-out",
+        "beatId": "beat-presentations-exit",
+        "targetComponentId": "presentations-subtitle",
+        "kind": "fade",
+        "property": "opacity",
+        "startMs": 8600,
+        "endMs": 10000,
+        "fromValue": 1.0,
+        "toValue": 0.0,
+        "easing": "fastSlow"
+      },
+      {
+        "id": "video-editing-panel-position",
+        "beatId": "beat-video-editing-reveal",
+        "targetComponentId": "video-editing-panel",
+        "kind": "move",
+        "property": "position",
+        "startMs": 10000,
+        "endMs": 11100,
+        "fromValue": {
+          "x": 0,
+          "y": 260
+        },
+        "toValue": {
+          "x": 0,
+          "y": 120
+        },
+        "easing": "slowFastSlow"
+      },
+      {
+        "id": "video-editing-panel-opacity-in",
+        "beatId": "beat-video-editing-reveal",
+        "targetComponentId": "video-editing-panel",
+        "kind": "fade",
+        "property": "opacity",
+        "startMs": 10000,
+        "endMs": 10720,
+        "fromValue": 0.0,
+        "toValue": 1.0,
+        "easing": "fastSlow"
+      },
+      {
+        "id": "video-editing-title-type",
+        "beatId": "beat-video-editing-reveal",
+        "targetComponentId": "video-editing-title",
+        "kind": "typewriter",
+        "property": "typewriterProgress",
+        "startMs": 10900,
+        "endMs": 12600,
+        "fromValue": 0.0,
+        "toValue": 1.0,
+        "easing": "linear"
+      },
+      {
+        "id": "video-editing-subtitle-type",
+        "beatId": "beat-video-editing-reveal",
+        "targetComponentId": "video-editing-subtitle",
+        "kind": "typewriter",
+        "property": "typewriterProgress",
+        "startMs": 12200,
+        "endMs": 14300,
+        "fromValue": 0.0,
+        "toValue": 1.0,
+        "easing": "linear"
+      },
+      {
+        "id": "video-editing-panel-opacity-out",
+        "beatId": "beat-video-editing-exit",
+        "targetComponentId": "video-editing-panel",
+        "kind": "fade",
+        "property": "opacity",
+        "startMs": 18600,
+        "endMs": 20000,
+        "fromValue": 1.0,
+        "toValue": 0.0,
+        "easing": "fastSlow"
+      },
+      {
+        "id": "video-editing-title-opacity-out",
+        "beatId": "beat-video-editing-exit",
+        "targetComponentId": "video-editing-title",
+        "kind": "fade",
+        "property": "opacity",
+        "startMs": 18600,
+        "endMs": 20000,
+        "fromValue": 1.0,
+        "toValue": 0.0,
+        "easing": "fastSlow"
+      },
+      {
+        "id": "video-editing-subtitle-opacity-out",
+        "beatId": "beat-video-editing-exit",
+        "targetComponentId": "video-editing-subtitle",
+        "kind": "fade",
+        "property": "opacity",
+        "startMs": 18600,
+        "endMs": 20000,
+        "fromValue": 1.0,
+        "toValue": 0.0,
+        "easing": "fastSlow"
+      },
+      {
+        "id": "audio-engineering-panel-position",
+        "beatId": "beat-audio-engineering-reveal",
+        "targetComponentId": "audio-engineering-panel",
+        "kind": "move",
+        "property": "position",
+        "startMs": 20000,
+        "endMs": 21100,
+        "fromValue": {
+          "x": 0,
+          "y": 260
+        },
+        "toValue": {
+          "x": 0,
+          "y": 120
+        },
+        "easing": "slowFastSlow"
+      },
+      {
+        "id": "audio-engineering-panel-opacity-in",
+        "beatId": "beat-audio-engineering-reveal",
+        "targetComponentId": "audio-engineering-panel",
+        "kind": "fade",
+        "property": "opacity",
+        "startMs": 20000,
+        "endMs": 20720,
+        "fromValue": 0.0,
+        "toValue": 1.0,
+        "easing": "fastSlow"
+      },
+      {
+        "id": "audio-engineering-title-type",
+        "beatId": "beat-audio-engineering-reveal",
+        "targetComponentId": "audio-engineering-title",
+        "kind": "typewriter",
+        "property": "typewriterProgress",
+        "startMs": 20900,
+        "endMs": 22600,
+        "fromValue": 0.0,
+        "toValue": 1.0,
+        "easing": "linear"
+      },
+      {
+        "id": "audio-engineering-subtitle-type",
+        "beatId": "beat-audio-engineering-reveal",
+        "targetComponentId": "audio-engineering-subtitle",
+        "kind": "typewriter",
+        "property": "typewriterProgress",
+        "startMs": 22200,
+        "endMs": 24300,
+        "fromValue": 0.0,
+        "toValue": 1.0,
+        "easing": "linear"
+      },
+      {
+        "id": "audio-engineering-panel-opacity-out",
+        "beatId": "beat-audio-engineering-exit",
+        "targetComponentId": "audio-engineering-panel",
+        "kind": "fade",
+        "property": "opacity",
+        "startMs": 28600,
+        "endMs": 30000,
+        "fromValue": 1.0,
+        "toValue": 0.0,
+        "easing": "fastSlow"
+      },
+      {
+        "id": "audio-engineering-title-opacity-out",
+        "beatId": "beat-audio-engineering-exit",
+        "targetComponentId": "audio-engineering-title",
+        "kind": "fade",
+        "property": "opacity",
+        "startMs": 28600,
+        "endMs": 30000,
+        "fromValue": 1.0,
+        "toValue": 0.0,
+        "easing": "fastSlow"
+      },
+      {
+        "id": "audio-engineering-subtitle-opacity-out",
+        "beatId": "beat-audio-engineering-exit",
+        "targetComponentId": "audio-engineering-subtitle",
+        "kind": "fade",
+        "property": "opacity",
+        "startMs": 28600,
+        "endMs": 30000,
+        "fromValue": 1.0,
+        "toValue": 0.0,
+        "easing": "fastSlow"
+      },
+      {
+        "id": "kinetic-text-panel-position",
+        "beatId": "beat-kinetic-text-reveal",
+        "targetComponentId": "kinetic-text-panel",
+        "kind": "move",
+        "property": "position",
+        "startMs": 30000,
+        "endMs": 31100,
+        "fromValue": {
+          "x": 0,
+          "y": 260
+        },
+        "toValue": {
+          "x": 0,
+          "y": 120
+        },
+        "easing": "slowFastSlow"
+      },
+      {
+        "id": "kinetic-text-panel-opacity-in",
+        "beatId": "beat-kinetic-text-reveal",
+        "targetComponentId": "kinetic-text-panel",
+        "kind": "fade",
+        "property": "opacity",
+        "startMs": 30000,
+        "endMs": 30720,
+        "fromValue": 0.0,
+        "toValue": 1.0,
+        "easing": "fastSlow"
+      },
+      {
+        "id": "kinetic-text-title-type",
+        "beatId": "beat-kinetic-text-reveal",
+        "targetComponentId": "kinetic-text-title",
+        "kind": "typewriter",
+        "property": "typewriterProgress",
+        "startMs": 30900,
+        "endMs": 32600,
+        "fromValue": 0.0,
+        "toValue": 1.0,
+        "easing": "linear"
+      },
+      {
+        "id": "kinetic-text-subtitle-type",
+        "beatId": "beat-kinetic-text-reveal",
+        "targetComponentId": "kinetic-text-subtitle",
+        "kind": "typewriter",
+        "property": "typewriterProgress",
+        "startMs": 32200,
+        "endMs": 34300,
+        "fromValue": 0.0,
+        "toValue": 1.0,
+        "easing": "linear"
+      },
+      {
+        "id": "kinetic-text-panel-opacity-out",
+        "beatId": "beat-kinetic-text-exit",
+        "targetComponentId": "kinetic-text-panel",
+        "kind": "fade",
+        "property": "opacity",
+        "startMs": 38600,
+        "endMs": 40000,
+        "fromValue": 1.0,
+        "toValue": 0.0,
+        "easing": "fastSlow"
+      },
+      {
+        "id": "kinetic-text-title-opacity-out",
+        "beatId": "beat-kinetic-text-exit",
+        "targetComponentId": "kinetic-text-title",
+        "kind": "fade",
+        "property": "opacity",
+        "startMs": 38600,
+        "endMs": 40000,
+        "fromValue": 1.0,
+        "toValue": 0.0,
+        "easing": "fastSlow"
+      },
+      {
+        "id": "kinetic-text-subtitle-opacity-out",
+        "beatId": "beat-kinetic-text-exit",
+        "targetComponentId": "kinetic-text-subtitle",
+        "kind": "fade",
+        "property": "opacity",
+        "startMs": 38600,
+        "endMs": 40000,
+        "fromValue": 1.0,
+        "toValue": 0.0,
+        "easing": "fastSlow"
+      },
+      {
+        "id": "image-editing-panel-position",
+        "beatId": "beat-image-editing-reveal",
+        "targetComponentId": "image-editing-panel",
+        "kind": "move",
+        "property": "position",
+        "startMs": 40000,
+        "endMs": 41100,
+        "fromValue": {
+          "x": 0,
+          "y": 260
+        },
+        "toValue": {
+          "x": 0,
+          "y": 120
+        },
+        "easing": "slowFastSlow"
+      },
+      {
+        "id": "image-editing-panel-opacity-in",
+        "beatId": "beat-image-editing-reveal",
+        "targetComponentId": "image-editing-panel",
+        "kind": "fade",
+        "property": "opacity",
+        "startMs": 40000,
+        "endMs": 40720,
+        "fromValue": 0.0,
+        "toValue": 1.0,
+        "easing": "fastSlow"
+      },
+      {
+        "id": "image-editing-title-type",
+        "beatId": "beat-image-editing-reveal",
+        "targetComponentId": "image-editing-title",
+        "kind": "typewriter",
+        "property": "typewriterProgress",
+        "startMs": 40900,
+        "endMs": 42600,
+        "fromValue": 0.0,
+        "toValue": 1.0,
+        "easing": "linear"
+      },
+      {
+        "id": "image-editing-subtitle-type",
+        "beatId": "beat-image-editing-reveal",
+        "targetComponentId": "image-editing-subtitle",
+        "kind": "typewriter",
+        "property": "typewriterProgress",
+        "startMs": 42200,
+        "endMs": 44300,
+        "fromValue": 0.0,
+        "toValue": 1.0,
+        "easing": "linear"
+      },
+      {
+        "id": "image-editing-panel-opacity-out",
+        "beatId": "beat-image-editing-exit",
+        "targetComponentId": "image-editing-panel",
+        "kind": "fade",
+        "property": "opacity",
+        "startMs": 48600,
+        "endMs": 50000,
+        "fromValue": 1.0,
+        "toValue": 0.0,
+        "easing": "fastSlow"
+      },
+      {
+        "id": "image-editing-title-opacity-out",
+        "beatId": "beat-image-editing-exit",
+        "targetComponentId": "image-editing-title",
+        "kind": "fade",
+        "property": "opacity",
+        "startMs": 48600,
+        "endMs": 50000,
+        "fromValue": 1.0,
+        "toValue": 0.0,
+        "easing": "fastSlow"
+      },
+      {
+        "id": "image-editing-subtitle-opacity-out",
+        "beatId": "beat-image-editing-exit",
+        "targetComponentId": "image-editing-subtitle",
+        "kind": "fade",
+        "property": "opacity",
+        "startMs": 48600,
+        "endMs": 50000,
+        "fromValue": 1.0,
+        "toValue": 0.0,
+        "easing": "fastSlow"
+      },
+      {
+        "id": "color-grading-panel-position",
+        "beatId": "beat-color-grading-reveal",
+        "targetComponentId": "color-grading-panel",
+        "kind": "move",
+        "property": "position",
+        "startMs": 50000,
+        "endMs": 51100,
+        "fromValue": {
+          "x": 0,
+          "y": 260
+        },
+        "toValue": {
+          "x": 0,
+          "y": 120
+        },
+        "easing": "slowFastSlow"
+      },
+      {
+        "id": "color-grading-panel-opacity-in",
+        "beatId": "beat-color-grading-reveal",
+        "targetComponentId": "color-grading-panel",
+        "kind": "fade",
+        "property": "opacity",
+        "startMs": 50000,
+        "endMs": 50720,
+        "fromValue": 0.0,
+        "toValue": 1.0,
+        "easing": "fastSlow"
+      },
+      {
+        "id": "color-grading-title-type",
+        "beatId": "beat-color-grading-reveal",
+        "targetComponentId": "color-grading-title",
+        "kind": "typewriter",
+        "property": "typewriterProgress",
+        "startMs": 50900,
+        "endMs": 52600,
+        "fromValue": 0.0,
+        "toValue": 1.0,
+        "easing": "linear"
+      },
+      {
+        "id": "color-grading-subtitle-type",
+        "beatId": "beat-color-grading-reveal",
+        "targetComponentId": "color-grading-subtitle",
+        "kind": "typewriter",
+        "property": "typewriterProgress",
+        "startMs": 52200,
+        "endMs": 54300,
+        "fromValue": 0.0,
+        "toValue": 1.0,
+        "easing": "linear"
+      },
+      {
+        "id": "color-grading-panel-opacity-out",
+        "beatId": "beat-color-grading-exit",
+        "targetComponentId": "color-grading-panel",
+        "kind": "fade",
+        "property": "opacity",
+        "startMs": 56800,
+        "endMs": 58000,
+        "fromValue": 1.0,
+        "toValue": 0.0,
+        "easing": "fastSlow"
+      },
+      {
+        "id": "color-grading-title-opacity-out",
+        "beatId": "beat-color-grading-exit",
+        "targetComponentId": "color-grading-title",
+        "kind": "fade",
+        "property": "opacity",
+        "startMs": 56800,
+        "endMs": 58000,
+        "fromValue": 1.0,
+        "toValue": 0.0,
+        "easing": "fastSlow"
+      },
+      {
+        "id": "color-grading-subtitle-opacity-out",
+        "beatId": "beat-color-grading-exit",
+        "targetComponentId": "color-grading-subtitle",
+        "kind": "fade",
+        "property": "opacity",
+        "startMs": 56800,
+        "endMs": 58000,
+        "fromValue": 1.0,
+        "toValue": 0.0,
+        "easing": "fastSlow"
+      },
+      {
+        "id": "outro-panel-fade",
+        "beatId": "beat-final-lockup",
+        "targetComponentId": "outro-panel",
+        "kind": "fade",
+        "property": "opacity",
+        "startMs": 58000,
+        "endMs": 58900,
+        "fromValue": 0.0,
+        "toValue": 1.0,
+        "easing": "fastSlow"
+      }
+    ]
+  },
+  "sceneProgram": {
+    "schemaVersion": "refusion.scene-program/v1",
+    "name": "Revival Premium App Demo 60s",
+    "durationMs": 60000,
+    "frameRate": 30,
+    "layers": [
+      {
+        "id": "background-layer",
+        "name": "Premium Background",
+        "kind": "shape",
+        "startMs": 0,
+        "durationMs": 60000,
+        "elements": [
+          {
+            "id": "background-field",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "rectangle",
+              "position": {
+                "x": 0,
+                "y": 0
+              },
+              "width": 1080,
+              "height": 1920,
+              "color": "#05070D",
+              "opacity": 1
+            }
+          },
+          {
+            "id": "ambient-orbit-a",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "circle",
+              "position": {
+                "x": -380,
+                "y": -620
+              },
+              "width": 460,
+              "height": 460,
+              "color": "#132238",
+              "opacity": 0.46,
+              "blur": 18
+            },
+            "channels": [
+              {
+                "property": "position",
+                "keyframes": [
+                  {
+                    "timeMs": 0,
+                    "value": {
+                      "x": -420,
+                      "y": -640
+                    },
+                    "easing": "slowFastSlow"
+                  },
+                  {
+                    "timeMs": 30000,
+                    "value": {
+                      "x": -330,
+                      "y": -570
+                    },
+                    "easing": "slowFastSlow"
+                  },
+                  {
+                    "timeMs": 60000,
+                    "value": {
+                      "x": -450,
+                      "y": -610
+                    },
+                    "easing": "slowFastSlow"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "ambient-orbit-b",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "circle",
+              "position": {
+                "x": 390,
+                "y": 590
+              },
+              "width": 520,
+              "height": 520,
+              "color": "#24143D",
+              "opacity": 0.42,
+              "blur": 22
+            },
+            "channels": [
+              {
+                "property": "position",
+                "keyframes": [
+                  {
+                    "timeMs": 0,
+                    "value": {
+                      "x": 420,
+                      "y": 620
+                    },
+                    "easing": "slowFastSlow"
+                  },
+                  {
+                    "timeMs": 30000,
+                    "value": {
+                      "x": 320,
+                      "y": 520
+                    },
+                    "easing": "slowFastSlow"
+                  },
+                  {
+                    "timeMs": 60000,
+                    "value": {
+                      "x": 450,
+                      "y": 650
+                    },
+                    "easing": "slowFastSlow"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "center-divider",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "line",
+              "position": {
+                "x": 0,
+                "y": 760
+              },
+              "width": 760,
+              "height": 2,
+              "color": "#263241",
+              "opacity": 0.7,
+              "trimStart": 0,
+              "trimEnd": 1
+            }
+          }
+        ]
+      },
+      {
+        "id": "brand-layer",
+        "name": "Revival Brand Header",
+        "kind": "text",
+        "startMs": 0,
+        "durationMs": 60000,
+        "elements": [
+          {
+            "id": "revival-wordmark",
+            "kind": "text",
+            "text": "REVIVAL",
+            "properties": {
+              "position": {
+                "x": 0,
+                "y": -760
+              },
+              "fontSize": 82,
+              "fontWeight": 900,
+              "letterSpacing": 4,
+              "textAlign": "center",
+              "color": "#F8FAFC",
+              "opacity": 1
+            },
+            "channels": [
+              {
+                "property": "opacity",
+                "keyframes": [
+                  {
+                    "timeMs": 0,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 700,
+                    "value": 1,
+                    "easing": "fastSlow"
+                  },
+                  {
+                    "timeMs": 58500,
+                    "value": 1,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 60000,
+                    "value": 0,
+                    "easing": "fastSlow"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "revival-tagline",
+            "kind": "text",
+            "text": "one native studio for cinematic AI creation",
+            "properties": {
+              "position": {
+                "x": 0,
+                "y": -675
+              },
+              "fontSize": 34,
+              "fontWeight": 500,
+              "letterSpacing": 0,
+              "textAlign": "center",
+              "color": "#AAB6C5",
+              "opacity": 1
+            },
+            "channels": [
+              {
+                "property": "typewriterProgress",
+                "keyframes": [
+                  {
+                    "timeMs": 300,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 2100,
+                    "value": 1,
+                    "easing": "linear"
+                  }
+                ]
+              },
+              {
+                "property": "opacity",
+                "keyframes": [
+                  {
+                    "timeMs": 0,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 900,
+                    "value": 1,
+                    "easing": "fastSlow"
+                  },
+                  {
+                    "timeMs": 58500,
+                    "value": 1,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 60000,
+                    "value": 0,
+                    "easing": "fastSlow"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "presentations-layer",
+        "name": "Professional Presentations",
+        "kind": "shape",
+        "startMs": 0,
+        "durationMs": 10000,
+        "elements": [
+          {
+            "id": "presentations-panel",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "roundedRectangle",
+              "position": {
+                "x": 0,
+                "y": 120
+              },
+              "width": 850,
+              "height": 1120,
+              "cornerRadius": 72,
+              "color": "#0B1020",
+              "opacity": 0,
+              "shadowOpacity": 0.36,
+              "shadowBlur": 44,
+              "shadowOffset": {
+                "x": 0,
+                "y": 30
+              },
+              "shadowColor": "#000000"
+            },
+            "channels": [
+              {
+                "property": "position",
+                "keyframes": [
+                  {
+                    "timeMs": 0,
+                    "value": {
+                      "x": 0,
+                      "y": 260
+                    },
+                    "easing": "slowFastSlow"
+                  },
+                  {
+                    "timeMs": 1100,
+                    "value": {
+                      "x": 0,
+                      "y": 120
+                    },
+                    "easing": "slowFastSlow"
+                  },
+                  {
+                    "timeMs": 8600,
+                    "value": {
+                      "x": 0,
+                      "y": 120
+                    },
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 10000,
+                    "value": {
+                      "x": 0,
+                      "y": -20
+                    },
+                    "easing": "fastSlow"
+                  }
+                ]
+              },
+              {
+                "property": "opacity",
+                "keyframes": [
+                  {
+                    "timeMs": 0,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 720,
+                    "value": 1,
+                    "easing": "fastSlow"
+                  },
+                  {
+                    "timeMs": 8600,
+                    "value": 1,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 10000,
+                    "value": 0,
+                    "easing": "fastSlow"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "presentations-accent",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "roundedRectangle",
+              "position": {
+                "x": 0,
+                "y": -365
+              },
+              "width": 680,
+              "height": 230,
+              "cornerRadius": 50,
+              "color": "#0B2730",
+              "opacity": 0.94
+            }
+          },
+          {
+            "id": "presentations-icon-halo",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "circle",
+              "position": {
+                "x": 0,
+                "y": -365
+              },
+              "width": 132,
+              "height": 132,
+              "color": "#66E3FF",
+              "opacity": 0.18
+            },
+            "channels": [
+              {
+                "property": "scale",
+                "keyframes": [
+                  {
+                    "timeMs": 420,
+                    "value": 0.82,
+                    "easing": "fastSlow"
+                  },
+                  {
+                    "timeMs": 1220,
+                    "value": 1.08,
+                    "easing": "slowFastSlow"
+                  },
+                  {
+                    "timeMs": 2200,
+                    "value": 1.0,
+                    "easing": "fastSlow"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "presentations-icon",
+            "kind": "icon",
+            "properties": {
+              "icon": "slideshow",
+              "position": {
+                "x": 0,
+                "y": -365
+              },
+              "width": 64,
+              "height": 64,
+              "color": "#66E3FF",
+              "opacity": 1
+            }
+          },
+          {
+            "id": "presentations-title",
+            "kind": "text",
+            "text": "Professional Presentations",
+            "properties": {
+              "position": {
+                "x": 0,
+                "y": -150
+              },
+              "fontSize": 58,
+              "fontWeight": 900,
+              "lineHeight": 1.05,
+              "letterSpacing": 0,
+              "textAlign": "center",
+              "color": "#FFFFFF",
+              "opacity": 1,
+              "typewriterProgress": 0
+            },
+            "channels": [
+              {
+                "property": "typewriterProgress",
+                "keyframes": [
+                  {
+                    "timeMs": 900,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 2600,
+                    "value": 1,
+                    "easing": "linear"
+                  }
+                ]
+              },
+              {
+                "property": "opacity",
+                "keyframes": [
+                  {
+                    "timeMs": 0,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 900,
+                    "value": 1,
+                    "easing": "fastSlow"
+                  },
+                  {
+                    "timeMs": 8600,
+                    "value": 1,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 10000,
+                    "value": 0,
+                    "easing": "fastSlow"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "presentations-subtitle",
+            "kind": "text",
+            "text": "Build polished decks with cinematic pacing, readable hierarchy, and editable motion.",
+            "properties": {
+              "position": {
+                "x": 0,
+                "y": 20
+              },
+              "fontSize": 34,
+              "fontWeight": 500,
+              "lineHeight": 1.16,
+              "letterSpacing": 0,
+              "textAlign": "center",
+              "color": "#B8C4D3",
+              "opacity": 1,
+              "typewriterProgress": 0
+            },
+            "channels": [
+              {
+                "property": "typewriterProgress",
+                "keyframes": [
+                  {
+                    "timeMs": 2200,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 4300,
+                    "value": 1,
+                    "easing": "linear"
+                  }
+                ]
+              },
+              {
+                "property": "opacity",
+                "keyframes": [
+                  {
+                    "timeMs": 1500,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 2400,
+                    "value": 1,
+                    "easing": "fastSlow"
+                  },
+                  {
+                    "timeMs": 8600,
+                    "value": 1,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 10000,
+                    "value": 0,
+                    "easing": "fastSlow"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "presentations-chip-bg-1",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "roundedRectangle",
+              "position": {
+                "x": 0,
+                "y": 360
+              },
+              "width": 650,
+              "height": 72,
+              "cornerRadius": 36,
+              "color": "#121826",
+              "opacity": 0.92
+            }
+          },
+          {
+            "id": "presentations-chip-text-1",
+            "kind": "text",
+            "text": "Deck storytelling",
+            "properties": {
+              "position": {
+                "x": 0,
+                "y": 364
+              },
+              "fontSize": 32,
+              "fontWeight": 700,
+              "letterSpacing": 0,
+              "textAlign": "center",
+              "color": "#E5EDF8",
+              "opacity": 1
+            }
+          },
+          {
+            "id": "presentations-chip-bg-2",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "roundedRectangle",
+              "position": {
+                "x": 0,
+                "y": 465
+              },
+              "width": 650,
+              "height": 72,
+              "cornerRadius": 36,
+              "color": "#121826",
+              "opacity": 0.92
+            }
+          },
+          {
+            "id": "presentations-chip-text-2",
+            "kind": "text",
+            "text": "Slide motion",
+            "properties": {
+              "position": {
+                "x": 0,
+                "y": 469
+              },
+              "fontSize": 32,
+              "fontWeight": 700,
+              "letterSpacing": 0,
+              "textAlign": "center",
+              "color": "#E5EDF8",
+              "opacity": 1
+            }
+          },
+          {
+            "id": "presentations-chip-bg-3",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "roundedRectangle",
+              "position": {
+                "x": 0,
+                "y": 570
+              },
+              "width": 650,
+              "height": 72,
+              "cornerRadius": 36,
+              "color": "#121826",
+              "opacity": 0.92
+            }
+          },
+          {
+            "id": "presentations-chip-text-3",
+            "kind": "text",
+            "text": "Brand polish",
+            "properties": {
+              "position": {
+                "x": 0,
+                "y": 574
+              },
+              "fontSize": 32,
+              "fontWeight": 700,
+              "letterSpacing": 0,
+              "textAlign": "center",
+              "color": "#E5EDF8",
+              "opacity": 1
+            }
+          },
+          {
+            "id": "presentations-progress",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "line",
+              "position": {
+                "x": 0,
+                "y": 710
+              },
+              "width": 620,
+              "height": 3,
+              "color": "#66E3FF",
+              "opacity": 1,
+              "trimStart": 0,
+              "trimEnd": 0
+            },
+            "channels": [
+              {
+                "property": "trimEnd",
+                "keyframes": [
+                  {
+                    "timeMs": 800,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 8600,
+                    "value": 1,
+                    "easing": "linear"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "video-editing-layer",
+        "name": "Video Editing Studio",
+        "kind": "shape",
+        "startMs": 10000,
+        "durationMs": 10000,
+        "elements": [
+          {
+            "id": "video-editing-panel",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "roundedRectangle",
+              "position": {
+                "x": 0,
+                "y": 120
+              },
+              "width": 850,
+              "height": 1120,
+              "cornerRadius": 72,
+              "color": "#0B1020",
+              "opacity": 0,
+              "shadowOpacity": 0.36,
+              "shadowBlur": 44,
+              "shadowOffset": {
+                "x": 0,
+                "y": 30
+              },
+              "shadowColor": "#000000"
+            },
+            "channels": [
+              {
+                "property": "position",
+                "keyframes": [
+                  {
+                    "timeMs": 0,
+                    "value": {
+                      "x": 0,
+                      "y": 260
+                    },
+                    "easing": "slowFastSlow"
+                  },
+                  {
+                    "timeMs": 1100,
+                    "value": {
+                      "x": 0,
+                      "y": 120
+                    },
+                    "easing": "slowFastSlow"
+                  },
+                  {
+                    "timeMs": 8600,
+                    "value": {
+                      "x": 0,
+                      "y": 120
+                    },
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 10000,
+                    "value": {
+                      "x": 0,
+                      "y": -20
+                    },
+                    "easing": "fastSlow"
+                  }
+                ]
+              },
+              {
+                "property": "opacity",
+                "keyframes": [
+                  {
+                    "timeMs": 0,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 720,
+                    "value": 1,
+                    "easing": "fastSlow"
+                  },
+                  {
+                    "timeMs": 8600,
+                    "value": 1,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 10000,
+                    "value": 0,
+                    "easing": "fastSlow"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "video-editing-accent",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "roundedRectangle",
+              "position": {
+                "x": 0,
+                "y": -365
+              },
+              "width": 680,
+              "height": 230,
+              "cornerRadius": 50,
+              "color": "#20143D",
+              "opacity": 0.94
+            }
+          },
+          {
+            "id": "video-editing-icon-halo",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "circle",
+              "position": {
+                "x": 0,
+                "y": -365
+              },
+              "width": 132,
+              "height": 132,
+              "color": "#8B5CF6",
+              "opacity": 0.18
+            },
+            "channels": [
+              {
+                "property": "scale",
+                "keyframes": [
+                  {
+                    "timeMs": 420,
+                    "value": 0.82,
+                    "easing": "fastSlow"
+                  },
+                  {
+                    "timeMs": 1220,
+                    "value": 1.08,
+                    "easing": "slowFastSlow"
+                  },
+                  {
+                    "timeMs": 2200,
+                    "value": 1.0,
+                    "easing": "fastSlow"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "video-editing-icon",
+            "kind": "icon",
+            "properties": {
+              "icon": "movie",
+              "position": {
+                "x": 0,
+                "y": -365
+              },
+              "width": 64,
+              "height": 64,
+              "color": "#8B5CF6",
+              "opacity": 1
+            }
+          },
+          {
+            "id": "video-editing-title",
+            "kind": "text",
+            "text": "Video Editing Studio",
+            "properties": {
+              "position": {
+                "x": 0,
+                "y": -150
+              },
+              "fontSize": 58,
+              "fontWeight": 900,
+              "lineHeight": 1.05,
+              "letterSpacing": 0,
+              "textAlign": "center",
+              "color": "#FFFFFF",
+              "opacity": 1,
+              "typewriterProgress": 0
+            },
+            "channels": [
+              {
+                "property": "typewriterProgress",
+                "keyframes": [
+                  {
+                    "timeMs": 900,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 2600,
+                    "value": 1,
+                    "easing": "linear"
+                  }
+                ]
+              },
+              {
+                "property": "opacity",
+                "keyframes": [
+                  {
+                    "timeMs": 0,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 900,
+                    "value": 1,
+                    "easing": "fastSlow"
+                  },
+                  {
+                    "timeMs": 8600,
+                    "value": 1,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 10000,
+                    "value": 0,
+                    "easing": "fastSlow"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "video-editing-subtitle",
+            "kind": "text",
+            "text": "Cut, layer, transition, and preview edits with frame-accurate timeline control.",
+            "properties": {
+              "position": {
+                "x": 0,
+                "y": 20
+              },
+              "fontSize": 34,
+              "fontWeight": 500,
+              "lineHeight": 1.16,
+              "letterSpacing": 0,
+              "textAlign": "center",
+              "color": "#B8C4D3",
+              "opacity": 1,
+              "typewriterProgress": 0
+            },
+            "channels": [
+              {
+                "property": "typewriterProgress",
+                "keyframes": [
+                  {
+                    "timeMs": 2200,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 4300,
+                    "value": 1,
+                    "easing": "linear"
+                  }
+                ]
+              },
+              {
+                "property": "opacity",
+                "keyframes": [
+                  {
+                    "timeMs": 1500,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 2400,
+                    "value": 1,
+                    "easing": "fastSlow"
+                  },
+                  {
+                    "timeMs": 8600,
+                    "value": 1,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 10000,
+                    "value": 0,
+                    "easing": "fastSlow"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "video-editing-chip-bg-1",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "roundedRectangle",
+              "position": {
+                "x": 0,
+                "y": 360
+              },
+              "width": 650,
+              "height": 72,
+              "cornerRadius": 36,
+              "color": "#121826",
+              "opacity": 0.92
+            }
+          },
+          {
+            "id": "video-editing-chip-text-1",
+            "kind": "text",
+            "text": "Timeline cuts",
+            "properties": {
+              "position": {
+                "x": 0,
+                "y": 364
+              },
+              "fontSize": 32,
+              "fontWeight": 700,
+              "letterSpacing": 0,
+              "textAlign": "center",
+              "color": "#E5EDF8",
+              "opacity": 1
+            }
+          },
+          {
+            "id": "video-editing-chip-bg-2",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "roundedRectangle",
+              "position": {
+                "x": 0,
+                "y": 465
+              },
+              "width": 650,
+              "height": 72,
+              "cornerRadius": 36,
+              "color": "#121826",
+              "opacity": 0.92
+            }
+          },
+          {
+            "id": "video-editing-chip-text-2",
+            "kind": "text",
+            "text": "Transitions",
+            "properties": {
+              "position": {
+                "x": 0,
+                "y": 469
+              },
+              "fontSize": 32,
+              "fontWeight": 700,
+              "letterSpacing": 0,
+              "textAlign": "center",
+              "color": "#E5EDF8",
+              "opacity": 1
+            }
+          },
+          {
+            "id": "video-editing-chip-bg-3",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "roundedRectangle",
+              "position": {
+                "x": 0,
+                "y": 570
+              },
+              "width": 650,
+              "height": 72,
+              "cornerRadius": 36,
+              "color": "#121826",
+              "opacity": 0.92
+            }
+          },
+          {
+            "id": "video-editing-chip-text-3",
+            "kind": "text",
+            "text": "Live preview",
+            "properties": {
+              "position": {
+                "x": 0,
+                "y": 574
+              },
+              "fontSize": 32,
+              "fontWeight": 700,
+              "letterSpacing": 0,
+              "textAlign": "center",
+              "color": "#E5EDF8",
+              "opacity": 1
+            }
+          },
+          {
+            "id": "video-editing-progress",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "line",
+              "position": {
+                "x": 0,
+                "y": 710
+              },
+              "width": 620,
+              "height": 3,
+              "color": "#8B5CF6",
+              "opacity": 1,
+              "trimStart": 0,
+              "trimEnd": 0
+            },
+            "channels": [
+              {
+                "property": "trimEnd",
+                "keyframes": [
+                  {
+                    "timeMs": 800,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 8600,
+                    "value": 1,
+                    "easing": "linear"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "audio-engineering-layer",
+        "name": "Audio Engineering",
+        "kind": "shape",
+        "startMs": 20000,
+        "durationMs": 10000,
+        "elements": [
+          {
+            "id": "audio-engineering-panel",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "roundedRectangle",
+              "position": {
+                "x": 0,
+                "y": 120
+              },
+              "width": 850,
+              "height": 1120,
+              "cornerRadius": 72,
+              "color": "#0B1020",
+              "opacity": 0,
+              "shadowOpacity": 0.36,
+              "shadowBlur": 44,
+              "shadowOffset": {
+                "x": 0,
+                "y": 30
+              },
+              "shadowColor": "#000000"
+            },
+            "channels": [
+              {
+                "property": "position",
+                "keyframes": [
+                  {
+                    "timeMs": 0,
+                    "value": {
+                      "x": 0,
+                      "y": 260
+                    },
+                    "easing": "slowFastSlow"
+                  },
+                  {
+                    "timeMs": 1100,
+                    "value": {
+                      "x": 0,
+                      "y": 120
+                    },
+                    "easing": "slowFastSlow"
+                  },
+                  {
+                    "timeMs": 8600,
+                    "value": {
+                      "x": 0,
+                      "y": 120
+                    },
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 10000,
+                    "value": {
+                      "x": 0,
+                      "y": -20
+                    },
+                    "easing": "fastSlow"
+                  }
+                ]
+              },
+              {
+                "property": "opacity",
+                "keyframes": [
+                  {
+                    "timeMs": 0,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 720,
+                    "value": 1,
+                    "easing": "fastSlow"
+                  },
+                  {
+                    "timeMs": 8600,
+                    "value": 1,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 10000,
+                    "value": 0,
+                    "easing": "fastSlow"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "audio-engineering-accent",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "roundedRectangle",
+              "position": {
+                "x": 0,
+                "y": -365
+              },
+              "width": 680,
+              "height": 230,
+              "cornerRadius": 50,
+              "color": "#0E2B1B",
+              "opacity": 0.94
+            }
+          },
+          {
+            "id": "audio-engineering-icon-halo",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "circle",
+              "position": {
+                "x": 0,
+                "y": -365
+              },
+              "width": 132,
+              "height": 132,
+              "color": "#22C55E",
+              "opacity": 0.18
+            },
+            "channels": [
+              {
+                "property": "scale",
+                "keyframes": [
+                  {
+                    "timeMs": 420,
+                    "value": 0.82,
+                    "easing": "fastSlow"
+                  },
+                  {
+                    "timeMs": 1220,
+                    "value": 1.08,
+                    "easing": "slowFastSlow"
+                  },
+                  {
+                    "timeMs": 2200,
+                    "value": 1.0,
+                    "easing": "fastSlow"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "audio-engineering-icon",
+            "kind": "icon",
+            "properties": {
+              "icon": "graphic_eq",
+              "position": {
+                "x": 0,
+                "y": -365
+              },
+              "width": 64,
+              "height": 64,
+              "color": "#22C55E",
+              "opacity": 1
+            }
+          },
+          {
+            "id": "audio-engineering-title",
+            "kind": "text",
+            "text": "Audio Engineering",
+            "properties": {
+              "position": {
+                "x": 0,
+                "y": -150
+              },
+              "fontSize": 58,
+              "fontWeight": 900,
+              "lineHeight": 1.05,
+              "letterSpacing": 0,
+              "textAlign": "center",
+              "color": "#FFFFFF",
+              "opacity": 1,
+              "typewriterProgress": 0
+            },
+            "channels": [
+              {
+                "property": "typewriterProgress",
+                "keyframes": [
+                  {
+                    "timeMs": 900,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 2600,
+                    "value": 1,
+                    "easing": "linear"
+                  }
+                ]
+              },
+              {
+                "property": "opacity",
+                "keyframes": [
+                  {
+                    "timeMs": 0,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 900,
+                    "value": 1,
+                    "easing": "fastSlow"
+                  },
+                  {
+                    "timeMs": 8600,
+                    "value": 1,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 10000,
+                    "value": 0,
+                    "easing": "fastSlow"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "audio-engineering-subtitle",
+            "kind": "text",
+            "text": "Shape voice, music, rhythm, and sync with precise audio-first editing tools.",
+            "properties": {
+              "position": {
+                "x": 0,
+                "y": 20
+              },
+              "fontSize": 34,
+              "fontWeight": 500,
+              "lineHeight": 1.16,
+              "letterSpacing": 0,
+              "textAlign": "center",
+              "color": "#B8C4D3",
+              "opacity": 1,
+              "typewriterProgress": 0
+            },
+            "channels": [
+              {
+                "property": "typewriterProgress",
+                "keyframes": [
+                  {
+                    "timeMs": 2200,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 4300,
+                    "value": 1,
+                    "easing": "linear"
+                  }
+                ]
+              },
+              {
+                "property": "opacity",
+                "keyframes": [
+                  {
+                    "timeMs": 1500,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 2400,
+                    "value": 1,
+                    "easing": "fastSlow"
+                  },
+                  {
+                    "timeMs": 8600,
+                    "value": 1,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 10000,
+                    "value": 0,
+                    "easing": "fastSlow"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "audio-engineering-chip-bg-1",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "roundedRectangle",
+              "position": {
+                "x": 0,
+                "y": 360
+              },
+              "width": 650,
+              "height": 72,
+              "cornerRadius": 36,
+              "color": "#121826",
+              "opacity": 0.92
+            }
+          },
+          {
+            "id": "audio-engineering-chip-text-1",
+            "kind": "text",
+            "text": "Voice polish",
+            "properties": {
+              "position": {
+                "x": 0,
+                "y": 364
+              },
+              "fontSize": 32,
+              "fontWeight": 700,
+              "letterSpacing": 0,
+              "textAlign": "center",
+              "color": "#E5EDF8",
+              "opacity": 1
+            }
+          },
+          {
+            "id": "audio-engineering-chip-bg-2",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "roundedRectangle",
+              "position": {
+                "x": 0,
+                "y": 465
+              },
+              "width": 650,
+              "height": 72,
+              "cornerRadius": 36,
+              "color": "#121826",
+              "opacity": 0.92
+            }
+          },
+          {
+            "id": "audio-engineering-chip-text-2",
+            "kind": "text",
+            "text": "Beat sync",
+            "properties": {
+              "position": {
+                "x": 0,
+                "y": 469
+              },
+              "fontSize": 32,
+              "fontWeight": 700,
+              "letterSpacing": 0,
+              "textAlign": "center",
+              "color": "#E5EDF8",
+              "opacity": 1
+            }
+          },
+          {
+            "id": "audio-engineering-chip-bg-3",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "roundedRectangle",
+              "position": {
+                "x": 0,
+                "y": 570
+              },
+              "width": 650,
+              "height": 72,
+              "cornerRadius": 36,
+              "color": "#121826",
+              "opacity": 0.92
+            }
+          },
+          {
+            "id": "audio-engineering-chip-text-3",
+            "kind": "text",
+            "text": "Sound balance",
+            "properties": {
+              "position": {
+                "x": 0,
+                "y": 574
+              },
+              "fontSize": 32,
+              "fontWeight": 700,
+              "letterSpacing": 0,
+              "textAlign": "center",
+              "color": "#E5EDF8",
+              "opacity": 1
+            }
+          },
+          {
+            "id": "audio-engineering-progress",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "line",
+              "position": {
+                "x": 0,
+                "y": 710
+              },
+              "width": 620,
+              "height": 3,
+              "color": "#22C55E",
+              "opacity": 1,
+              "trimStart": 0,
+              "trimEnd": 0
+            },
+            "channels": [
+              {
+                "property": "trimEnd",
+                "keyframes": [
+                  {
+                    "timeMs": 800,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 8600,
+                    "value": 1,
+                    "easing": "linear"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "kinetic-text-layer",
+        "name": "Kinetic Text Systems",
+        "kind": "shape",
+        "startMs": 30000,
+        "durationMs": 10000,
+        "elements": [
+          {
+            "id": "kinetic-text-panel",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "roundedRectangle",
+              "position": {
+                "x": 0,
+                "y": 120
+              },
+              "width": 850,
+              "height": 1120,
+              "cornerRadius": 72,
+              "color": "#0B1020",
+              "opacity": 0,
+              "shadowOpacity": 0.36,
+              "shadowBlur": 44,
+              "shadowOffset": {
+                "x": 0,
+                "y": 30
+              },
+              "shadowColor": "#000000"
+            },
+            "channels": [
+              {
+                "property": "position",
+                "keyframes": [
+                  {
+                    "timeMs": 0,
+                    "value": {
+                      "x": 0,
+                      "y": 260
+                    },
+                    "easing": "slowFastSlow"
+                  },
+                  {
+                    "timeMs": 1100,
+                    "value": {
+                      "x": 0,
+                      "y": 120
+                    },
+                    "easing": "slowFastSlow"
+                  },
+                  {
+                    "timeMs": 8600,
+                    "value": {
+                      "x": 0,
+                      "y": 120
+                    },
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 10000,
+                    "value": {
+                      "x": 0,
+                      "y": -20
+                    },
+                    "easing": "fastSlow"
+                  }
+                ]
+              },
+              {
+                "property": "opacity",
+                "keyframes": [
+                  {
+                    "timeMs": 0,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 720,
+                    "value": 1,
+                    "easing": "fastSlow"
+                  },
+                  {
+                    "timeMs": 8600,
+                    "value": 1,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 10000,
+                    "value": 0,
+                    "easing": "fastSlow"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "kinetic-text-accent",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "roundedRectangle",
+              "position": {
+                "x": 0,
+                "y": -365
+              },
+              "width": 680,
+              "height": 230,
+              "cornerRadius": 50,
+              "color": "#3A1D0A",
+              "opacity": 0.94
+            }
+          },
+          {
+            "id": "kinetic-text-icon-halo",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "circle",
+              "position": {
+                "x": 0,
+                "y": -365
+              },
+              "width": 132,
+              "height": 132,
+              "color": "#F97316",
+              "opacity": 0.18
+            },
+            "channels": [
+              {
+                "property": "scale",
+                "keyframes": [
+                  {
+                    "timeMs": 420,
+                    "value": 0.82,
+                    "easing": "fastSlow"
+                  },
+                  {
+                    "timeMs": 1220,
+                    "value": 1.08,
+                    "easing": "slowFastSlow"
+                  },
+                  {
+                    "timeMs": 2200,
+                    "value": 1.0,
+                    "easing": "fastSlow"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "kinetic-text-icon",
+            "kind": "icon",
+            "properties": {
+              "icon": "text_fields",
+              "position": {
+                "x": 0,
+                "y": -365
+              },
+              "width": 64,
+              "height": 64,
+              "color": "#F97316",
+              "opacity": 1
+            }
+          },
+          {
+            "id": "kinetic-text-title",
+            "kind": "text",
+            "text": "Kinetic Text Systems",
+            "properties": {
+              "position": {
+                "x": 0,
+                "y": -150
+              },
+              "fontSize": 58,
+              "fontWeight": 900,
+              "lineHeight": 1.05,
+              "letterSpacing": 0,
+              "textAlign": "center",
+              "color": "#FFFFFF",
+              "opacity": 1,
+              "typewriterProgress": 0
+            },
+            "channels": [
+              {
+                "property": "typewriterProgress",
+                "keyframes": [
+                  {
+                    "timeMs": 900,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 2600,
+                    "value": 1,
+                    "easing": "linear"
+                  }
+                ]
+              },
+              {
+                "property": "opacity",
+                "keyframes": [
+                  {
+                    "timeMs": 0,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 900,
+                    "value": 1,
+                    "easing": "fastSlow"
+                  },
+                  {
+                    "timeMs": 8600,
+                    "value": 1,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 10000,
+                    "value": 0,
+                    "easing": "fastSlow"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "kinetic-text-subtitle",
+            "kind": "text",
+            "text": "Create editorial typography, type-on reveals, captions, and premium title motion.",
+            "properties": {
+              "position": {
+                "x": 0,
+                "y": 20
+              },
+              "fontSize": 34,
+              "fontWeight": 500,
+              "lineHeight": 1.16,
+              "letterSpacing": 0,
+              "textAlign": "center",
+              "color": "#B8C4D3",
+              "opacity": 1,
+              "typewriterProgress": 0
+            },
+            "channels": [
+              {
+                "property": "typewriterProgress",
+                "keyframes": [
+                  {
+                    "timeMs": 2200,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 4300,
+                    "value": 1,
+                    "easing": "linear"
+                  }
+                ]
+              },
+              {
+                "property": "opacity",
+                "keyframes": [
+                  {
+                    "timeMs": 1500,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 2400,
+                    "value": 1,
+                    "easing": "fastSlow"
+                  },
+                  {
+                    "timeMs": 8600,
+                    "value": 1,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 10000,
+                    "value": 0,
+                    "easing": "fastSlow"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "kinetic-text-chip-bg-1",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "roundedRectangle",
+              "position": {
+                "x": 0,
+                "y": 360
+              },
+              "width": 650,
+              "height": 72,
+              "cornerRadius": 36,
+              "color": "#121826",
+              "opacity": 0.92
+            }
+          },
+          {
+            "id": "kinetic-text-chip-text-1",
+            "kind": "text",
+            "text": "Typewriter",
+            "properties": {
+              "position": {
+                "x": 0,
+                "y": 364
+              },
+              "fontSize": 32,
+              "fontWeight": 700,
+              "letterSpacing": 0,
+              "textAlign": "center",
+              "color": "#E5EDF8",
+              "opacity": 1
+            }
+          },
+          {
+            "id": "kinetic-text-chip-bg-2",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "roundedRectangle",
+              "position": {
+                "x": 0,
+                "y": 465
+              },
+              "width": 650,
+              "height": 72,
+              "cornerRadius": 36,
+              "color": "#121826",
+              "opacity": 0.92
+            }
+          },
+          {
+            "id": "kinetic-text-chip-text-2",
+            "kind": "text",
+            "text": "Captions",
+            "properties": {
+              "position": {
+                "x": 0,
+                "y": 469
+              },
+              "fontSize": 32,
+              "fontWeight": 700,
+              "letterSpacing": 0,
+              "textAlign": "center",
+              "color": "#E5EDF8",
+              "opacity": 1
+            }
+          },
+          {
+            "id": "kinetic-text-chip-bg-3",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "roundedRectangle",
+              "position": {
+                "x": 0,
+                "y": 570
+              },
+              "width": 650,
+              "height": 72,
+              "cornerRadius": 36,
+              "color": "#121826",
+              "opacity": 0.92
+            }
+          },
+          {
+            "id": "kinetic-text-chip-text-3",
+            "kind": "text",
+            "text": "Title design",
+            "properties": {
+              "position": {
+                "x": 0,
+                "y": 574
+              },
+              "fontSize": 32,
+              "fontWeight": 700,
+              "letterSpacing": 0,
+              "textAlign": "center",
+              "color": "#E5EDF8",
+              "opacity": 1
+            }
+          },
+          {
+            "id": "kinetic-text-progress",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "line",
+              "position": {
+                "x": 0,
+                "y": 710
+              },
+              "width": 620,
+              "height": 3,
+              "color": "#F97316",
+              "opacity": 1,
+              "trimStart": 0,
+              "trimEnd": 0
+            },
+            "channels": [
+              {
+                "property": "trimEnd",
+                "keyframes": [
+                  {
+                    "timeMs": 800,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 8600,
+                    "value": 1,
+                    "easing": "linear"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "image-editing-layer",
+        "name": "Image Editing & Retouch",
+        "kind": "shape",
+        "startMs": 40000,
+        "durationMs": 10000,
+        "elements": [
+          {
+            "id": "image-editing-panel",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "roundedRectangle",
+              "position": {
+                "x": 0,
+                "y": 120
+              },
+              "width": 850,
+              "height": 1120,
+              "cornerRadius": 72,
+              "color": "#0B1020",
+              "opacity": 0,
+              "shadowOpacity": 0.36,
+              "shadowBlur": 44,
+              "shadowOffset": {
+                "x": 0,
+                "y": 30
+              },
+              "shadowColor": "#000000"
+            },
+            "channels": [
+              {
+                "property": "position",
+                "keyframes": [
+                  {
+                    "timeMs": 0,
+                    "value": {
+                      "x": 0,
+                      "y": 260
+                    },
+                    "easing": "slowFastSlow"
+                  },
+                  {
+                    "timeMs": 1100,
+                    "value": {
+                      "x": 0,
+                      "y": 120
+                    },
+                    "easing": "slowFastSlow"
+                  },
+                  {
+                    "timeMs": 8600,
+                    "value": {
+                      "x": 0,
+                      "y": 120
+                    },
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 10000,
+                    "value": {
+                      "x": 0,
+                      "y": -20
+                    },
+                    "easing": "fastSlow"
+                  }
+                ]
+              },
+              {
+                "property": "opacity",
+                "keyframes": [
+                  {
+                    "timeMs": 0,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 720,
+                    "value": 1,
+                    "easing": "fastSlow"
+                  },
+                  {
+                    "timeMs": 8600,
+                    "value": 1,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 10000,
+                    "value": 0,
+                    "easing": "fastSlow"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "image-editing-accent",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "roundedRectangle",
+              "position": {
+                "x": 0,
+                "y": -365
+              },
+              "width": 680,
+              "height": 230,
+              "cornerRadius": 50,
+              "color": "#361326",
+              "opacity": 0.94
+            }
+          },
+          {
+            "id": "image-editing-icon-halo",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "circle",
+              "position": {
+                "x": 0,
+                "y": -365
+              },
+              "width": 132,
+              "height": 132,
+              "color": "#EC4899",
+              "opacity": 0.18
+            },
+            "channels": [
+              {
+                "property": "scale",
+                "keyframes": [
+                  {
+                    "timeMs": 420,
+                    "value": 0.82,
+                    "easing": "fastSlow"
+                  },
+                  {
+                    "timeMs": 1220,
+                    "value": 1.08,
+                    "easing": "slowFastSlow"
+                  },
+                  {
+                    "timeMs": 2200,
+                    "value": 1.0,
+                    "easing": "fastSlow"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "image-editing-icon",
+            "kind": "icon",
+            "properties": {
+              "icon": "image",
+              "position": {
+                "x": 0,
+                "y": -365
+              },
+              "width": 64,
+              "height": 64,
+              "color": "#EC4899",
+              "opacity": 1
+            }
+          },
+          {
+            "id": "image-editing-title",
+            "kind": "text",
+            "text": "Image Editing & Retouch",
+            "properties": {
+              "position": {
+                "x": 0,
+                "y": -150
+              },
+              "fontSize": 58,
+              "fontWeight": 900,
+              "lineHeight": 1.05,
+              "letterSpacing": 0,
+              "textAlign": "center",
+              "color": "#FFFFFF",
+              "opacity": 1,
+              "typewriterProgress": 0
+            },
+            "channels": [
+              {
+                "property": "typewriterProgress",
+                "keyframes": [
+                  {
+                    "timeMs": 900,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 2600,
+                    "value": 1,
+                    "easing": "linear"
+                  }
+                ]
+              },
+              {
+                "property": "opacity",
+                "keyframes": [
+                  {
+                    "timeMs": 0,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 900,
+                    "value": 1,
+                    "easing": "fastSlow"
+                  },
+                  {
+                    "timeMs": 8600,
+                    "value": 1,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 10000,
+                    "value": 0,
+                    "easing": "fastSlow"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "image-editing-subtitle",
+            "kind": "text",
+            "text": "Compose images, overlays, cards, masks, and product visuals in editable layers.",
+            "properties": {
+              "position": {
+                "x": 0,
+                "y": 20
+              },
+              "fontSize": 34,
+              "fontWeight": 500,
+              "lineHeight": 1.16,
+              "letterSpacing": 0,
+              "textAlign": "center",
+              "color": "#B8C4D3",
+              "opacity": 1,
+              "typewriterProgress": 0
+            },
+            "channels": [
+              {
+                "property": "typewriterProgress",
+                "keyframes": [
+                  {
+                    "timeMs": 2200,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 4300,
+                    "value": 1,
+                    "easing": "linear"
+                  }
+                ]
+              },
+              {
+                "property": "opacity",
+                "keyframes": [
+                  {
+                    "timeMs": 1500,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 2400,
+                    "value": 1,
+                    "easing": "fastSlow"
+                  },
+                  {
+                    "timeMs": 8600,
+                    "value": 1,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 10000,
+                    "value": 0,
+                    "easing": "fastSlow"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "image-editing-chip-bg-1",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "roundedRectangle",
+              "position": {
+                "x": 0,
+                "y": 360
+              },
+              "width": 650,
+              "height": 72,
+              "cornerRadius": 36,
+              "color": "#121826",
+              "opacity": 0.92
+            }
+          },
+          {
+            "id": "image-editing-chip-text-1",
+            "kind": "text",
+            "text": "Layer masks",
+            "properties": {
+              "position": {
+                "x": 0,
+                "y": 364
+              },
+              "fontSize": 32,
+              "fontWeight": 700,
+              "letterSpacing": 0,
+              "textAlign": "center",
+              "color": "#E5EDF8",
+              "opacity": 1
+            }
+          },
+          {
+            "id": "image-editing-chip-bg-2",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "roundedRectangle",
+              "position": {
+                "x": 0,
+                "y": 465
+              },
+              "width": 650,
+              "height": 72,
+              "cornerRadius": 36,
+              "color": "#121826",
+              "opacity": 0.92
+            }
+          },
+          {
+            "id": "image-editing-chip-text-2",
+            "kind": "text",
+            "text": "Image polish",
+            "properties": {
+              "position": {
+                "x": 0,
+                "y": 469
+              },
+              "fontSize": 32,
+              "fontWeight": 700,
+              "letterSpacing": 0,
+              "textAlign": "center",
+              "color": "#E5EDF8",
+              "opacity": 1
+            }
+          },
+          {
+            "id": "image-editing-chip-bg-3",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "roundedRectangle",
+              "position": {
+                "x": 0,
+                "y": 570
+              },
+              "width": 650,
+              "height": 72,
+              "cornerRadius": 36,
+              "color": "#121826",
+              "opacity": 0.92
+            }
+          },
+          {
+            "id": "image-editing-chip-text-3",
+            "kind": "text",
+            "text": "Social assets",
+            "properties": {
+              "position": {
+                "x": 0,
+                "y": 574
+              },
+              "fontSize": 32,
+              "fontWeight": 700,
+              "letterSpacing": 0,
+              "textAlign": "center",
+              "color": "#E5EDF8",
+              "opacity": 1
+            }
+          },
+          {
+            "id": "image-editing-progress",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "line",
+              "position": {
+                "x": 0,
+                "y": 710
+              },
+              "width": 620,
+              "height": 3,
+              "color": "#EC4899",
+              "opacity": 1,
+              "trimStart": 0,
+              "trimEnd": 0
+            },
+            "channels": [
+              {
+                "property": "trimEnd",
+                "keyframes": [
+                  {
+                    "timeMs": 800,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 8600,
+                    "value": 1,
+                    "easing": "linear"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "color-grading-layer",
+        "name": "Color & Look Control",
+        "kind": "shape",
+        "startMs": 50000,
+        "durationMs": 10000,
+        "elements": [
+          {
+            "id": "color-grading-panel",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "roundedRectangle",
+              "position": {
+                "x": 0,
+                "y": 120
+              },
+              "width": 850,
+              "height": 1120,
+              "cornerRadius": 72,
+              "color": "#0B1020",
+              "opacity": 0,
+              "shadowOpacity": 0.36,
+              "shadowBlur": 44,
+              "shadowOffset": {
+                "x": 0,
+                "y": 30
+              },
+              "shadowColor": "#000000"
+            },
+            "channels": [
+              {
+                "property": "position",
+                "keyframes": [
+                  {
+                    "timeMs": 0,
+                    "value": {
+                      "x": 0,
+                      "y": 260
+                    },
+                    "easing": "slowFastSlow"
+                  },
+                  {
+                    "timeMs": 1100,
+                    "value": {
+                      "x": 0,
+                      "y": 120
+                    },
+                    "easing": "slowFastSlow"
+                  },
+                  {
+                    "timeMs": 8600,
+                    "value": {
+                      "x": 0,
+                      "y": 120
+                    },
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 10000,
+                    "value": {
+                      "x": 0,
+                      "y": -20
+                    },
+                    "easing": "fastSlow"
+                  }
+                ]
+              },
+              {
+                "property": "opacity",
+                "keyframes": [
+                  {
+                    "timeMs": 0,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 720,
+                    "value": 1,
+                    "easing": "fastSlow"
+                  },
+                  {
+                    "timeMs": 8600,
+                    "value": 1,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 10000,
+                    "value": 0,
+                    "easing": "fastSlow"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "color-grading-accent",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "roundedRectangle",
+              "position": {
+                "x": 0,
+                "y": -365
+              },
+              "width": 680,
+              "height": 230,
+              "cornerRadius": 50,
+              "color": "#332A08",
+              "opacity": 0.94
+            }
+          },
+          {
+            "id": "color-grading-icon-halo",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "circle",
+              "position": {
+                "x": 0,
+                "y": -365
+              },
+              "width": 132,
+              "height": 132,
+              "color": "#FACC15",
+              "opacity": 0.18
+            },
+            "channels": [
+              {
+                "property": "scale",
+                "keyframes": [
+                  {
+                    "timeMs": 420,
+                    "value": 0.82,
+                    "easing": "fastSlow"
+                  },
+                  {
+                    "timeMs": 1220,
+                    "value": 1.08,
+                    "easing": "slowFastSlow"
+                  },
+                  {
+                    "timeMs": 2200,
+                    "value": 1.0,
+                    "easing": "fastSlow"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "color-grading-icon",
+            "kind": "icon",
+            "properties": {
+              "icon": "palette",
+              "position": {
+                "x": 0,
+                "y": -365
+              },
+              "width": 64,
+              "height": 64,
+              "color": "#FACC15",
+              "opacity": 1
+            }
+          },
+          {
+            "id": "color-grading-title",
+            "kind": "text",
+            "text": "Color & Look Control",
+            "properties": {
+              "position": {
+                "x": 0,
+                "y": -150
+              },
+              "fontSize": 58,
+              "fontWeight": 900,
+              "lineHeight": 1.05,
+              "letterSpacing": 0,
+              "textAlign": "center",
+              "color": "#FFFFFF",
+              "opacity": 1,
+              "typewriterProgress": 0
+            },
+            "channels": [
+              {
+                "property": "typewriterProgress",
+                "keyframes": [
+                  {
+                    "timeMs": 900,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 2600,
+                    "value": 1,
+                    "easing": "linear"
+                  }
+                ]
+              },
+              {
+                "property": "opacity",
+                "keyframes": [
+                  {
+                    "timeMs": 0,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 900,
+                    "value": 1,
+                    "easing": "fastSlow"
+                  },
+                  {
+                    "timeMs": 8600,
+                    "value": 1,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 10000,
+                    "value": 0,
+                    "easing": "fastSlow"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "color-grading-subtitle",
+            "kind": "text",
+            "text": "Tune palette, contrast, glow, blur, and visual mood for a unified premium look.",
+            "properties": {
+              "position": {
+                "x": 0,
+                "y": 20
+              },
+              "fontSize": 34,
+              "fontWeight": 500,
+              "lineHeight": 1.16,
+              "letterSpacing": 0,
+              "textAlign": "center",
+              "color": "#B8C4D3",
+              "opacity": 1,
+              "typewriterProgress": 0
+            },
+            "channels": [
+              {
+                "property": "typewriterProgress",
+                "keyframes": [
+                  {
+                    "timeMs": 2200,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 4300,
+                    "value": 1,
+                    "easing": "linear"
+                  }
+                ]
+              },
+              {
+                "property": "opacity",
+                "keyframes": [
+                  {
+                    "timeMs": 1500,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 2400,
+                    "value": 1,
+                    "easing": "fastSlow"
+                  },
+                  {
+                    "timeMs": 8600,
+                    "value": 1,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 10000,
+                    "value": 0,
+                    "easing": "fastSlow"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "color-grading-chip-bg-1",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "roundedRectangle",
+              "position": {
+                "x": 0,
+                "y": 360
+              },
+              "width": 650,
+              "height": 72,
+              "cornerRadius": 36,
+              "color": "#121826",
+              "opacity": 0.92
+            }
+          },
+          {
+            "id": "color-grading-chip-text-1",
+            "kind": "text",
+            "text": "Color mood",
+            "properties": {
+              "position": {
+                "x": 0,
+                "y": 364
+              },
+              "fontSize": 32,
+              "fontWeight": 700,
+              "letterSpacing": 0,
+              "textAlign": "center",
+              "color": "#E5EDF8",
+              "opacity": 1
+            }
+          },
+          {
+            "id": "color-grading-chip-bg-2",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "roundedRectangle",
+              "position": {
+                "x": 0,
+                "y": 465
+              },
+              "width": 650,
+              "height": 72,
+              "cornerRadius": 36,
+              "color": "#121826",
+              "opacity": 0.92
+            }
+          },
+          {
+            "id": "color-grading-chip-text-2",
+            "kind": "text",
+            "text": "Contrast",
+            "properties": {
+              "position": {
+                "x": 0,
+                "y": 469
+              },
+              "fontSize": 32,
+              "fontWeight": 700,
+              "letterSpacing": 0,
+              "textAlign": "center",
+              "color": "#E5EDF8",
+              "opacity": 1
+            }
+          },
+          {
+            "id": "color-grading-chip-bg-3",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "roundedRectangle",
+              "position": {
+                "x": 0,
+                "y": 570
+              },
+              "width": 650,
+              "height": 72,
+              "cornerRadius": 36,
+              "color": "#121826",
+              "opacity": 0.92
+            }
+          },
+          {
+            "id": "color-grading-chip-text-3",
+            "kind": "text",
+            "text": "Final look",
+            "properties": {
+              "position": {
+                "x": 0,
+                "y": 574
+              },
+              "fontSize": 32,
+              "fontWeight": 700,
+              "letterSpacing": 0,
+              "textAlign": "center",
+              "color": "#E5EDF8",
+              "opacity": 1
+            }
+          },
+          {
+            "id": "color-grading-progress",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "line",
+              "position": {
+                "x": 0,
+                "y": 710
+              },
+              "width": 620,
+              "height": 3,
+              "color": "#FACC15",
+              "opacity": 1,
+              "trimStart": 0,
+              "trimEnd": 0
+            },
+            "channels": [
+              {
+                "property": "trimEnd",
+                "keyframes": [
+                  {
+                    "timeMs": 800,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 8600,
+                    "value": 1,
+                    "easing": "linear"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "outro-layer",
+        "name": "Final Revival Lockup",
+        "kind": "text",
+        "startMs": 55000,
+        "durationMs": 5000,
+        "elements": [
+          {
+            "id": "outro-panel",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "roundedRectangle",
+              "position": {
+                "x": 0,
+                "y": 120
+              },
+              "width": 820,
+              "height": 620,
+              "cornerRadius": 70,
+              "color": "#F8FAFC",
+              "opacity": 0
+            },
+            "channels": [
+              {
+                "property": "opacity",
+                "keyframes": [
+                  {
+                    "timeMs": 0,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 900,
+                    "value": 1,
+                    "easing": "fastSlow"
+                  },
+                  {
+                    "timeMs": 4300,
+                    "value": 1,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 5000,
+                    "value": 0,
+                    "easing": "fastSlow"
+                  }
+                ]
+              },
+              {
+                "property": "scale",
+                "keyframes": [
+                  {
+                    "timeMs": 0,
+                    "value": 0.92,
+                    "easing": "slowFastSlow"
+                  },
+                  {
+                    "timeMs": 1100,
+                    "value": 1,
+                    "easing": "slowFastSlow"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "outro-title",
+            "kind": "text",
+            "text": "Revival makes creation feel cinematic.",
+            "properties": {
+              "position": {
+                "x": 0,
+                "y": 30
+              },
+              "fontSize": 54,
+              "fontWeight": 900,
+              "lineHeight": 1.08,
+              "letterSpacing": 0,
+              "textAlign": "center",
+              "color": "#08111F",
+              "opacity": 1,
+              "typewriterProgress": 0
+            },
+            "channels": [
+              {
+                "property": "typewriterProgress",
+                "keyframes": [
+                  {
+                    "timeMs": 700,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 2500,
+                    "value": 1,
+                    "easing": "linear"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "outro-subtitle",
+            "kind": "text",
+            "text": "Presentations. Video. Audio. Text. Images. Color. One editable native scene system.",
+            "properties": {
+              "position": {
+                "x": 0,
+                "y": 190
+              },
+              "fontSize": 30,
+              "fontWeight": 600,
+              "lineHeight": 1.16,
+              "letterSpacing": 0,
+              "textAlign": "center",
+              "color": "#334155",
+              "opacity": 1,
+              "typewriterProgress": 0
+            },
+            "channels": [
+              {
+                "property": "typewriterProgress",
+                "keyframes": [
+                  {
+                    "timeMs": 1800,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 3800,
+                    "value": 1,
+                    "easing": "linear"
+                  }
                 ]
               }
             ]

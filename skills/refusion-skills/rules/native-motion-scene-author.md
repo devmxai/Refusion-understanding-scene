@@ -44,6 +44,11 @@ Do not output:
 - Markdown wrapped around the JSON
 - rendered video as the source of truth
 
+For long product demos, do not let the platform truncate the response. A valid
+ReFusion scene must be complete from the first `{` to the final `}`. If you can
+write files, create a `.json` artifact and validate it with
+`scripts/validate_scene_program.py` before delivery.
+
 ## Four Internal Roles
 
 If you are one agent, run these roles internally. If a system supports multiple
@@ -113,6 +118,7 @@ Every visible motion must be editable.
 
 Reject and revise if:
 
+- JSON is incomplete or does not end with the final root `}`;
 - DirectorPlan and SceneProgram disagree;
 - important text has no readable hold;
 - motion feels random;

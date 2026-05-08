@@ -31,6 +31,11 @@ Always return this wrapper:
 
 Return complete JSON from the first `{` to the final `}`.
 
+Do not return partial snippets for app import. If a chat platform cuts long
+answers, the app will show `Scene program rejected` with an incomplete JSON
+message. For long demos, keep the structure compact, avoid one-layer-per-letter
+patterns, and validate the complete object before sharing.
+
 ## Numeric Timing
 
 Use numeric values, never strings:
@@ -92,6 +97,10 @@ Layer shape:
 
 Keep scenes compact. Prefer 3 to 8 visible layers unless the prompt asks for a
 complex composition.
+
+For 50-60 second feature demos, use one persistent background/brand layer plus
+one feature layer per 8-10 second segment. This keeps the script paste-safe and
+editable while still feeling like a complete product film.
 
 ## Elements
 

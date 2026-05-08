@@ -18,6 +18,13 @@ Return complete ReFusion JSON only when the user asks for a scene. Do not return
 Markdown around the JSON. Do not use executable code, JSX, CSS, functions,
 imports, shader code, remote code, or comments.
 
+The most common app rejection is incomplete paste. Before returning a scene,
+verify the response starts with the first `{` and ends with the final `}` of the
+same JSON object. Never split a JSON scene across multiple chat messages. For
+long 50-60 second scenes, prefer a compact scene with reusable layers and, when
+the environment supports files, write a `.json` file rather than asking the user
+to copy a truncated chat fragment.
+
 ReFusion is not an HTML design surface. It is a native editable video/motion
 scene engine. Use Shapes, Text, Image, Video, Scene Program layers, channels,
 keyframes, SpeedyGraph, and official effects. Treat Open Design and Remotion as
@@ -48,6 +55,15 @@ executable scene.
 5. Run the QA Critic role: validate timing, holds, contrast, effects,
    editability, and professional taste.
 6. Return only complete JSON.
+
+If this repository is available locally, run this before delivery:
+
+```bash
+python3 scripts/validate_scene_program.py path/to/scene.json
+```
+
+If the validator fails, repair the JSON first. Do not tell the user to paste a
+scene that has not passed JSON integrity checks.
 
 ## Load Rules As Needed
 
