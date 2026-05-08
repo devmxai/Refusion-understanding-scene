@@ -243,22 +243,49 @@ future Visual Closure Loop and prevents known first-import failures.
 If reviewing or repairing a scene, use these failure codes:
 
 ```text
-JSON_TRUNCATED
-UNSUPPORTED_EXECUTION_SURFACE
-UNKNOWN_COMPONENT_CONTRACT
-LOOSE_PROMPT_TEXT
-MISSING_TEXT_FRAME
-TEXT_OVERFLOW
-TYPEWRITER_NOT_FIXED_FRAME
-MOTION_WITHOUT_BEAT
-READABLE_HOLD_MISSING
-CONTINUITY_UNDECLARED
-UNSUPPORTED_EFFECT
-SILENT_LINEAR_FALLBACK
+TEXT_OVERFLOW_RIGHT
+TEXT_OVERFLOW_HEIGHT
+MISSING_PARENT_SLOT
+CARD_CHILD_FLOATING
+UNSUPPORTED_ICON
+UNSUPPORTED_COMPONENT
+UNSUPPORTED_VARIANT
+SAFE_AREA_VIOLATION
+DUPLICATE_PROPERTY_CHANNEL
+UNREADABLE_HOLD
+UNFINISHED_BOUNDARY_MOTION
+SPEEDYGRAPH_BYPASS
+NON_DETERMINISTIC_COMPILATION
 ```
 
 Repair scenes by changing component contracts, timing, and supported native
 properties. Do not repair by switching to HTML/CSS/JS or by inventing effects.
+
+## Deterministic Compile Rule
+
+For semantic-blueprint authoring, keep this contract:
+
+- same normalized semantic blueprint => same lowered SceneProgram hash;
+- reject raw numeric authoring values by default in blueprint mode;
+- allow raw values only with explicit `rawValueOverride` intent;
+- lowered SceneProgram can contain resolved native numeric values.
+
+Expected proof in diagnostics:
+
+```text
+TF_SCENE_DETERMINISM_PROOF
+```
+
+with `blueprintHash`, `sceneProgramHash`, `tokenResolutionHash`,
+`rawValuesDetected`, `rawValueOverrides`, and `passed`.
+
+## Migration Rule (v1 -> v2)
+
+- Existing direct `refusion.scene-program/v1` JSON remains importable.
+- Prefer new scenes as semantic blueprints that lower into native SceneProgram.
+- Do not regress old scenes by removing compatibility paths.
+- When migrating old scenes, keep timing/easing semantics and upgrade only
+  structure: components, slots, textFrame, and beat ownership.
 
 ## Stop List
 

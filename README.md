@@ -11,6 +11,7 @@ skills/refusion-skills/
 ├── rules/
 │   ├── native-motion-scene-author.md
 │   ├── native-scene-intelligence.md
+│   ├── migration-v1-to-v2.md
 │   ├── speedygraph.md
 │   ├── effects-and-renderer.md
 │   ├── modern-motion-design.md
@@ -86,6 +87,7 @@ Direct browser links:
 - [All-in-one fallback](https://github.com/devmxai/refusion-skills/blob/main/REFUSION_SCENE_SKILL_FULL.md)
 - [Native Motion Scene Author](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/native-motion-scene-author.md)
 - [Native Scene Intelligence](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/native-scene-intelligence.md)
+- [Scene Migration v1 To v2](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/migration-v1-to-v2.md)
 - [SpeedyGraph](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/speedygraph.md)
 - [Effects And Renderer](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/effects-and-renderer.md)
 - [Modern Motion Design](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/modern-motion-design.md)

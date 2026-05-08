@@ -16,6 +16,10 @@ SOURCES = [
         "Native Scene Intelligence Rule",
         "skills/refusion-skills/rules/native-scene-intelligence.md",
     ),
+    (
+        "Scene Migration v1 To v2 Rule",
+        "skills/refusion-skills/rules/migration-v1-to-v2.md",
+    ),
     ("SpeedyGraph Rule", "skills/refusion-skills/rules/speedygraph.md"),
     (
         "Effects And Renderer Rule",

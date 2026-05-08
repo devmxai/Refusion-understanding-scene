@@ -15,6 +15,7 @@ python3 scripts/build_full_skill_bundle.py
 - `skills/refusion-skills/SKILL.md`
 - `skills/refusion-skills/rules/native-motion-scene-author.md`
 - `skills/refusion-skills/rules/native-scene-intelligence.md`
+- `skills/refusion-skills/rules/migration-v1-to-v2.md`
 - `skills/refusion-skills/rules/speedygraph.md`
 - `skills/refusion-skills/rules/effects-and-renderer.md`
 - `skills/refusion-skills/rules/modern-motion-design.md`
@@ -683,22 +684,49 @@ future Visual Closure Loop and prevents known first-import failures.
 If reviewing or repairing a scene, use these failure codes:
 
 ```text
-JSON_TRUNCATED
-UNSUPPORTED_EXECUTION_SURFACE
-UNKNOWN_COMPONENT_CONTRACT
-LOOSE_PROMPT_TEXT
-MISSING_TEXT_FRAME
-TEXT_OVERFLOW
-TYPEWRITER_NOT_FIXED_FRAME
-MOTION_WITHOUT_BEAT
-READABLE_HOLD_MISSING
-CONTINUITY_UNDECLARED
-UNSUPPORTED_EFFECT
-SILENT_LINEAR_FALLBACK
+TEXT_OVERFLOW_RIGHT
+TEXT_OVERFLOW_HEIGHT
+MISSING_PARENT_SLOT
+CARD_CHILD_FLOATING
+UNSUPPORTED_ICON
+UNSUPPORTED_COMPONENT
+UNSUPPORTED_VARIANT
+SAFE_AREA_VIOLATION
+DUPLICATE_PROPERTY_CHANNEL
+UNREADABLE_HOLD
+UNFINISHED_BOUNDARY_MOTION
+SPEEDYGRAPH_BYPASS
+NON_DETERMINISTIC_COMPILATION
 ```
 
 Repair scenes by changing component contracts, timing, and supported native
 properties. Do not repair by switching to HTML/CSS/JS or by inventing effects.
+
+## Deterministic Compile Rule
+
+For semantic-blueprint authoring, keep this contract:
+
+- same normalized semantic blueprint => same lowered SceneProgram hash;
+- reject raw numeric authoring values by default in blueprint mode;
+- allow raw values only with explicit `rawValueOverride` intent;
+- lowered SceneProgram can contain resolved native numeric values.
+
+Expected proof in diagnostics:
+
+```text
+TF_SCENE_DETERMINISM_PROOF
+```
+
+with `blueprintHash`, `sceneProgramHash`, `tokenResolutionHash`,
+`rawValuesDetected`, `rawValueOverrides`, and `passed`.
+
+## Migration Rule (v1 -> v2)
+
+- Existing direct `refusion.scene-program/v1` JSON remains importable.
+- Prefer new scenes as semantic blueprints that lower into native SceneProgram.
+- Do not regress old scenes by removing compatibility paths.
+- When migrating old scenes, keep timing/easing semantics and upgrade only
+  structure: components, slots, textFrame, and beat ownership.
 
 ## Stop List
 
@@ -710,6 +738,70 @@ properties. Do not repair by switching to HTML/CSS/JS or by inventing effects.
 - Do not output token-only pseudo-scenes that the app cannot import.
 - Do not claim Visual Closure Loop completion until rendered probes and
   structured repair payloads exist in the app.
+
+---
+
+# Scene Migration v1 To v2 Rule
+
+Source: `skills/refusion-skills/rules/migration-v1-to-v2.md`
+
+# Scene Migration v1 To v2
+
+Use this rule when upgrading legacy direct SceneProgram authoring to the
+VERSION 2 semantic-authoring path.
+
+## Goal
+
+Keep runtime compatibility while moving authoring quality from "JSON-valid" to
+"component-safe + visually safe + deterministic".
+
+## Keep As-Is
+
+- Existing `refusion.scene-program/v1` scenes remain importable.
+- Existing layer/element/channel runtime paths remain native.
+- Existing SpeedyGraph/easing semantics remain unchanged.
+
+## Migrate In Authoring Layer
+
+Move agent-authored scenes to semantic blueprint intent first:
+
+1. declare components from the registry;
+2. bind children by parent/slot contracts;
+3. enforce bounded `textFrame` for bounded UI text;
+4. bind important motion to beats with enter/hold/exit;
+5. compile timing through SpeedyGraph truth compiler;
+6. run visual QA probe checks;
+7. run deterministic compile checks.
+
+## Minimum Migration Checklist
+
+- no loose text over card/input components;
+- no bounded text without finite `textFrame` dimensions;
+- no unsupported component ids or variants;
+- no unowned overlap across cards/panels;
+- no important motion outside beat ownership;
+- no SpeedyGraph bypass;
+- no non-deterministic lowering output for same blueprint input.
+
+## Diagnostics Expected
+
+```text
+TF_SCENE_BLUEPRINT_COMPILER_PROOF
+TF_SCENE_TOKEN_REGISTRY_PROOF
+TF_SCENE_COMPONENT_REGISTRY_PROOF
+TF_SCENE_TEXT_GEOMETRY_PROOF
+TF_SCENE_LAYOUT_SOLVER_PROOF
+TF_SCENE_BEAT_GRAMMAR_PROOF
+TF_SCENE_DETERMINISM_PROOF
+TF_SCENE_VISUAL_FRAME_QA_PROOF
+TF_SCENE_REPAIR_LOOP_PROOF
+```
+
+## Stop Conditions
+
+- Do not switch to HTML/CSS/JS as a migration shortcut.
+- Do not rewrite runtime engine contracts.
+- Do not claim migrated success if visual QA still reports overflow/clipping.
 
 ---
 
