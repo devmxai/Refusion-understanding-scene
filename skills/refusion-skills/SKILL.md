@@ -72,6 +72,9 @@ scene that has not passed JSON integrity checks.
   [rules/native-scene-intelligence.md](rules/native-scene-intelligence.md).
 - For schema, coordinates, supported properties, icons, and examples, read
   [rules/scene-program-json.md](rules/scene-program-json.md).
+- For coordinate canon, shared evaluated-frame truth, and render/QA parity
+  expectations, read
+  [rules/native-scene-intelligence.md](rules/native-scene-intelligence.md).
 - For the ReFusion-native authoring pipeline, four internal production roles,
   JSON-only output, and Open Design/Remotion exclusion rules, read
   [rules/native-motion-scene-author.md](rules/native-motion-scene-author.md).
@@ -222,6 +225,8 @@ Return exactly one complete JSON object with directorPlan and sceneProgram.
 Use schemaVersion refusion.motion-director/v1 and refusion.scene-program/v1.
 Use numeric startMs, endMs, durationMs, timeMs, and frameRate.
 Use center-origin 1080x1920 canvas unless asked otherwise.
+Treat coordinates as canonical center-origin:
++X right, +Y down, and `position` is element center by default.
 Plan ordered beats, semantic components, primitives, then editable layers,
 elements, channels, and keyframes.
 Use component-safe contracts for prompt bars, cards, panels, and input fields.

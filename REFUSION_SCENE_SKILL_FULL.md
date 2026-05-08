@@ -114,6 +114,9 @@ scene that has not passed JSON integrity checks.
   [rules/native-scene-intelligence.md](rules/native-scene-intelligence.md).
 - For schema, coordinates, supported properties, icons, and examples, read
   [rules/scene-program-json.md](rules/scene-program-json.md).
+- For coordinate canon, shared evaluated-frame truth, and render/QA parity
+  expectations, read
+  [rules/native-scene-intelligence.md](rules/native-scene-intelligence.md).
 - For the ReFusion-native authoring pipeline, four internal production roles,
   JSON-only output, and Open Design/Remotion exclusion rules, read
   [rules/native-motion-scene-author.md](rules/native-motion-scene-author.md).
@@ -264,6 +267,8 @@ Return exactly one complete JSON object with directorPlan and sceneProgram.
 Use schemaVersion refusion.motion-director/v1 and refusion.scene-program/v1.
 Use numeric startMs, endMs, durationMs, timeMs, and frameRate.
 Use center-origin 1080x1920 canvas unless asked otherwise.
+Treat coordinates as canonical center-origin:
++X right, +Y down, and `position` is element center by default.
 Plan ordered beats, semantic components, primitives, then editable layers,
 elements, channels, and keyframes.
 Use component-safe contracts for prompt bars, cards, panels, and input fields.
@@ -452,6 +457,16 @@ ReFusion scene authoring uses:
 Closed Vocabulary + Component Contracts + Beat Grammar + Visual Closure Prep
 ```
 
+Runtime quality gate in VERSION 4:
+
+```text
+QA truth == Preview truth == Apply gate truth
+```
+
+This is implemented through a shared evaluated-frame contract. Agent-authored
+scenes should assume that containment, overlap, safe-area, and continuity are
+verified from the same evaluated geometry that preview renders.
+
 The agent should not guess raw layout numbers when a known component contract
 exists. Use semantic vocabulary during planning, then lower it into valid native
 Scene Program JSON with concrete editable values.
@@ -462,6 +477,45 @@ Important distinction:
 - lowered `refusion.scene-program/v1` may contain resolved native numbers,
   colors, and keyframes;
 - do not require every lowered Scene Program value to remain a token.
+
+## Coordinate Canon (Center-Origin V1)
+
+Canonical scene space:
+
+```text
+origin: canvas center
++X: right
++Y: down
+unit: design pixels
+position: element center by default
+```
+
+For a 1080x1920 canvas:
+
+```text
+left  = -540
+right = 540
+top   = -960
+bottom= 960
+```
+
+Convert top-left specs to center-origin before authoring:
+
+```text
+centerX = left + width/2 - canvasWidth/2
+centerY = top + height/2 - canvasHeight/2
+```
+
+Example:
+
+```text
+top-left rect: left=120, top=280, width=840, height=128
+canvas: 1080x1920
+=> centerX = 120 + 420 - 540 = 0
+=> centerY = 280 + 64 - 960 = -616
+```
+
+Never output top-left coordinates directly unless you explicitly converted.
 
 ## Closed Vocabulary For Agent-Facing Plans
 
@@ -612,6 +666,67 @@ Rules:
 - if the icon becomes the input bar, describe continuity as a handoff or morph.
   Do not claim true geometric morph if the authored channels only fade/scale.
 
+## Executable Hierarchy Rule (HCT-Aware)
+
+- `parentId` is allowed only when the target contract supports executable
+  hierarchy (PromptInputBar, FeatureCard, FeedbackCard, and similar grouped
+  components).
+- Children must live inside real slots or content bounds, not free-floating
+  visual placements.
+- Child motion should inherit parent motion by hierarchy whenever possible.
+- Do not author independent competing transforms for parent and child unless
+  the beat explicitly requires a handoff.
+
+If a component contract does not support executable hierarchy, fail closed:
+author it as explicit independent elements with clear containment and timing.
+
+## Component Good/Bad Patterns
+
+### PromptInputBar
+
+Good:
+
+- one `prompt-shell` container;
+- `prompt-text` bound to content slot + `textFrame`;
+- trailing `send-button` and `send-icon` in accessory slot;
+- typewriter uses `typewriterProgress` in fixed text frame.
+
+Bad:
+
+- text visually on top of a shell with no slot/textFrame;
+- send icon not parented/related to send button;
+- text font larger than frame height;
+- per-character layers.
+
+### FeatureCard
+
+Good:
+
+- card shell as parent container;
+- title/body/icon each in explicit slots;
+- card width/height chosen for readable hold and safe area;
+- body max lines + overflow policy set.
+
+Bad:
+
+- card text positioned with free absolute values only;
+- title/body overlap during hold frame;
+- icon outside card bounds at any probe frame.
+
+### FeedbackCard
+
+Good:
+
+- header row slot (platform icon + source label);
+- content slot with bounded paragraph text;
+- consistent insets and max text width.
+
+Bad:
+
+- body text crossing card edge;
+- multiple label texts stacked in same position unintentionally;
+- card grid extending beyond safe area.
+
 ## Beat Grammar
 
 Every important visual action belongs to a beat.
@@ -702,6 +817,35 @@ NON_DETERMINISTIC_COMPILATION
 Repair scenes by changing component contracts, timing, and supported native
 properties. Do not repair by switching to HTML/CSS/JS or by inventing effects.
 
+### Structured Repair Example (EvaluatedFrameTruth)
+
+Input error payload:
+
+```json
+{
+  "code": "TEXT_OVERFLOW_RIGHT",
+  "frameMs": 5050,
+  "componentId": "prompt-shell",
+  "elementId": "prompt-text",
+  "measured": {
+    "containerWidth": 640,
+    "textWidth": 688,
+    "overflowPx": 48
+  },
+  "suggestedAction": {
+    "path": "properties.textFrame.fitPolicy",
+    "value": "shrinkToFit"
+  }
+}
+```
+
+Repair action:
+
+- keep the same component and beat;
+- reduce text width pressure through `textFrame.width`, `maxLines: 1`, and
+  `fitPolicy: "shrinkToFit"`;
+- do not move text outside the shell or bypass the component.
+
 ## Deterministic Compile Rule
 
 For semantic-blueprint authoring, keep this contract:
@@ -738,6 +882,8 @@ with `blueprintHash`, `sceneProgramHash`, `tokenResolutionHash`,
 - Do not output token-only pseudo-scenes that the app cannot import.
 - Do not claim Visual Closure Loop completion until rendered probes and
   structured repair payloads exist in the app.
+- Do not use top-left coordinates directly in authored Scene Program values.
+- Do not assume QA uses a different coordinate interpretation than preview.
 
 ---
 
@@ -1350,6 +1496,33 @@ top edge     y=-960
 bottom edge  y=960
 ```
 
+Canonical rules:
+
+```text
+- center-origin is the source of truth;
+- +X points right;
+- +Y points down;
+- `position` is element center by default.
+```
+
+Top-left conversion (when translating Figma/web specs):
+
+```text
+centerX = left + width/2 - canvasWidth/2
+centerY = top + height/2 - canvasHeight/2
+```
+
+Example:
+
+```text
+top-left rect: left=96, top=140, width=888, height=120
+canvas: 1080x1920
+=> position.x = 0
+=> position.y = -760
+```
+
+Never paste top-left values into `position` without conversion.
+
 Keep important text inside:
 
 ```text
@@ -1630,11 +1803,15 @@ Accepted metadata keys:
 Strict contract:
 
 - every parent id must reference a real element in the Scene Program;
+- do not rely on `parentId` alone for behavior; use it within known component
+  contracts that define executable hierarchy and slots;
 - parent chains may not contain cycles;
 - child layer lifetime must stay inside parent layer lifetime;
 - a parent should declare `layoutRole: "container"` or `layoutRole: "group"`;
-- inherited group transforms are not active yet, so still write concrete
-  positions/channels for each visible child.
+- hierarchy is executable when the component contract supports it; child
+  transform/visibility should follow the parent through evaluated-frame truth;
+- if executable hierarchy is unavailable for a custom construct, keep children
+  explicitly positioned and avoid conflicting parent/child transforms.
 
 ### PromptInputBar Component-Safe Pattern
 
@@ -2554,9 +2731,10 @@ Generated JSON must support that separation. In practice:
 
 - give layers clear names;
 - give elements clear stable IDs;
-- keep related elements grouped by layer or parent metadata when supported;
+- keep related elements grouped by layer and executable parent contracts when
+  supported;
 - use `layoutRole`, `parentId`, `parentGroup`, `zIndex`, and similar metadata
-  when it helps the app show a clean hierarchy;
+  when it helps the app show a clean hierarchy and evaluated-frame containment;
 - do not depend on visual-only ordering that cannot be inspected.
 
 ## Timing Rule
@@ -4340,10 +4518,30 @@ No URLs unless the user and engine explicitly support that asset path.
   `elements`.
 - Every element has `id`, `kind`, and valid `properties`.
 - Every animation is represented by a channel with sorted keyframes.
+- Scene coordinates follow center-origin canon (`x=0,y=0` is canvas center).
+- Any top-left sourced numbers are converted before authoring final `position`.
 - `PromptInputBar`-style scenes must give the text a real parent, layout slot,
   one-line `textFrame`, and fixed-frame typewriter reveal.
+- `FeatureCard` and `FeedbackCard` text/icon elements remain inside card bounds
+  at hold frames.
 - Use stable semantic IDs, not random UUID-like names.
 - Do not create excessive layers for a simple scene.
+
+## Evaluated Frame Truth Checks
+
+- Assume QA, preview, and apply gate consume the same evaluated-frame geometry.
+- If a scene would overflow/clamp only after animation, treat it as invalid
+  before delivery.
+- Parent/child continuity must hold at probe frames:
+  - child bounds stay within parent content bounds unless intentionally exiting;
+  - child visibility/lifetime follows parent beat visibility;
+  - no accidental stacked labels in the same frame.
+- Treat these as hard failures for professional scenes:
+  - `TEXT_OVERFLOW_RIGHT`, `TEXT_OVERFLOW_HEIGHT`
+  - `SAFE_AREA_VIOLATION`
+  - `CARD_CHILD_FLOATING`
+  - `DUPLICATE_PROPERTY_CHANNEL`
+  - `UNREADABLE_HOLD`
 
 ## Mask Reveal And Shape Morph
 

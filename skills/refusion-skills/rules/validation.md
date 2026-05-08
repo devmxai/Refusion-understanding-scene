@@ -81,10 +81,30 @@ No URLs unless the user and engine explicitly support that asset path.
   `elements`.
 - Every element has `id`, `kind`, and valid `properties`.
 - Every animation is represented by a channel with sorted keyframes.
+- Scene coordinates follow center-origin canon (`x=0,y=0` is canvas center).
+- Any top-left sourced numbers are converted before authoring final `position`.
 - `PromptInputBar`-style scenes must give the text a real parent, layout slot,
   one-line `textFrame`, and fixed-frame typewriter reveal.
+- `FeatureCard` and `FeedbackCard` text/icon elements remain inside card bounds
+  at hold frames.
 - Use stable semantic IDs, not random UUID-like names.
 - Do not create excessive layers for a simple scene.
+
+## Evaluated Frame Truth Checks
+
+- Assume QA, preview, and apply gate consume the same evaluated-frame geometry.
+- If a scene would overflow/clamp only after animation, treat it as invalid
+  before delivery.
+- Parent/child continuity must hold at probe frames:
+  - child bounds stay within parent content bounds unless intentionally exiting;
+  - child visibility/lifetime follows parent beat visibility;
+  - no accidental stacked labels in the same frame.
+- Treat these as hard failures for professional scenes:
+  - `TEXT_OVERFLOW_RIGHT`, `TEXT_OVERFLOW_HEIGHT`
+  - `SAFE_AREA_VIOLATION`
+  - `CARD_CHILD_FLOATING`
+  - `DUPLICATE_PROPERTY_CHANNEL`
+  - `UNREADABLE_HOLD`
 
 ## Mask Reveal And Shape Morph
 

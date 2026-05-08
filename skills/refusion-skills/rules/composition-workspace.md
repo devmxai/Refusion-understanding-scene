@@ -263,9 +263,10 @@ Generated JSON must support that separation. In practice:
 
 - give layers clear names;
 - give elements clear stable IDs;
-- keep related elements grouped by layer or parent metadata when supported;
+- keep related elements grouped by layer and executable parent contracts when
+  supported;
 - use `layoutRole`, `parentId`, `parentGroup`, `zIndex`, and similar metadata
-  when it helps the app show a clean hierarchy;
+  when it helps the app show a clean hierarchy and evaluated-frame containment;
 - do not depend on visual-only ordering that cannot be inspected.
 
 ## Timing Rule

@@ -11,6 +11,16 @@ ReFusion scene authoring uses:
 Closed Vocabulary + Component Contracts + Beat Grammar + Visual Closure Prep
 ```
 
+Runtime quality gate in VERSION 4:
+
+```text
+QA truth == Preview truth == Apply gate truth
+```
+
+This is implemented through a shared evaluated-frame contract. Agent-authored
+scenes should assume that containment, overlap, safe-area, and continuity are
+verified from the same evaluated geometry that preview renders.
+
 The agent should not guess raw layout numbers when a known component contract
 exists. Use semantic vocabulary during planning, then lower it into valid native
 Scene Program JSON with concrete editable values.
@@ -21,6 +31,45 @@ Important distinction:
 - lowered `refusion.scene-program/v1` may contain resolved native numbers,
   colors, and keyframes;
 - do not require every lowered Scene Program value to remain a token.
+
+## Coordinate Canon (Center-Origin V1)
+
+Canonical scene space:
+
+```text
+origin: canvas center
++X: right
++Y: down
+unit: design pixels
+position: element center by default
+```
+
+For a 1080x1920 canvas:
+
+```text
+left  = -540
+right = 540
+top   = -960
+bottom= 960
+```
+
+Convert top-left specs to center-origin before authoring:
+
+```text
+centerX = left + width/2 - canvasWidth/2
+centerY = top + height/2 - canvasHeight/2
+```
+
+Example:
+
+```text
+top-left rect: left=120, top=280, width=840, height=128
+canvas: 1080x1920
+=> centerX = 120 + 420 - 540 = 0
+=> centerY = 280 + 64 - 960 = -616
+```
+
+Never output top-left coordinates directly unless you explicitly converted.
 
 ## Closed Vocabulary For Agent-Facing Plans
 
@@ -171,6 +220,67 @@ Rules:
 - if the icon becomes the input bar, describe continuity as a handoff or morph.
   Do not claim true geometric morph if the authored channels only fade/scale.
 
+## Executable Hierarchy Rule (HCT-Aware)
+
+- `parentId` is allowed only when the target contract supports executable
+  hierarchy (PromptInputBar, FeatureCard, FeedbackCard, and similar grouped
+  components).
+- Children must live inside real slots or content bounds, not free-floating
+  visual placements.
+- Child motion should inherit parent motion by hierarchy whenever possible.
+- Do not author independent competing transforms for parent and child unless
+  the beat explicitly requires a handoff.
+
+If a component contract does not support executable hierarchy, fail closed:
+author it as explicit independent elements with clear containment and timing.
+
+## Component Good/Bad Patterns
+
+### PromptInputBar
+
+Good:
+
+- one `prompt-shell` container;
+- `prompt-text` bound to content slot + `textFrame`;
+- trailing `send-button` and `send-icon` in accessory slot;
+- typewriter uses `typewriterProgress` in fixed text frame.
+
+Bad:
+
+- text visually on top of a shell with no slot/textFrame;
+- send icon not parented/related to send button;
+- text font larger than frame height;
+- per-character layers.
+
+### FeatureCard
+
+Good:
+
+- card shell as parent container;
+- title/body/icon each in explicit slots;
+- card width/height chosen for readable hold and safe area;
+- body max lines + overflow policy set.
+
+Bad:
+
+- card text positioned with free absolute values only;
+- title/body overlap during hold frame;
+- icon outside card bounds at any probe frame.
+
+### FeedbackCard
+
+Good:
+
+- header row slot (platform icon + source label);
+- content slot with bounded paragraph text;
+- consistent insets and max text width.
+
+Bad:
+
+- body text crossing card edge;
+- multiple label texts stacked in same position unintentionally;
+- card grid extending beyond safe area.
+
 ## Beat Grammar
 
 Every important visual action belongs to a beat.
@@ -261,6 +371,35 @@ NON_DETERMINISTIC_COMPILATION
 Repair scenes by changing component contracts, timing, and supported native
 properties. Do not repair by switching to HTML/CSS/JS or by inventing effects.
 
+### Structured Repair Example (EvaluatedFrameTruth)
+
+Input error payload:
+
+```json
+{
+  "code": "TEXT_OVERFLOW_RIGHT",
+  "frameMs": 5050,
+  "componentId": "prompt-shell",
+  "elementId": "prompt-text",
+  "measured": {
+    "containerWidth": 640,
+    "textWidth": 688,
+    "overflowPx": 48
+  },
+  "suggestedAction": {
+    "path": "properties.textFrame.fitPolicy",
+    "value": "shrinkToFit"
+  }
+}
+```
+
+Repair action:
+
+- keep the same component and beat;
+- reduce text width pressure through `textFrame.width`, `maxLines: 1`, and
+  `fitPolicy: "shrinkToFit"`;
+- do not move text outside the shell or bypass the component.
+
 ## Deterministic Compile Rule
 
 For semantic-blueprint authoring, keep this contract:
@@ -297,3 +436,5 @@ with `blueprintHash`, `sceneProgramHash`, `tokenResolutionHash`,
 - Do not output token-only pseudo-scenes that the app cannot import.
 - Do not claim Visual Closure Loop completion until rendered probes and
   structured repair payloads exist in the app.
+- Do not use top-left coordinates directly in authored Scene Program values.
+- Do not assume QA uses a different coordinate interpretation than preview.

@@ -113,6 +113,10 @@ The target is not merely valid JSON. The target is professional motion:
 - DirectorPlan-first creative and motion direction;
 - Native Scene Intelligence contracts for prompt bars, cards, text fit, Beat
   Grammar, and Visual Closure preparation;
+- center-origin coordinate canon with explicit top-left conversion before final
+  authoring;
+- shared evaluated-frame truth expectations so QA and preview read the same
+  geometry;
 - SpeedyGraph / Bezier timing truth;
 - official editable effects only;
 - deterministic timing;

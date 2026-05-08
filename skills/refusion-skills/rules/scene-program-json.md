@@ -64,6 +64,33 @@ top edge     y=-960
 bottom edge  y=960
 ```
 
+Canonical rules:
+
+```text
+- center-origin is the source of truth;
+- +X points right;
+- +Y points down;
+- `position` is element center by default.
+```
+
+Top-left conversion (when translating Figma/web specs):
+
+```text
+centerX = left + width/2 - canvasWidth/2
+centerY = top + height/2 - canvasHeight/2
+```
+
+Example:
+
+```text
+top-left rect: left=96, top=140, width=888, height=120
+canvas: 1080x1920
+=> position.x = 0
+=> position.y = -760
+```
+
+Never paste top-left values into `position` without conversion.
+
 Keep important text inside:
 
 ```text
@@ -344,11 +371,15 @@ Accepted metadata keys:
 Strict contract:
 
 - every parent id must reference a real element in the Scene Program;
+- do not rely on `parentId` alone for behavior; use it within known component
+  contracts that define executable hierarchy and slots;
 - parent chains may not contain cycles;
 - child layer lifetime must stay inside parent layer lifetime;
 - a parent should declare `layoutRole: "container"` or `layoutRole: "group"`;
-- inherited group transforms are not active yet, so still write concrete
-  positions/channels for each visible child.
+- hierarchy is executable when the component contract supports it; child
+  transform/visibility should follow the parent through evaluated-frame truth;
+- if executable hierarchy is unavailable for a custom construct, keep children
+  explicitly positioned and avoid conflicting parent/child transforms.
 
 ### PromptInputBar Component-Safe Pattern
 
