@@ -12,6 +12,10 @@ SOURCES = [
         "Native Motion Scene Author Rule",
         "skills/refusion-skills/rules/native-motion-scene-author.md",
     ),
+    (
+        "Native Scene Intelligence Rule",
+        "skills/refusion-skills/rules/native-scene-intelligence.md",
+    ),
     ("SpeedyGraph Rule", "skills/refusion-skills/rules/speedygraph.md"),
     (
         "Effects And Renderer Rule",

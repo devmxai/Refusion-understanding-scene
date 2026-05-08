@@ -68,6 +68,9 @@ No URLs unless the user and engine explicitly support that asset path.
 - Every beat references existing components.
 - Every primitive targets an existing component.
 - Every primitive maps to a real Scene Program channel.
+- Every important motion belongs to a beat with enter/hold/resolve intent.
+- Prompt/search/input scenes use component-safe contracts rather than loose
+  text over a rectangle.
 - Background fade primitives are implemented by an actual opacity channel, not
   only static opacity properties.
 - Typewriter primitive maps to `typewriterProgress`.
@@ -78,6 +81,8 @@ No URLs unless the user and engine explicitly support that asset path.
   `elements`.
 - Every element has `id`, `kind`, and valid `properties`.
 - Every animation is represented by a channel with sorted keyframes.
+- `PromptInputBar`-style scenes must give the text a real parent, layout slot,
+  one-line `textFrame`, and fixed-frame typewriter reveal.
 - Use stable semantic IDs, not random UUID-like names.
 - Do not create excessive layers for a simple scene.
 
@@ -127,6 +132,8 @@ Reject and rewrite if:
 - animation feels random;
 - scene looks like a web page translation rather than a native motion
   composition;
+- a prompt/search/input bar has text that is larger than the field, outside the
+  field, or missing `textFrame`;
 - the output contains HTML/CSS/JS/React/Remotion code;
 - timing bypasses SpeedyGraph when professional movement was requested;
 - effects are invented or unsupported;

@@ -10,6 +10,7 @@ skills/refusion-skills/
 ├── SKILL.md
 ├── rules/
 │   ├── native-motion-scene-author.md
+│   ├── native-scene-intelligence.md
 │   ├── speedygraph.md
 │   ├── effects-and-renderer.md
 │   ├── modern-motion-design.md
@@ -84,6 +85,7 @@ Direct browser links:
 - [Skill entry](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/SKILL.md)
 - [All-in-one fallback](https://github.com/devmxai/refusion-skills/blob/main/REFUSION_SCENE_SKILL_FULL.md)
 - [Native Motion Scene Author](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/native-motion-scene-author.md)
+- [Native Scene Intelligence](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/native-scene-intelligence.md)
 - [SpeedyGraph](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/speedygraph.md)
 - [Effects And Renderer](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/effects-and-renderer.md)
 - [Modern Motion Design](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/modern-motion-design.md)
@@ -107,6 +109,8 @@ The target is not merely valid JSON. The target is professional motion:
 - ReFusion-native scenes, not HTML artifacts;
 - real editable layers, elements, channels, and keyframes;
 - DirectorPlan-first creative and motion direction;
+- Native Scene Intelligence contracts for prompt bars, cards, text fit, Beat
+  Grammar, and Visual Closure preparation;
 - SpeedyGraph / Bezier timing truth;
 - official editable effects only;
 - deterministic timing;

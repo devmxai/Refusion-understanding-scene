@@ -14,6 +14,7 @@ python3 scripts/build_full_skill_bundle.py
 
 - `skills/refusion-skills/SKILL.md`
 - `skills/refusion-skills/rules/native-motion-scene-author.md`
+- `skills/refusion-skills/rules/native-scene-intelligence.md`
 - `skills/refusion-skills/rules/speedygraph.md`
 - `skills/refusion-skills/rules/effects-and-renderer.md`
 - `skills/refusion-skills/rules/modern-motion-design.md`
@@ -107,6 +108,9 @@ scene that has not passed JSON integrity checks.
 
 ## Load Rules As Needed
 
+- For native scene intelligence, component-safe prompt/card/panel contracts,
+  closed vocabulary planning, Beat Grammar, and Visual Closure preparation, read
+  [rules/native-scene-intelligence.md](rules/native-scene-intelligence.md).
 - For schema, coordinates, supported properties, icons, and examples, read
   [rules/scene-program-json.md](rules/scene-program-json.md).
 - For the ReFusion-native authoring pipeline, four internal production roles,
@@ -156,6 +160,9 @@ rule file, and the example JSON in one document.
   artifacts as the ReFusion scene source of truth.
 - Do not translate a website template directly. Translate design intelligence
   into editable Shapes/Text/Image/Video layers.
+- Do not author prompt bars, search bars, cards, or panels as loose text placed
+  over random rectangles when a component contract exists. Use parent/slot,
+  textFrame, contentInsets, and readable hold rules.
 - Do not bypass SpeedyGraph or MotionInterpolation truth when authoring timing.
 - Do not write velocity metadata without executable Bezier or approved timing
   truth.
@@ -258,6 +265,7 @@ Use numeric startMs, endMs, durationMs, timeMs, and frameRate.
 Use center-origin 1080x1920 canvas unless asked otherwise.
 Plan ordered beats, semantic components, primitives, then editable layers,
 elements, channels, and keyframes.
+Use component-safe contracts for prompt bars, cards, panels, and input fields.
 Use SpeedyGraph timing for cinematic motion.
 Use official ReFusion effects only when needed.
 Do not use executable code, Markdown, comments, URLs, JSX, CSS, React,
@@ -423,6 +431,285 @@ The result must feel inspectable by a motion designer:
 - readable final frame;
 - editable layers;
 - no black-box runtime tricks.
+
+---
+
+# Native Scene Intelligence Rule
+
+Source: `skills/refusion-skills/rules/native-scene-intelligence.md`
+
+# Native Scene Intelligence
+
+Use this rule when authoring scenes that must feel deliberately designed,
+component-safe, and reliable on first import.
+
+## Principle
+
+ReFusion scene authoring uses:
+
+```text
+Closed Vocabulary + Component Contracts + Beat Grammar + Visual Closure Prep
+```
+
+The agent should not guess raw layout numbers when a known component contract
+exists. Use semantic vocabulary during planning, then lower it into valid native
+Scene Program JSON with concrete editable values.
+
+Important distinction:
+
+- agent-facing blueprints should prefer closed vocabulary tokens;
+- lowered `refusion.scene-program/v1` may contain resolved native numbers,
+  colors, and keyframes;
+- do not require every lowered Scene Program value to remain a token.
+
+## Closed Vocabulary For Agent-Facing Plans
+
+Prefer these references in planning notes, DirectorPlan labels, component roles,
+and internal reasoning before lowering to Scene Program values.
+
+### Components
+
+```text
+$component.PromptInputBar
+$component.AppIconIntro
+$component.FeatureCard
+$component.ResultCard
+$component.MotionTextBlock
+$component.IconButton
+$component.DashboardPanel
+$component.TimelineStrip
+$component.AudioWaveform
+$component.ColorGradePanel
+```
+
+### Spacing
+
+```text
+$spacing.xs   compact internal gap
+$spacing.sm   small grouped gap
+$spacing.md   default component gap
+$spacing.lg   safe readable padding
+$spacing.xl   section spacing
+$spacing.2xl  hero spacing
+$spacing.3xl  scene spacing
+```
+
+### Typography
+
+```text
+$typography.caption
+$typography.body
+$typography.input
+$typography.title
+$typography.headline
+$typography.hero
+```
+
+### Duration
+
+```text
+$duration.instant
+$duration.fast
+$duration.medium
+$duration.slow
+$duration.deliberate
+```
+
+### Easing / SpeedyGraph
+
+```text
+$easing.linear
+$easing.easyEase
+$easing.fastSlow
+$easing.slowFast
+$easing.slowFastSlow
+$easing.snappy
+$easing.expressive
+```
+
+Lower easing to supported Scene Program timing names such as `linear`,
+`easyEase`, `fastSlow`, `slowFast`, and `slowFastSlow`.
+
+### Motion
+
+```text
+$motion.softFadeUp
+$motion.scaleFromOrigin
+$motion.morphFromIcon
+$motion.typewriterFixedFrame
+$motion.cardStackIn
+$motion.sendPressResolve
+```
+
+### Beats
+
+```text
+$beat.intro
+$beat.prompt
+$beat.feature
+$beat.proof
+$beat.outro
+```
+
+## PromptInputBar Contract
+
+Use `PromptInputBar` whenever the scene asks for a chatbot text input, prompt
+field, search bar, compose box, or command input.
+
+Required pieces:
+
+```text
+prompt-shell   shape container
+prompt-text    text child in primary/content slot
+send-button    trailing accessory shape
+send-icon      trailing accessory icon
+```
+
+The shell must declare:
+
+```json
+{
+  "layoutRole": "container",
+  "layoutMode": "absolute",
+  "contentInsets": { "left": 48, "right": 128, "top": 24, "bottom": 24 },
+  "width": 860,
+  "height": 112
+}
+```
+
+The prompt text must declare:
+
+```json
+{
+  "parentId": "prompt-shell",
+  "layout": {
+    "role": "content",
+    "slot": "primaryText",
+    "align": "centerLeft"
+  },
+  "textFrame": {
+    "width": 640,
+    "height": 54,
+    "maxLines": 1,
+    "overflow": "ellipsis",
+    "fitPolicy": "shrinkToFit",
+    "measure": "fullText"
+  }
+}
+```
+
+Rules:
+
+- text belongs inside the shell content rect, not visually on top of it;
+- reserve right-side space for the send button;
+- use one full text element plus `typewriterProgress`;
+- never create one text element per character;
+- font size must be smaller than the text frame height;
+- prompt text must complete early enough to leave a readable hold;
+- send press should happen after the readable hold, not while the text is still
+  typing;
+- if the icon becomes the input bar, describe continuity as a handoff or morph.
+  Do not claim true geometric morph if the authored channels only fade/scale.
+
+## Beat Grammar
+
+Every important visual action belongs to a beat.
+
+Each major beat should have intent:
+
+```text
+enter -> hold -> exit/resolve
+```
+
+Example prompt scene:
+
+```text
+0-1200ms    establish icon
+1200-2600ms icon handoff to prompt shell
+2600-4700ms type prompt
+4700-5600ms prompt readable hold
+5600-7600ms send press and result resolve
+7600-9200ms final readable hold
+```
+
+Rules:
+
+- no important motion outside a beat;
+- no random parallel motion;
+- overlap requires explicit parallel or handoff intent;
+- motion uses SpeedyGraph timing names, not silent linear timing;
+- professional text reveals always leave readable hold.
+
+## Visual Closure Preparation
+
+Before returning JSON, run this mental preflight. It prepares the scene for the
+future Visual Closure Loop and prevents known first-import failures.
+
+### Layout Check
+
+- Is every known component represented by a component contract?
+- Does every child declare a real parent when the layout depends on a parent?
+- Does text fit inside its container at the hold frame?
+- Are safe areas respected?
+- Are icon/accessory slots reserved?
+
+### Text Fit Check
+
+- Text frame width is wide enough for the full text or has `shrinkToFit`.
+- `fontSize <= textFrame.height`.
+- `maxLines` is explicit for prompt/search/input text.
+- Typewriter reveals the full text inside a fixed frame.
+
+### Timing Check
+
+- Every keyframe is inside the owning layer duration.
+- Reveal finishes before the hold.
+- Final action resolves before the scene ends.
+- There is no accidental same-property overlap.
+
+### Continuity Check
+
+- Handoffs name source and target components.
+- Disappearing elements fade/scale as part of a beat.
+- A component does not teleport without an intentional transition.
+
+### Contrast Check
+
+- Text has high contrast against its background during readable hold.
+- Important text is not tiny, moving too quickly, or covered by effects.
+
+## Structured Repair Codes
+
+If reviewing or repairing a scene, use these failure codes:
+
+```text
+JSON_TRUNCATED
+UNSUPPORTED_EXECUTION_SURFACE
+UNKNOWN_COMPONENT_CONTRACT
+LOOSE_PROMPT_TEXT
+MISSING_TEXT_FRAME
+TEXT_OVERFLOW
+TYPEWRITER_NOT_FIXED_FRAME
+MOTION_WITHOUT_BEAT
+READABLE_HOLD_MISSING
+CONTINUITY_UNDECLARED
+UNSUPPORTED_EFFECT
+SILENT_LINEAR_FALLBACK
+```
+
+Repair scenes by changing component contracts, timing, and supported native
+properties. Do not repair by switching to HTML/CSS/JS or by inventing effects.
+
+## Stop List
+
+- Do not use raw loose coordinates for a prompt/search/input bar when
+  `PromptInputBar` applies.
+- Do not let text be larger than its field.
+- Do not place input text on a separate visual layer with no parent/slot.
+- Do not animate typing by replacing strings or creating per-character layers.
+- Do not output token-only pseudo-scenes that the app cannot import.
+- Do not claim Visual Closure Loop completion until rendered probes and
+  structured repair payloads exist in the app.
 
 ---
 
@@ -1244,8 +1531,9 @@ Accepted metadata keys:
 
 - `parentId`, `containerId`, `parentGroup`
 - `layoutRole`, `layoutMode`
-- `padding`, `gap`, `align`, `justify`, `anchor`
+- `padding`, `contentInsets`, `gap`, `align`, `justify`, `anchor`
 - `safeArea`, `constraints`, `zIndex`
+- `layout`, `textFrame`
 
 Strict contract:
 
@@ -1255,6 +1543,71 @@ Strict contract:
 - a parent should declare `layoutRole: "container"` or `layoutRole: "group"`;
 - inherited group transforms are not active yet, so still write concrete
   positions/channels for each visible child.
+
+### PromptInputBar Component-Safe Pattern
+
+Use this pattern for chatbot prompt fields, command bars, search inputs, and
+text-entry hero scenes. It prevents the common failure where the text becomes
+larger than the input field or floats outside it.
+
+```json
+{
+  "id": "prompt-shell",
+  "kind": "shape",
+  "properties": {
+    "shapeKind": "roundedRectangle",
+    "layoutRole": "container",
+    "layoutMode": "absolute",
+    "contentInsets": { "left": 48, "right": 128, "top": 24, "bottom": 24 },
+    "position": { "x": 0, "y": -40 },
+    "width": 860,
+    "height": 112,
+    "cornerRadius": 56,
+    "color": "#101827",
+    "opacity": 1
+  }
+}
+```
+
+```json
+{
+  "id": "prompt-text",
+  "kind": "text",
+  "text": "generate a new offer for my business",
+  "properties": {
+    "parentId": "prompt-shell",
+    "layout": {
+      "role": "content",
+      "slot": "primaryText",
+      "align": "centerLeft"
+    },
+    "textFrame": {
+      "width": 640,
+      "height": 54,
+      "maxLines": 1,
+      "overflow": "ellipsis",
+      "fitPolicy": "shrinkToFit",
+      "measure": "fullText"
+    },
+    "position": { "x": -70, "y": -40 },
+    "fontSize": 34,
+    "lineHeight": 1.1,
+    "textAlign": "left",
+    "letterSpacing": 0,
+    "color": "#F8FAFC",
+    "opacity": 1,
+    "typewriterProgress": 0
+  }
+}
+```
+
+Rules:
+
+- the prompt text is one full text element;
+- animate `typewriterProgress`, not the `text` string;
+- the text position is the center of the text frame;
+- the text frame stays inside the shell content rect;
+- reserve a trailing area for `send-button` and `send-icon`.
 
 Shadow support status:
 
@@ -3882,6 +4235,9 @@ No URLs unless the user and engine explicitly support that asset path.
 - Every beat references existing components.
 - Every primitive targets an existing component.
 - Every primitive maps to a real Scene Program channel.
+- Every important motion belongs to a beat with enter/hold/resolve intent.
+- Prompt/search/input scenes use component-safe contracts rather than loose
+  text over a rectangle.
 - Background fade primitives are implemented by an actual opacity channel, not
   only static opacity properties.
 - Typewriter primitive maps to `typewriterProgress`.
@@ -3892,6 +4248,8 @@ No URLs unless the user and engine explicitly support that asset path.
   `elements`.
 - Every element has `id`, `kind`, and valid `properties`.
 - Every animation is represented by a channel with sorted keyframes.
+- `PromptInputBar`-style scenes must give the text a real parent, layout slot,
+  one-line `textFrame`, and fixed-frame typewriter reveal.
 - Use stable semantic IDs, not random UUID-like names.
 - Do not create excessive layers for a simple scene.
 
@@ -3941,6 +4299,8 @@ Reject and rewrite if:
 - animation feels random;
 - scene looks like a web page translation rather than a native motion
   composition;
+- a prompt/search/input bar has text that is larger than the field, outside the
+  field, or missing `textFrame`;
 - the output contains HTML/CSS/JS/React/Remotion code;
 - timing bypasses SpeedyGraph when professional movement was requested;
 - effects are invented or unsupported;
@@ -4447,114 +4807,276 @@ Source: `skills/refusion-skills/examples/premium-app-promo-scene.json`
 {
   "directorPlan": {
     "schemaVersion": "refusion.motion-director/v1",
-    "name": "Premium App Promo Plan",
-    "durationMs": 3600,
+    "name": "Premium App Promo Prompt Bar Plan",
+    "durationMs": 9200,
     "frameRate": 30,
     "canvasWidth": 1080,
     "canvasHeight": 1920,
     "beats": [
       {
-        "id": "establish",
-        "label": "Establish premium canvas",
+        "id": "establish-icon",
+        "label": "Establish Revival icon",
         "startMs": 0,
-        "endMs": 520,
-        "intent": "Fade in a restrained dark background while the scene prepares.",
-        "componentRefs": ["background"]
+        "endMs": 1200,
+        "intent": "Establish a premium app icon in the center with a calm readable intro.",
+        "componentRefs": [
+          "background",
+          "app-icon",
+          "brand-title"
+        ]
       },
       {
-        "id": "card-enter",
-        "label": "Hero app card enters",
-        "startMs": 260,
-        "endMs": 1120,
-        "intent": "Bring the central app card into focus with cinematic slow-fast-slow motion.",
-        "componentRefs": ["hero-card"]
+        "id": "morph-to-prompt",
+        "label": "Icon transforms into prompt input",
+        "startMs": 1200,
+        "endMs": 2600,
+        "intent": "Transform the icon into a wide chatbot-style text input bar; the text field must be much wider than the text.",
+        "componentRefs": [
+          "prompt-shell",
+          "prompt-text",
+          "send-button",
+          "send-icon"
+        ]
       },
       {
-        "id": "headline-reveal",
-        "label": "Headline types on",
-        "startMs": 980,
-        "endMs": 2050,
-        "intent": "Reveal the primary message after the card is visually established.",
-        "componentRefs": ["headline"]
+        "id": "type-prompt",
+        "label": "Type user prompt",
+        "startMs": 2600,
+        "endMs": 4700,
+        "intent": "Type the prompt inside the input bar with correct font size and safe padding.",
+        "componentRefs": [
+          "prompt-shell",
+          "prompt-text",
+          "send-button",
+          "send-icon"
+        ]
       },
       {
-        "id": "cta-settle",
-        "label": "CTA settles",
-        "startMs": 1880,
-        "endMs": 2520,
-        "intent": "Show the action button with a confident soft landing.",
-        "componentRefs": ["cta"]
+        "id": "prompt-readable-hold",
+        "label": "Prompt readable hold",
+        "startMs": 4700,
+        "endMs": 5600,
+        "intent": "Readable hold for the completed prompt inside the text input before send.",
+        "componentRefs": [
+          "prompt-shell",
+          "prompt-text",
+          "send-button",
+          "send-icon"
+        ]
       },
       {
-        "id": "final-hold",
+        "id": "send-and-resolve",
+        "label": "Send and resolve",
+        "startMs": 5600,
+        "endMs": 7600,
+        "intent": "Press send; the input bar becomes a premium generated result card.",
+        "componentRefs": [
+          "prompt-shell",
+          "send-button",
+          "result-card",
+          "result-title",
+          "result-subtitle"
+        ]
+      },
+      {
+        "id": "final-readable-hold",
         "label": "Final readable hold",
-        "startMs": 2520,
-        "endMs": 3600,
-        "intent": "Hold the finished composition for readability.",
-        "componentRefs": ["hero-card", "headline", "cta"]
+        "startMs": 7600,
+        "endMs": 8500,
+        "intent": "Type the supporting result line while the generated offer card remains stable.",
+        "componentRefs": [
+          "result-title",
+          "result-subtitle",
+          "result-card"
+        ]
+      },
+      {
+        "id": "result-subtitle-readable-hold",
+        "startMs": 8500,
+        "endMs": 9200,
+        "intent": "Readable hold for the generated offer subtitle after typing completes.",
+        "componentRefs": [
+          "result-card",
+          "result-title",
+          "result-subtitle"
+        ]
       }
     ],
     "components": [
-      { "id": "background", "role": "background.canvas", "label": "Dark background" },
-      { "id": "hero-card", "role": "product.card", "label": "Central app card" },
-      { "id": "headline", "role": "text.headline", "label": "Headline" },
-      { "id": "cta", "role": "button.cta", "label": "Call to action" }
+      {
+        "id": "background",
+        "role": "background.canvas",
+        "label": "Dark studio background",
+        "layerId": "background-layer",
+        "elementId": "background"
+      },
+      {
+        "id": "app-icon",
+        "role": "shape.icon",
+        "label": "Revival app icon",
+        "layerId": "app-icon-layer",
+        "elementId": "app-icon"
+      },
+      {
+        "id": "brand-title",
+        "role": "text.title",
+        "label": "Brand title",
+        "layerId": "brand-layer",
+        "elementId": "brand-title"
+      },
+      {
+        "id": "prompt-shell",
+        "role": "shape.prompt shell",
+        "label": "Prompt input shell",
+        "layerId": "prompt-layer",
+        "elementId": "prompt-shell"
+      },
+      {
+        "id": "prompt-text",
+        "role": "text.copy",
+        "label": "Prompt text",
+        "layerId": "prompt-layer",
+        "elementId": "prompt-text"
+      },
+      {
+        "id": "send-button",
+        "role": "shape.button",
+        "label": "Send button",
+        "layerId": "prompt-layer",
+        "elementId": "send-button"
+      },
+      {
+        "id": "send-icon",
+        "role": "icon.send",
+        "label": "Send icon",
+        "layerId": "prompt-layer",
+        "elementId": "send-icon"
+      },
+      {
+        "id": "result-card",
+        "role": "shape.panel",
+        "label": "Generated offer card",
+        "layerId": "result-layer",
+        "elementId": "result-card"
+      },
+      {
+        "id": "result-title",
+        "role": "text.title",
+        "label": "Result title",
+        "layerId": "result-layer",
+        "elementId": "result-title"
+      },
+      {
+        "id": "result-subtitle",
+        "role": "text.copy",
+        "label": "Result subtitle",
+        "layerId": "result-layer",
+        "elementId": "result-subtitle"
+      }
     ],
     "primitives": [
       {
-        "id": "bg-fade",
-        "beatId": "establish",
-        "targetComponentId": "background",
-        "kind": "fade",
-        "property": "opacity",
+        "id": "icon-pop",
+        "beatId": "establish-icon",
+        "targetComponentId": "app-icon",
+        "kind": "scale",
+        "property": "scale",
         "startMs": 0,
-        "endMs": 520,
-        "fromValue": 0.0,
+        "endMs": 900,
+        "fromValue": 0.72,
         "toValue": 1.0,
-        "easing": "linear"
-      },
-      {
-        "id": "card-y",
-        "beatId": "card-enter",
-        "targetComponentId": "hero-card",
-        "kind": "move",
-        "property": "position",
-        "startMs": 260,
-        "endMs": 1120,
-        "fromValue": { "x": 0, "y": 160 },
-        "toValue": { "x": 0, "y": 80 },
         "easing": "slowFastSlow"
       },
       {
-        "id": "headline-type",
-        "beatId": "headline-reveal",
-        "targetComponentId": "headline",
+        "id": "shell-opacity-in",
+        "beatId": "morph-to-prompt",
+        "targetComponentId": "prompt-shell",
+        "kind": "fade",
+        "property": "opacity",
+        "startMs": 1200,
+        "endMs": 1650,
+        "fromValue": 0,
+        "toValue": 1,
+        "easing": "fastSlow"
+      },
+      {
+        "id": "shell-size",
+        "beatId": "morph-to-prompt",
+        "targetComponentId": "prompt-shell",
+        "kind": "scale",
+        "property": "scale",
+        "startMs": 1200,
+        "endMs": 2600,
+        "fromValue": 0.2,
+        "toValue": 1,
+        "easing": "slowFastSlow"
+      },
+      {
+        "id": "prompt-type",
+        "beatId": "type-prompt",
+        "targetComponentId": "prompt-text",
         "kind": "typewriter",
         "property": "typewriterProgress",
-        "startMs": 980,
-        "endMs": 2050,
-        "fromValue": 0.0,
-        "toValue": 1.0,
+        "startMs": 2800,
+        "endMs": 4600,
+        "fromValue": 0,
+        "toValue": 1,
         "easing": "linear"
       },
       {
-        "id": "cta-pop",
-        "beatId": "cta-settle",
-        "targetComponentId": "cta",
+        "id": "send-press",
+        "beatId": "send-and-resolve",
+        "targetComponentId": "send-button",
         "kind": "scale",
         "property": "scale",
-        "startMs": 1880,
-        "endMs": 2520,
-        "fromValue": 0.92,
-        "toValue": 1.0,
+        "startMs": 5600,
+        "endMs": 6100,
+        "fromValue": 1,
+        "toValue": 0.88,
         "easing": "fastSlow"
+      },
+      {
+        "id": "result-card-in",
+        "beatId": "send-and-resolve",
+        "targetComponentId": "result-card",
+        "kind": "fade",
+        "property": "opacity",
+        "startMs": 6200,
+        "endMs": 7100,
+        "fromValue": 0,
+        "toValue": 1,
+        "easing": "fastSlow"
+      },
+      {
+        "id": "result-title-type",
+        "beatId": "send-and-resolve",
+        "targetComponentId": "result-title",
+        "kind": "typewriter",
+        "property": "typewriterProgress",
+        "startMs": 6700,
+        "endMs": 7500,
+        "fromValue": 0,
+        "toValue": 1,
+        "easing": "linear"
+      },
+      {
+        "id": "result-subtitle-type",
+        "beatId": "final-readable-hold",
+        "targetComponentId": "result-subtitle",
+        "kind": "typewriter",
+        "property": "typewriterProgress",
+        "startMs": 7600,
+        "endMs": 8500,
+        "fromValue": 0,
+        "toValue": 1,
+        "easing": "linear"
       }
     ]
   },
   "sceneProgram": {
     "schemaVersion": "refusion.scene-program/v1",
-    "name": "Premium App Promo",
-    "durationMs": 3600,
+    "name": "Premium App Promo Prompt Bar",
+    "durationMs": 9200,
     "frameRate": 30,
     "layers": [
       {
@@ -4562,25 +5084,177 @@ Source: `skills/refusion-skills/examples/premium-app-promo-scene.json`
         "name": "Background",
         "kind": "shape",
         "startMs": 0,
-        "durationMs": 3600,
+        "durationMs": 9200,
         "elements": [
           {
             "id": "background",
             "kind": "shape",
             "properties": {
               "shapeKind": "rectangle",
-              "position": { "x": 0, "y": 0 },
+              "position": {
+                "x": 0,
+                "y": 0
+              },
               "width": 1080,
               "height": 1920,
-              "color": "#070A12",
+              "color": "#05070D",
+              "opacity": 1
+            }
+          },
+          {
+            "id": "ambient-blue",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "circle",
+              "position": {
+                "x": -340,
+                "y": -520
+              },
+              "width": 520,
+              "height": 520,
+              "color": "#102542",
+              "opacity": 0.55,
+              "blur": 24
+            }
+          },
+          {
+            "id": "ambient-violet",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "circle",
+              "position": {
+                "x": 360,
+                "y": 420
+              },
+              "width": 620,
+              "height": 620,
+              "color": "#24143D",
+              "opacity": 0.48,
+              "blur": 28
+            }
+          }
+        ]
+      },
+      {
+        "id": "app-icon-layer",
+        "name": "Revival App Icon",
+        "kind": "shape",
+        "startMs": 0,
+        "durationMs": 2600,
+        "elements": [
+          {
+            "id": "app-icon",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "roundedRectangle",
+              "position": {
+                "x": 0,
+                "y": -120
+              },
+              "width": 190,
+              "height": 190,
+              "cornerRadius": 52,
+              "color": "#111827",
+              "opacity": 1,
+              "shadowOpacity": 0.35,
+              "shadowBlur": 42,
+              "shadowOffset": {
+                "x": 0,
+                "y": 24
+              },
+              "shadowColor": "#000000"
+            },
+            "channels": [
+              {
+                "property": "scale",
+                "keyframes": [
+                  {
+                    "timeMs": 0,
+                    "value": 0.72,
+                    "easing": "slowFastSlow"
+                  },
+                  {
+                    "timeMs": 900,
+                    "value": 1.0,
+                    "easing": "slowFastSlow"
+                  },
+                  {
+                    "timeMs": 1200,
+                    "value": 1.0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 1900,
+                    "value": 0.1,
+                    "easing": "fastSlow"
+                  }
+                ]
+              },
+              {
+                "property": "opacity",
+                "keyframes": [
+                  {
+                    "timeMs": 0,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 450,
+                    "value": 1,
+                    "easing": "fastSlow"
+                  },
+                  {
+                    "timeMs": 1550,
+                    "value": 1,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 2100,
+                    "value": 0,
+                    "easing": "fastSlow"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "app-spark",
+            "kind": "icon",
+            "properties": {
+              "icon": "sparkles",
+              "position": {
+                "x": 0,
+                "y": -120
+              },
+              "width": 78,
+              "height": 78,
+              "color": "#66E3FF",
               "opacity": 1
             },
             "channels": [
               {
                 "property": "opacity",
                 "keyframes": [
-                  { "timeMs": 0, "value": 0.0, "easing": "linear" },
-                  { "timeMs": 520, "value": 1.0, "easing": "linear" }
+                  {
+                    "timeMs": 0,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 520,
+                    "value": 1,
+                    "easing": "fastSlow"
+                  },
+                  {
+                    "timeMs": 1550,
+                    "value": 1,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 2100,
+                    "value": 0,
+                    "easing": "fastSlow"
+                  }
                 ]
               }
             ]
@@ -4588,65 +5262,25 @@ Source: `skills/refusion-skills/examples/premium-app-promo-scene.json`
         ]
       },
       {
-        "id": "hero-card-layer",
-        "name": "Hero App Card",
-        "kind": "shape",
-        "startMs": 0,
-        "durationMs": 3600,
-        "elements": [
-          {
-            "id": "hero-card",
-            "kind": "shape",
-            "properties": {
-              "shapeKind": "roundedRectangle",
-              "position": { "x": 0, "y": 80 },
-              "width": 760,
-              "height": 880,
-              "cornerRadius": 64,
-              "color": "#111827",
-              "opacity": 1,
-              "shadowOpacity": 0.32,
-              "shadowBlur": 42,
-              "shadowOffset": { "x": 0, "y": 28 },
-              "shadowColor": "#000000"
-            },
-            "channels": [
-              {
-                "property": "position",
-                "keyframes": [
-                  { "timeMs": 260, "value": { "x": 0, "y": 160 }, "easing": "slowFastSlow" },
-                  { "timeMs": 1120, "value": { "x": 0, "y": 80 }, "easing": "slowFastSlow" }
-                ]
-              },
-              {
-                "property": "opacity",
-                "keyframes": [
-                  { "timeMs": 260, "value": 0.0, "easing": "linear" },
-                  { "timeMs": 760, "value": 1.0, "easing": "fastSlow" }
-                ]
-              }
-            ]
-          }
-        ]
-      },
-      {
-        "id": "headline-layer",
-        "name": "Headline",
+        "id": "brand-layer",
+        "name": "Brand Title",
         "kind": "text",
         "startMs": 0,
-        "durationMs": 3600,
+        "durationMs": 2600,
         "elements": [
           {
-            "id": "headline",
+            "id": "brand-title",
             "kind": "text",
-            "text": "Design motion that feels alive.",
+            "text": "REVIVAL",
             "properties": {
-              "position": { "x": 0, "y": -520 },
-              "fontSize": 62,
-              "fontWeight": 800,
-              "lineHeight": 1.05,
+              "position": {
+                "x": 0,
+                "y": 140
+              },
+              "fontSize": 72,
+              "fontWeight": 900,
+              "letterSpacing": 4,
               "textAlign": "center",
-              "letterSpacing": 0,
               "color": "#F8FAFC",
               "opacity": 1,
               "typewriterProgress": 0
@@ -4655,8 +5289,41 @@ Source: `skills/refusion-skills/examples/premium-app-promo-scene.json`
               {
                 "property": "typewriterProgress",
                 "keyframes": [
-                  { "timeMs": 980, "value": 0.0, "easing": "linear" },
-                  { "timeMs": 2050, "value": 1.0, "easing": "linear" }
+                  {
+                    "timeMs": 300,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 1100,
+                    "value": 1,
+                    "easing": "linear"
+                  }
+                ]
+              },
+              {
+                "property": "opacity",
+                "keyframes": [
+                  {
+                    "timeMs": 0,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 500,
+                    "value": 1,
+                    "easing": "fastSlow"
+                  },
+                  {
+                    "timeMs": 1500,
+                    "value": 1,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 2200,
+                    "value": 0,
+                    "easing": "fastSlow"
+                  }
                 ]
               }
             ]
@@ -4664,38 +5331,449 @@ Source: `skills/refusion-skills/examples/premium-app-promo-scene.json`
         ]
       },
       {
-        "id": "cta-layer",
-        "name": "CTA",
+        "id": "prompt-layer",
+        "name": "Prompt Input",
         "kind": "shape",
-        "startMs": 0,
-        "durationMs": 3600,
+        "startMs": 1200,
+        "durationMs": 5600,
         "elements": [
           {
-            "id": "cta",
+            "id": "prompt-shell",
             "kind": "shape",
             "properties": {
+              "layoutRole": "container",
               "shapeKind": "roundedRectangle",
-              "position": { "x": 0, "y": 690 },
-              "width": 430,
-              "height": 104,
-              "cornerRadius": 52,
-              "color": "#7DD3FC",
-              "opacity": 1,
-              "scale": 1.0
+              "position": {
+                "x": 0,
+                "y": -40
+              },
+              "width": 860,
+              "height": 118,
+              "cornerRadius": 59,
+              "color": "#F8FAFC",
+              "opacity": 0,
+              "shadowOpacity": 0.32,
+              "shadowBlur": 42,
+              "shadowOffset": {
+                "x": 0,
+                "y": 26
+              },
+              "shadowColor": "#000000",
+              "continuity": {
+                "kind": "dissolve",
+                "sourceId": "app-icon"
+              },
+              "contentInsets": {
+                "left": 44,
+                "right": 124,
+                "top": 16,
+                "bottom": 16
+              }
             },
             "channels": [
               {
+                "property": "opacity",
+                "keyframes": [
+                  {
+                    "timeMs": 0,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 450,
+                    "value": 1,
+                    "easing": "fastSlow"
+                  },
+                  {
+                    "timeMs": 4400,
+                    "value": 1,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 5600,
+                    "value": 0,
+                    "easing": "fastSlow"
+                  }
+                ]
+              },
+              {
                 "property": "scale",
                 "keyframes": [
-                  { "timeMs": 1880, "value": 0.92, "easing": "fastSlow" },
-                  { "timeMs": 2520, "value": 1.0, "easing": "fastSlow" }
+                  {
+                    "timeMs": 0,
+                    "value": 0.2,
+                    "easing": "slowFastSlow"
+                  },
+                  {
+                    "timeMs": 1400,
+                    "value": 1,
+                    "easing": "slowFastSlow"
+                  },
+                  {
+                    "timeMs": 4400,
+                    "value": 1,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 5600,
+                    "value": 1.04,
+                    "easing": "fastSlow"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "prompt-text",
+            "kind": "text",
+            "text": "generate new offer for my business",
+            "properties": {
+              "parentId": "prompt-shell",
+              "layoutRole": "content",
+              "layout": {
+                "slot": "primaryText",
+                "anchor": "centerLeft",
+                "maxWidth": 680,
+                "maxLines": 1,
+                "overflow": "clip"
+              },
+              "textFrame": {
+                "width": 680,
+                "height": 60,
+                "anchor": "centerLeft",
+                "maxLines": 1,
+                "overflow": "clip",
+                "fitPolicy": "shrinkToFit",
+                "minFontSize": 24,
+                "maxFontSize": 32,
+                "measure": "fullText"
+              },
+              "position": {
+                "x": -76,
+                "y": -40
+              },
+              "fontSize": 32,
+              "fontWeight": 650,
+              "letterSpacing": 0,
+              "lineHeight": 1.0,
+              "textAlign": "left",
+              "color": "#101827",
+              "opacity": 1,
+              "typewriterProgress": 0
+            },
+            "channels": [
+              {
+                "property": "typewriterProgress",
+                "keyframes": [
+                  {
+                    "timeMs": 1600,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 3400,
+                    "value": 1,
+                    "easing": "linear"
+                  }
                 ]
               },
               {
                 "property": "opacity",
                 "keyframes": [
-                  { "timeMs": 1880, "value": 0.0, "easing": "linear" },
-                  { "timeMs": 2220, "value": 1.0, "easing": "fastSlow" }
+                  {
+                    "timeMs": 900,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 1500,
+                    "value": 1,
+                    "easing": "fastSlow"
+                  },
+                  {
+                    "timeMs": 4400,
+                    "value": 1,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 5600,
+                    "value": 0,
+                    "easing": "fastSlow"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "send-button",
+            "kind": "shape",
+            "properties": {
+              "parentId": "prompt-shell",
+              "layoutRole": "trailingAccessory",
+              "layout": {
+                "slot": "trailingAccessory",
+                "anchor": "centerRight"
+              },
+              "shapeKind": "circle",
+              "position": {
+                "x": 355,
+                "y": -40
+              },
+              "width": 76,
+              "height": 76,
+              "color": "#111827",
+              "opacity": 1
+            },
+            "channels": [
+              {
+                "property": "scale",
+                "keyframes": [
+                  {
+                    "timeMs": 0,
+                    "value": 0.85,
+                    "easing": "slowFastSlow"
+                  },
+                  {
+                    "timeMs": 900,
+                    "value": 1,
+                    "easing": "slowFastSlow"
+                  },
+                  {
+                    "timeMs": 4400,
+                    "value": 1,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 4900,
+                    "value": 0.88,
+                    "easing": "fastSlow"
+                  },
+                  {
+                    "timeMs": 5400,
+                    "value": 1.2,
+                    "easing": "fastSlow"
+                  }
+                ]
+              },
+              {
+                "property": "opacity",
+                "keyframes": [
+                  {
+                    "timeMs": 0,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 900,
+                    "value": 1,
+                    "easing": "fastSlow"
+                  },
+                  {
+                    "timeMs": 4400,
+                    "value": 1,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 5600,
+                    "value": 0,
+                    "easing": "fastSlow"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "send-icon",
+            "kind": "icon",
+            "properties": {
+              "parentId": "send-button",
+              "layoutRole": "icon",
+              "icon": "send",
+              "position": {
+                "x": 355,
+                "y": -40
+              },
+              "width": 34,
+              "height": 34,
+              "color": "#66E3FF",
+              "opacity": 1
+            },
+            "channels": [
+              {
+                "property": "opacity",
+                "keyframes": [
+                  {
+                    "timeMs": 0,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 900,
+                    "value": 1,
+                    "easing": "fastSlow"
+                  },
+                  {
+                    "timeMs": 4400,
+                    "value": 1,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 5600,
+                    "value": 0,
+                    "easing": "fastSlow"
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "result-layer",
+        "name": "Generated Result",
+        "kind": "shape",
+        "startMs": 5600,
+        "durationMs": 3600,
+        "elements": [
+          {
+            "id": "result-card",
+            "kind": "shape",
+            "properties": {
+              "shapeKind": "roundedRectangle",
+              "position": {
+                "x": 0,
+                "y": 80
+              },
+              "width": 840,
+              "height": 520,
+              "cornerRadius": 70,
+              "color": "#0B1020",
+              "opacity": 0,
+              "shadowOpacity": 0.38,
+              "shadowBlur": 48,
+              "shadowOffset": {
+                "x": 0,
+                "y": 28
+              },
+              "shadowColor": "#000000"
+            },
+            "channels": [
+              {
+                "property": "opacity",
+                "keyframes": [
+                  {
+                    "timeMs": 600,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 1500,
+                    "value": 1,
+                    "easing": "fastSlow"
+                  },
+                  {
+                    "timeMs": 3400,
+                    "value": 1,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 3600,
+                    "value": 1,
+                    "easing": "linear"
+                  }
+                ]
+              },
+              {
+                "property": "position",
+                "keyframes": [
+                  {
+                    "timeMs": 600,
+                    "value": {
+                      "x": 0,
+                      "y": 190
+                    },
+                    "easing": "slowFastSlow"
+                  },
+                  {
+                    "timeMs": 1550,
+                    "value": {
+                      "x": 0,
+                      "y": 80
+                    },
+                    "easing": "slowFastSlow"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "result-title",
+            "kind": "text",
+            "text": "Offer campaign ready",
+            "properties": {
+              "position": {
+                "x": 0,
+                "y": -30
+              },
+              "fontSize": 58,
+              "fontWeight": 900,
+              "lineHeight": 1.05,
+              "letterSpacing": 0,
+              "textAlign": "center",
+              "color": "#FFFFFF",
+              "opacity": 1,
+              "typewriterProgress": 0
+            },
+            "channels": [
+              {
+                "property": "typewriterProgress",
+                "keyframes": [
+                  {
+                    "timeMs": 1100,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 1900,
+                    "value": 1,
+                    "easing": "linear"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "id": "result-subtitle",
+            "kind": "text",
+            "text": "Revival turns a prompt into editable premium motion scenes.",
+            "properties": {
+              "position": {
+                "x": 0,
+                "y": 115
+              },
+              "fontSize": 34,
+              "fontWeight": 600,
+              "lineHeight": 1.16,
+              "letterSpacing": 0,
+              "textAlign": "center",
+              "color": "#B8C4D3",
+              "opacity": 1,
+              "typewriterProgress": 0
+            },
+            "channels": [
+              {
+                "property": "typewriterProgress",
+                "keyframes": [
+                  {
+                    "timeMs": 2000,
+                    "value": 0,
+                    "easing": "linear"
+                  },
+                  {
+                    "timeMs": 2900,
+                    "value": 1,
+                    "easing": "linear"
+                  }
                 ]
               }
             ]

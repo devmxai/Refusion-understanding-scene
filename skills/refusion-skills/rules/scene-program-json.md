@@ -337,8 +337,9 @@ Accepted metadata keys:
 
 - `parentId`, `containerId`, `parentGroup`
 - `layoutRole`, `layoutMode`
-- `padding`, `gap`, `align`, `justify`, `anchor`
+- `padding`, `contentInsets`, `gap`, `align`, `justify`, `anchor`
 - `safeArea`, `constraints`, `zIndex`
+- `layout`, `textFrame`
 
 Strict contract:
 
@@ -348,6 +349,71 @@ Strict contract:
 - a parent should declare `layoutRole: "container"` or `layoutRole: "group"`;
 - inherited group transforms are not active yet, so still write concrete
   positions/channels for each visible child.
+
+### PromptInputBar Component-Safe Pattern
+
+Use this pattern for chatbot prompt fields, command bars, search inputs, and
+text-entry hero scenes. It prevents the common failure where the text becomes
+larger than the input field or floats outside it.
+
+```json
+{
+  "id": "prompt-shell",
+  "kind": "shape",
+  "properties": {
+    "shapeKind": "roundedRectangle",
+    "layoutRole": "container",
+    "layoutMode": "absolute",
+    "contentInsets": { "left": 48, "right": 128, "top": 24, "bottom": 24 },
+    "position": { "x": 0, "y": -40 },
+    "width": 860,
+    "height": 112,
+    "cornerRadius": 56,
+    "color": "#101827",
+    "opacity": 1
+  }
+}
+```
+
+```json
+{
+  "id": "prompt-text",
+  "kind": "text",
+  "text": "generate a new offer for my business",
+  "properties": {
+    "parentId": "prompt-shell",
+    "layout": {
+      "role": "content",
+      "slot": "primaryText",
+      "align": "centerLeft"
+    },
+    "textFrame": {
+      "width": 640,
+      "height": 54,
+      "maxLines": 1,
+      "overflow": "ellipsis",
+      "fitPolicy": "shrinkToFit",
+      "measure": "fullText"
+    },
+    "position": { "x": -70, "y": -40 },
+    "fontSize": 34,
+    "lineHeight": 1.1,
+    "textAlign": "left",
+    "letterSpacing": 0,
+    "color": "#F8FAFC",
+    "opacity": 1,
+    "typewriterProgress": 0
+  }
+}
+```
+
+Rules:
+
+- the prompt text is one full text element;
+- animate `typewriterProgress`, not the `text` string;
+- the text position is the center of the text frame;
+- the text frame stays inside the shell content rect;
+- reserve a trailing area for `send-button` and `send-icon`.
 
 Shadow support status:
 

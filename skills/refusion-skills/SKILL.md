@@ -67,6 +67,9 @@ scene that has not passed JSON integrity checks.
 
 ## Load Rules As Needed
 
+- For native scene intelligence, component-safe prompt/card/panel contracts,
+  closed vocabulary planning, Beat Grammar, and Visual Closure preparation, read
+  [rules/native-scene-intelligence.md](rules/native-scene-intelligence.md).
 - For schema, coordinates, supported properties, icons, and examples, read
   [rules/scene-program-json.md](rules/scene-program-json.md).
 - For the ReFusion-native authoring pipeline, four internal production roles,
@@ -116,6 +119,9 @@ rule file, and the example JSON in one document.
   artifacts as the ReFusion scene source of truth.
 - Do not translate a website template directly. Translate design intelligence
   into editable Shapes/Text/Image/Video layers.
+- Do not author prompt bars, search bars, cards, or panels as loose text placed
+  over random rectangles when a component contract exists. Use parent/slot,
+  textFrame, contentInsets, and readable hold rules.
 - Do not bypass SpeedyGraph or MotionInterpolation truth when authoring timing.
 - Do not write velocity metadata without executable Bezier or approved timing
   truth.
@@ -218,6 +224,7 @@ Use numeric startMs, endMs, durationMs, timeMs, and frameRate.
 Use center-origin 1080x1920 canvas unless asked otherwise.
 Plan ordered beats, semantic components, primitives, then editable layers,
 elements, channels, and keyframes.
+Use component-safe contracts for prompt bars, cards, panels, and input fields.
 Use SpeedyGraph timing for cinematic motion.
 Use official ReFusion effects only when needed.
 Do not use executable code, Markdown, comments, URLs, JSX, CSS, React,
