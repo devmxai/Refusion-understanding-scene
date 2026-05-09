@@ -1,0 +1,18 @@
+{
+  "directorBrief": {
+    "intent": "promote social app launch with clean mobile-native storytelling",
+    "audience": "gen z creators",
+    "mood": "playful polished",
+    "primaryFocus": "app flow strip",
+    "rhythm": "quick icon punch then smooth card sequence and coherent end",
+    "aspect": "$canvas.vertical9x16",
+    "durationIntent": "$duration.medium",
+    "elements": [
+      {
+        "kind": "appFlow",
+        "importance": "primary"
+      }
+    ]
+  }
+}
+

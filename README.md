@@ -24,11 +24,29 @@ skills/refusion-skills/
 │   ├── transitions.md
 │   ├── capability-registry.md
 │   ├── tutorial-intake.md
-│   └── validation.md
+│   ├── validation.md
+│   ├── director-brief-authoring-v5.md
+│   ├── director-plan-validator-v5.md
+│   ├── motion-recipe-library-v2.md
+│   ├── brand-aware-motion-v5.md
+│   ├── brand-icon-usage-v5.md
+│   ├── brand-asset-legal-fallback-v5.md
+│   ├── component-internal-choreography-v5.md
+│   ├── inter-component-choreography-v5.md
+│   ├── background-semantic-pairing-v5.md
+│   ├── text-layout-v5.md
+│   ├── scene-composition-v5.md
+│   ├── rhythm-density-principles-v5.md
+│   ├── professional-taste-checklist-v5.md
+│   └── repair-loop-examples-v5.md
 └── examples/
     ├── basic-typewriter-intro.json
     ├── premium-app-promo-scene.json
-    └── revival-premium-app-demo-60s.json
+    ├── revival-premium-app-demo-60s.json
+    └── v5/
+        ├── README.md
+        ├── good/ (10 director-brief examples)
+        └── bad/ (10 rejected examples)
 scripts/
 └── validate_scene_program.py
 ```
@@ -78,6 +96,21 @@ skills/refusion-skills/rules/transitions.md
 skills/refusion-skills/rules/capability-registry.md
 skills/refusion-skills/rules/tutorial-intake.md
 skills/refusion-skills/rules/validation.md
+skills/refusion-skills/rules/director-brief-authoring-v5.md
+skills/refusion-skills/rules/director-plan-validator-v5.md
+skills/refusion-skills/rules/motion-recipe-library-v2.md
+skills/refusion-skills/rules/brand-aware-motion-v5.md
+skills/refusion-skills/rules/brand-icon-usage-v5.md
+skills/refusion-skills/rules/brand-asset-legal-fallback-v5.md
+skills/refusion-skills/rules/component-internal-choreography-v5.md
+skills/refusion-skills/rules/inter-component-choreography-v5.md
+skills/refusion-skills/rules/background-semantic-pairing-v5.md
+skills/refusion-skills/rules/text-layout-v5.md
+skills/refusion-skills/rules/scene-composition-v5.md
+skills/refusion-skills/rules/rhythm-density-principles-v5.md
+skills/refusion-skills/rules/professional-taste-checklist-v5.md
+skills/refusion-skills/rules/repair-loop-examples-v5.md
+skills/refusion-skills/examples/v5/README.md
 scripts/validate_scene_program.py
 ```
 
@@ -101,7 +134,22 @@ Direct browser links:
 - [Capability Registry](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/capability-registry.md)
 - [Tutorial Intake](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/tutorial-intake.md)
 - [Validation](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/validation.md)
+- [Director Brief Authoring v5](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/director-brief-authoring-v5.md)
+- [Director Plan Validator v5](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/director-plan-validator-v5.md)
+- [Motion Recipe Library v2](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/motion-recipe-library-v2.md)
+- [Brand-Aware Motion v5](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/brand-aware-motion-v5.md)
+- [Brand Icon Usage v5](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/brand-icon-usage-v5.md)
+- [Brand Asset Legal Fallback v5](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/brand-asset-legal-fallback-v5.md)
+- [Component Internal Choreography v5](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/component-internal-choreography-v5.md)
+- [Inter-Component Choreography v5](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/inter-component-choreography-v5.md)
+- [Background Semantic Pairing v5](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/background-semantic-pairing-v5.md)
+- [Text Layout v5](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/text-layout-v5.md)
+- [Scene Composition v5](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/scene-composition-v5.md)
+- [Rhythm and Density Principles v5](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/rhythm-density-principles-v5.md)
+- [Professional Taste Checklist v5](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/professional-taste-checklist-v5.md)
+- [Repair Loop Examples v5](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/rules/repair-loop-examples-v5.md)
 - [Revival Premium App Demo 60s](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/examples/revival-premium-app-demo-60s.json)
+- [VERSION 5 Examples Catalog](https://github.com/devmxai/refusion-skills/blob/main/skills/refusion-skills/examples/v5/README.md)
 - [Scene Program Validator](https://github.com/devmxai/refusion-skills/blob/main/scripts/validate_scene_program.py)
 
 ## Mission

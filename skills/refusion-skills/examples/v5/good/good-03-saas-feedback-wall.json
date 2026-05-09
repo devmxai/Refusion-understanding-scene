@@ -1,0 +1,18 @@
+{
+  "directorBrief": {
+    "intent": "show multi-platform feedback unified in one workspace",
+    "audience": "product teams",
+    "mood": "minimal trusted professional",
+    "primaryFocus": "feedback wall",
+    "rhythm": "slow intro then layered cards with calm drift hold",
+    "aspect": "$canvas.horizontal16x9",
+    "durationIntent": "$duration.medium",
+    "elements": [
+      {
+        "kind": "testimonialWall",
+        "importance": "primary"
+      }
+    ]
+  }
+}
+

@@ -31,23 +31,24 @@ keyframes, SpeedyGraph, and official effects. Treat Open Design and Remotion as
 sources of design/motion discipline only; do not copy their HTML/React execution
 surface into ReFusion output.
 
-Preferred root shape:
+Preferred root shape (Director-first v5):
 
 ```json
 {
+  "directorBrief": {},
   "directorPlan": {},
   "sceneProgram": {}
 }
 ```
 
-`directorPlan` is the choreography contract. `sceneProgram` is the editable
-executable scene.
+`directorBrief` is the creative contract. `directorPlan` is the choreography
+contract. `sceneProgram` is the editable executable scene.
 
 ## Required Workflow
 
 1. Understand the visual goal.
 2. Run the Creative Director role: define visual thesis, hierarchy, mood, and
-   semantic components.
+   semantic components in a Director Brief.
 3. Run the Motion Director role: plan ordered beats, primitives, holds,
    handoffs, and timing.
 4. Run the Technical Scene Writer role: compile primitives into real layers,
@@ -110,6 +111,34 @@ scene that has not passed JSON integrity checks.
   capability, read [rules/tutorial-intake.md](rules/tutorial-intake.md).
 - For preflight checks before returning JSON, read
   [rules/validation.md](rules/validation.md).
+- For v5 Director-first authoring, read
+  [rules/director-brief-authoring-v5.md](rules/director-brief-authoring-v5.md).
+- For v5 Director Plan fail-closed validation, read
+  [rules/director-plan-validator-v5.md](rules/director-plan-validator-v5.md).
+- For v5 motion recipe vocabulary, read
+  [rules/motion-recipe-library-v2.md](rules/motion-recipe-library-v2.md).
+- For v5 brand-aware motion defaults, read
+  [rules/brand-aware-motion-v5.md](rules/brand-aware-motion-v5.md).
+- For v5 brand icon/token usage, read
+  [rules/brand-icon-usage-v5.md](rules/brand-icon-usage-v5.md).
+- For v5 brand legal fallback policy, read
+  [rules/brand-asset-legal-fallback-v5.md](rules/brand-asset-legal-fallback-v5.md).
+- For v5 component internal choreography rules, read
+  [rules/component-internal-choreography-v5.md](rules/component-internal-choreography-v5.md).
+- For v5 inter-component choreography rules, read
+  [rules/inter-component-choreography-v5.md](rules/inter-component-choreography-v5.md).
+- For v5 background semantic pairing, read
+  [rules/background-semantic-pairing-v5.md](rules/background-semantic-pairing-v5.md).
+- For v5 text layout fit policy, read
+  [rules/text-layout-v5.md](rules/text-layout-v5.md).
+- For v5 composition intent and safe-area solving, read
+  [rules/scene-composition-v5.md](rules/scene-composition-v5.md).
+- For v5 rhythm and density rules, read
+  [rules/rhythm-density-principles-v5.md](rules/rhythm-density-principles-v5.md).
+- For v5 final taste review, read
+  [rules/professional-taste-checklist-v5.md](rules/professional-taste-checklist-v5.md).
+- For v5 repair payload examples, read
+  [rules/repair-loop-examples-v5.md](rules/repair-loop-examples-v5.md).
 
 If your environment cannot open these relative rule files, use the repository
 root file `REFUSION_SCENE_SKILL_FULL.md` instead. It contains this skill, every
@@ -118,6 +147,9 @@ rule file, and the example JSON in one document.
 ## Non-Negotiable Professional Rules
 
 - Do not create random simultaneous animation.
+- Do not write raw element lists before writing a Director Brief.
+- Do not bypass brand registry or legal fallback policy.
+- Do not rely on fade-only motion for all sibling cards.
 - Do not output HTML, CSS, JSX, JavaScript, GSAP, Remotion code, or Open Design
   artifacts as the ReFusion scene source of truth.
 - Do not translate a website template directly. Translate design intelligence
@@ -221,7 +253,8 @@ contract is fully implemented, be conservative:
 ```text
 You are a ReFusion Scene Director.
 Read the ReFusion Skills instructions.
-Return exactly one complete JSON object with directorPlan and sceneProgram.
+Return exactly one complete JSON object with directorBrief, directorPlan,
+and sceneProgram.
 Use schemaVersion refusion.motion-director/v1 and refusion.scene-program/v1.
 Use numeric startMs, endMs, durationMs, timeMs, and frameRate.
 Use center-origin 1080x1920 canvas unless asked otherwise.
@@ -229,7 +262,9 @@ Treat coordinates as canonical center-origin:
 +X right, +Y down, and `position` is element center by default.
 Plan ordered beats, semantic components, primitives, then editable layers,
 elements, channels, and keyframes.
+Use Director Brief first; do not start from raw coordinates.
 Use component-safe contracts for prompt bars, cards, panels, and input fields.
+Use registry-backed brand and icon tokens when brands are present.
 Use SpeedyGraph timing for cinematic motion.
 Use official ReFusion effects only when needed.
 Do not use executable code, Markdown, comments, URLs, JSX, CSS, React,

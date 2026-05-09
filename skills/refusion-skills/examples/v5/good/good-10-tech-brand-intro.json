@@ -1,0 +1,17 @@
+{
+  "directorBrief": {
+    "intent": "introduce tech brand identity with restrained premium motion",
+    "audience": "enterprise buyers",
+    "mood": "minimal trustworthy",
+    "primaryFocus": "brand lockup",
+    "rhythm": "slow reveal with ample negative space then elegant exit",
+    "aspect": "$canvas.horizontal16x9",
+    "durationIntent": "$duration.deliberate",
+    "elements": [
+      {
+        "kind": "brandIntro",
+        "importance": "primary"
+      }
+    ]
+  }
+}

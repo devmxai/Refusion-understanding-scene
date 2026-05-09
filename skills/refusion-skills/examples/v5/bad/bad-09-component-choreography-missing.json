@@ -1,0 +1,19 @@
+{
+  "directorBrief": {
+    "intent": "show prompt bar",
+    "audience": "users",
+    "mood": "clean",
+    "primaryFocus": "prompt bar",
+    "rhythm": "simple",
+    "aspect": "$canvas.vertical9x16",
+    "durationIntent": "$duration.medium",
+    "elements": [
+      {
+        "kind": "promptMorph",
+        "disableChoreography": true
+      }
+    ],
+    "expectedRejectionReason": "WEAK_COMPONENT_CHOREOGRAPHY"
+  }
+}
+

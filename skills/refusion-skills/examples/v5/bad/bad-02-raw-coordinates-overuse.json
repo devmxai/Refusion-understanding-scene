@@ -1,0 +1,20 @@
+{
+  "directorBrief": {
+    "intent": "show product cards",
+    "audience": "creators",
+    "mood": "professional",
+    "primaryFocus": "cards",
+    "rhythm": "normal",
+    "aspect": "$canvas.vertical9x16",
+    "durationIntent": "$duration.medium",
+    "elements": [
+      {
+        "kind": "featureCard",
+        "x": 923,
+        "y": 1711
+      }
+    ],
+    "expectedRejectionReason": "LOOSE_COORDINATE_AUTHORING"
+  }
+}
+

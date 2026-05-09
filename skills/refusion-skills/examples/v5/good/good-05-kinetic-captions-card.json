@@ -1,0 +1,19 @@
+{
+  "directorBrief": {
+    "intent": "demonstrate readable kinetic captions as product capability",
+    "audience": "social video editors",
+    "mood": "energetic controlled",
+    "primaryFocus": "captions card",
+    "rhythm": "title pop then typewriter body then pulse accent",
+    "aspect": "$canvas.vertical9x16",
+    "durationIntent": "$duration.medium",
+    "elements": [
+      {
+        "kind": "featureCard",
+        "importance": "primary",
+        "topic": "captions"
+      }
+    ]
+  }
+}
+

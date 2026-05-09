@@ -1,0 +1,19 @@
+{
+  "directorBrief": {
+    "intent": "show global brand feature",
+    "audience": "marketers",
+    "mood": "premium",
+    "primaryFocus": "logo card",
+    "rhythm": "quick",
+    "aspect": "$canvas.vertical9x16",
+    "durationIntent": "$duration.medium",
+    "elements": [
+      {
+        "kind": "brandIntro",
+        "brandName": "unknown-secret-logo"
+      }
+    ],
+    "expectedRejectionReason": "MISSING_BRAND_ASSET"
+  }
+}
+

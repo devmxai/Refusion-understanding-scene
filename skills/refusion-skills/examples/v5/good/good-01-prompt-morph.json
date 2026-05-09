@@ -1,0 +1,17 @@
+{
+  "directorBrief": {
+    "intent": "morph app icon into chatbot prompt bar and open feature showcase",
+    "audience": "startup founders",
+    "mood": "modern professional energetic",
+    "primaryFocus": "prompt icon morph",
+    "rhythm": "intro pop then stretch then type then burst",
+    "aspect": "$canvas.vertical9x16",
+    "durationIntent": "$duration.deliberate",
+    "elements": [
+      {
+        "kind": "promptMorph",
+        "importance": "primary"
+      }
+    ]
+  }
+}

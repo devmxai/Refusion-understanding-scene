@@ -1,0 +1,19 @@
+{
+  "directorBrief": {
+    "intent": "serious financial update scene",
+    "audience": "executives",
+    "mood": "calm minimal",
+    "primaryFocus": "title",
+    "rhythm": "steady and readable",
+    "aspect": "$canvas.horizontal16x9",
+    "durationIntent": "$duration.deliberate",
+    "elements": [
+      {
+        "kind": "title",
+        "motionRecipe": "$motion.whipPan"
+      }
+    ],
+    "expectedRejectionReason": "BRIEF_MOOD_CONTRADICTION"
+  }
+}
+

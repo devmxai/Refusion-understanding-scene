@@ -1,0 +1,19 @@
+{
+  "directorBrief": {
+    "intent": "highlight audio cleanup quality with one hero card",
+    "audience": "podcasters",
+    "mood": "focused technical refined",
+    "primaryFocus": "audio card",
+    "rhythm": "single card hero with waveform support and readable hold",
+    "aspect": "$canvas.vertical9x16",
+    "durationIntent": "$duration.medium",
+    "elements": [
+      {
+        "kind": "featureCard",
+        "importance": "primary",
+        "topic": "audio"
+      }
+    ]
+  }
+}
+

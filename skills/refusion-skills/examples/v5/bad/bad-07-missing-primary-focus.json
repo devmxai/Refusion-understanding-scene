@@ -1,0 +1,13 @@
+{
+  "directorBrief": {
+    "intent": "show features",
+    "audience": "creators",
+    "mood": "professional",
+    "primaryFocus": "",
+    "rhythm": "intro then cards",
+    "aspect": "$canvas.vertical9x16",
+    "durationIntent": "$duration.medium",
+    "expectedRejectionReason": "BRIEF_PRIMARY_FOCUS_CONFLICT"
+  }
+}
+

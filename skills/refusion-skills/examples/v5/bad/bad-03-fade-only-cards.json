@@ -1,0 +1,19 @@
+{
+  "directorBrief": {
+    "intent": "show four cards",
+    "audience": "founders",
+    "mood": "modern",
+    "primaryFocus": "card group",
+    "rhythm": "flat",
+    "aspect": "$canvas.vertical9x16",
+    "durationIntent": "$duration.medium",
+    "elements": [
+      {
+        "kind": "featureCardGroup",
+        "motionRecipe": "$motion.fadeIn",
+        "expectedRejectionReason": "MOTION_VARIETY_LOW"
+      }
+    ]
+  }
+}
+

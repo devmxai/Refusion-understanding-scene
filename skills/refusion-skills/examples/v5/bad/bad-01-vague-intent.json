@@ -1,0 +1,13 @@
+{
+  "directorBrief": {
+    "intent": "make something cool",
+    "audience": "everyone",
+    "mood": "random",
+    "primaryFocus": "everything",
+    "rhythm": "whatever",
+    "aspect": "$canvas.vertical9x16",
+    "durationIntent": "$duration.medium",
+    "expectedRejectionReason": "BRIEF_INTENT_TOO_VAGUE"
+  }
+}
+

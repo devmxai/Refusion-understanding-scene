@@ -29,10 +29,45 @@ python3 scripts/build_full_skill_bundle.py
 - `skills/refusion-skills/rules/capability-registry.md`
 - `skills/refusion-skills/rules/tutorial-intake.md`
 - `skills/refusion-skills/rules/validation.md`
+- `skills/refusion-skills/rules/director-brief-authoring-v5.md`
+- `skills/refusion-skills/rules/director-plan-validator-v5.md`
+- `skills/refusion-skills/rules/motion-recipe-library-v2.md`
+- `skills/refusion-skills/rules/brand-aware-motion-v5.md`
+- `skills/refusion-skills/rules/brand-icon-usage-v5.md`
+- `skills/refusion-skills/rules/brand-asset-legal-fallback-v5.md`
+- `skills/refusion-skills/rules/component-internal-choreography-v5.md`
+- `skills/refusion-skills/rules/inter-component-choreography-v5.md`
+- `skills/refusion-skills/rules/background-semantic-pairing-v5.md`
+- `skills/refusion-skills/rules/text-layout-v5.md`
+- `skills/refusion-skills/rules/scene-composition-v5.md`
+- `skills/refusion-skills/rules/rhythm-density-principles-v5.md`
+- `skills/refusion-skills/rules/professional-taste-checklist-v5.md`
+- `skills/refusion-skills/rules/repair-loop-examples-v5.md`
+- `skills/refusion-skills/examples/v5/README.md`
 - `scripts/validate_scene_program.py`
 - `skills/refusion-skills/examples/basic-typewriter-intro.json`
 - `skills/refusion-skills/examples/premium-app-promo-scene.json`
 - `skills/refusion-skills/examples/revival-premium-app-demo-60s.json`
+- `skills/refusion-skills/examples/v5/good/good-01-prompt-morph.json`
+- `skills/refusion-skills/examples/v5/good/good-02-feature-grid-fast-voice-smart-image.json`
+- `skills/refusion-skills/examples/v5/good/good-03-saas-feedback-wall.json`
+- `skills/refusion-skills/examples/v5/good/good-04-audio-engineering-card.json`
+- `skills/refusion-skills/examples/v5/good/good-05-kinetic-captions-card.json`
+- `skills/refusion-skills/examples/v5/good/good-06-image-retouch-card.json`
+- `skills/refusion-skills/examples/v5/good/good-07-multi-aspect-adaptation.json`
+- `skills/refusion-skills/examples/v5/good/good-08-ai-features-cascade.json`
+- `skills/refusion-skills/examples/v5/good/good-09-social-app-promo.json`
+- `skills/refusion-skills/examples/v5/good/good-10-tech-brand-intro.json`
+- `skills/refusion-skills/examples/v5/bad/bad-01-vague-intent.json`
+- `skills/refusion-skills/examples/v5/bad/bad-02-raw-coordinates-overuse.json`
+- `skills/refusion-skills/examples/v5/bad/bad-03-fade-only-cards.json`
+- `skills/refusion-skills/examples/v5/bad/bad-04-brand-without-registry.json`
+- `skills/refusion-skills/examples/v5/bad/bad-05-text-cut-mid-phrase.json`
+- `skills/refusion-skills/examples/v5/bad/bad-06-overloaded-motion-density.json`
+- `skills/refusion-skills/examples/v5/bad/bad-07-missing-primary-focus.json`
+- `skills/refusion-skills/examples/v5/bad/bad-08-contradictory-mood.json`
+- `skills/refusion-skills/examples/v5/bad/bad-09-component-choreography-missing.json`
+- `skills/refusion-skills/examples/v5/bad/bad-10-safe-area-violation.json`
 
 ---
 
@@ -73,23 +108,24 @@ keyframes, SpeedyGraph, and official effects. Treat Open Design and Remotion as
 sources of design/motion discipline only; do not copy their HTML/React execution
 surface into ReFusion output.
 
-Preferred root shape:
+Preferred root shape (Director-first v5):
 
 ```json
 {
+  "directorBrief": {},
   "directorPlan": {},
   "sceneProgram": {}
 }
 ```
 
-`directorPlan` is the choreography contract. `sceneProgram` is the editable
-executable scene.
+`directorBrief` is the creative contract. `directorPlan` is the choreography
+contract. `sceneProgram` is the editable executable scene.
 
 ## Required Workflow
 
 1. Understand the visual goal.
 2. Run the Creative Director role: define visual thesis, hierarchy, mood, and
-   semantic components.
+   semantic components in a Director Brief.
 3. Run the Motion Director role: plan ordered beats, primitives, holds,
    handoffs, and timing.
 4. Run the Technical Scene Writer role: compile primitives into real layers,
@@ -152,6 +188,34 @@ scene that has not passed JSON integrity checks.
   capability, read [rules/tutorial-intake.md](rules/tutorial-intake.md).
 - For preflight checks before returning JSON, read
   [rules/validation.md](rules/validation.md).
+- For v5 Director-first authoring, read
+  [rules/director-brief-authoring-v5.md](rules/director-brief-authoring-v5.md).
+- For v5 Director Plan fail-closed validation, read
+  [rules/director-plan-validator-v5.md](rules/director-plan-validator-v5.md).
+- For v5 motion recipe vocabulary, read
+  [rules/motion-recipe-library-v2.md](rules/motion-recipe-library-v2.md).
+- For v5 brand-aware motion defaults, read
+  [rules/brand-aware-motion-v5.md](rules/brand-aware-motion-v5.md).
+- For v5 brand icon/token usage, read
+  [rules/brand-icon-usage-v5.md](rules/brand-icon-usage-v5.md).
+- For v5 brand legal fallback policy, read
+  [rules/brand-asset-legal-fallback-v5.md](rules/brand-asset-legal-fallback-v5.md).
+- For v5 component internal choreography rules, read
+  [rules/component-internal-choreography-v5.md](rules/component-internal-choreography-v5.md).
+- For v5 inter-component choreography rules, read
+  [rules/inter-component-choreography-v5.md](rules/inter-component-choreography-v5.md).
+- For v5 background semantic pairing, read
+  [rules/background-semantic-pairing-v5.md](rules/background-semantic-pairing-v5.md).
+- For v5 text layout fit policy, read
+  [rules/text-layout-v5.md](rules/text-layout-v5.md).
+- For v5 composition intent and safe-area solving, read
+  [rules/scene-composition-v5.md](rules/scene-composition-v5.md).
+- For v5 rhythm and density rules, read
+  [rules/rhythm-density-principles-v5.md](rules/rhythm-density-principles-v5.md).
+- For v5 final taste review, read
+  [rules/professional-taste-checklist-v5.md](rules/professional-taste-checklist-v5.md).
+- For v5 repair payload examples, read
+  [rules/repair-loop-examples-v5.md](rules/repair-loop-examples-v5.md).
 
 If your environment cannot open these relative rule files, use the repository
 root file `REFUSION_SCENE_SKILL_FULL.md` instead. It contains this skill, every
@@ -160,6 +224,9 @@ rule file, and the example JSON in one document.
 ## Non-Negotiable Professional Rules
 
 - Do not create random simultaneous animation.
+- Do not write raw element lists before writing a Director Brief.
+- Do not bypass brand registry or legal fallback policy.
+- Do not rely on fade-only motion for all sibling cards.
 - Do not output HTML, CSS, JSX, JavaScript, GSAP, Remotion code, or Open Design
   artifacts as the ReFusion scene source of truth.
 - Do not translate a website template directly. Translate design intelligence
@@ -263,7 +330,8 @@ contract is fully implemented, be conservative:
 ```text
 You are a ReFusion Scene Director.
 Read the ReFusion Skills instructions.
-Return exactly one complete JSON object with directorPlan and sceneProgram.
+Return exactly one complete JSON object with directorBrief, directorPlan,
+and sceneProgram.
 Use schemaVersion refusion.motion-director/v1 and refusion.scene-program/v1.
 Use numeric startMs, endMs, durationMs, timeMs, and frameRate.
 Use center-origin 1080x1920 canvas unless asked otherwise.
@@ -271,7 +339,9 @@ Treat coordinates as canonical center-origin:
 +X right, +Y down, and `position` is element center by default.
 Plan ordered beats, semantic components, primitives, then editable layers,
 elements, channels, and keyframes.
+Use Director Brief first; do not start from raw coordinates.
 Use component-safe contracts for prompt bars, cards, panels, and input fields.
+Use registry-backed brand and icon tokens when brands are present.
 Use SpeedyGraph timing for cinematic motion.
 Use official ReFusion effects only when needed.
 Do not use executable code, Markdown, comments, URLs, JSX, CSS, React,
@@ -4612,6 +4682,477 @@ python3 scripts/validate_scene_program.py skills/refusion-skills/examples/reviva
 The validator is intentionally stricter than casual JSON parsing. Passing it
 does not replace app import testing, but failing it means the scene is not ready
 to paste into ReFusion.
+
+---
+
+# Director Brief Authoring v5 Rule
+
+Source: `skills/refusion-skills/rules/director-brief-authoring-v5.md`
+
+# Director Brief Authoring v5
+
+This rule makes authoring Director-first. Agents must start with a Director
+Brief, not a loose element list.
+
+## Required Root Contract
+
+```json
+{
+  "directorBrief": {
+    "intent": "string",
+    "audience": "string",
+    "mood": "string",
+    "primaryFocus": "string",
+    "rhythm": "string",
+    "aspect": "$canvas.vertical9x16",
+    "durationIntent": "$duration.deliberate",
+    "elements": []
+  }
+}
+```
+
+## Mandatory Fields
+
+- `intent`: explicit business or storytelling goal.
+- `audience`: who the scene is for.
+- `mood`: professional mood token or approved phrase.
+- `primaryFocus`: exactly one dominant focal target per beat.
+- `rhythm`: human-readable pacing narrative.
+- `aspect`: token, not raw ratio text.
+- `durationIntent`: token, not raw milliseconds.
+- `elements`: semantic blocks (`title`, `subtitle`, `featureCardGroup`, etc).
+
+## Authoring Rules
+
+1. Declare visual thesis first, then motion thesis.
+2. Define hierarchy (`primary`, `secondary`, `supporting`).
+3. Use tokens for motion, text fit, composition intent, and taste profile.
+4. Never start from raw x/y numbers unless explicitly requested for debug.
+5. For feature groups, include `primaryCardIndex`.
+6. Prefer four-beat structure: intro, expand, hold, exit.
+
+## Forbidden
+
+- Raw element arrays as first-class authoring surface.
+- Mixed coordinate systems in one brief.
+- Multiple conflicting `primaryFocus` values in same beat.
+- Brand name usage without registry token or fallback policy.
+
+---
+
+# Director Plan Validator v5 Rule
+
+Source: `skills/refusion-skills/rules/director-plan-validator-v5.md`
+
+# Director Plan Validator v5
+
+Director briefs must fail closed before planning.
+
+## Hard Validation Gates
+
+- Reject vague intent phrases (`make cool`, `nice animation`, `anything`).
+- Require explicit `audience`, `mood`, `primaryFocus`, `rhythm`.
+- Require `aspect` token and `durationIntent` token.
+- Enforce one primary focal target per beat.
+- Reject contradictory mood-motion pairs (for example calm + aggressive whip).
+- Reject duplicate semantic elements unless `allowDuplicate=true`.
+- Require `primaryCardIndex` for multi-card feature groups.
+
+## Output
+
+Validator returns structured issues with deterministic codes:
+
+- `BRIEF_INTENT_TOO_VAGUE`
+- `BRIEF_MISSING_CONTEXT_FIELD`
+- `BRIEF_PRIMARY_FOCUS_CONFLICT`
+- `BRIEF_MOOD_CONTRADICTION`
+- `BRIEF_DUPLICATE_ELEMENT`
+- `BRIEF_CARD_GROUP_PRIMARY_MISSING`
+
+Each issue includes:
+
+- `path`
+- `severity`
+- `suggestedFixPath`
+- `suggestedFixValue`
+
+---
+
+# Motion Recipe Library v2 Rule
+
+Source: `skills/refusion-skills/rules/motion-recipe-library-v2.md`
+
+# Motion Recipe Library v2
+
+Professional scenes must use tokenized motion recipes from registry, not ad hoc
+opacity-only channels.
+
+## Recipe Families
+
+- Entrance: slide, scale, bounce, rotate, blur, morph, typewriter, stamp.
+- Exit: directional slide out, push back, scale out, dissolve.
+- Group: cascade variants and mirrored entry.
+- Attention: pulse, pointing emphasis, underline sweep.
+
+## Minimum Variety Rule
+
+For sibling cards in one beat:
+
+- At most 60% can share the same recipe.
+- Entrance and exit cannot be identical for all siblings.
+- At least one supporting element must use non-fade motion.
+
+## Required Token Use
+
+- `motionRecipe`: `$motion.*`
+- `componentChoreography.enterRecipe`: `$motion.*`
+- `componentChoreography.exitRecipe`: `$motion.*`
+
+Do not author raw bezier strings in brief-level output; rely on recipe tokens.
+
+---
+
+# Brand-Aware Motion v5 Rule
+
+Source: `skills/refusion-skills/rules/brand-aware-motion-v5.md`
+
+# Brand-Aware Motion v5
+
+Brand category influences motion feel.
+
+## Category Mapping
+
+- AI / tech: snappy and precise.
+- Productivity: clean and restrained.
+- Social playful: bouncy and expressive.
+- Premium media: deliberate and cinematic.
+
+## Rules
+
+1. If `brandToken` exists, map default recipe from category.
+2. Avoid contradictory feel unless user explicitly asks.
+3. Keep brand motion coherent across the same scene.
+4. Do not override canonical brand color by default.
+
+## Example
+
+- `$brand.chatgpt` -> `$motion.brand.tech`
+- `$brand.instagram` -> `$motion.brand.playful`
+- `$brand.notion` -> `$motion.brand.minimal`
+
+---
+
+# Brand Icon Usage v5 Rule
+
+Source: `skills/refusion-skills/rules/brand-icon-usage-v5.md`
+
+# Brand and Icon Usage v5
+
+## Core Rule
+
+Brands must be registry-backed.
+
+Use:
+
+- `brandToken` (`$brand.meta`, `$brand.google`, `$brand.chatgpt`, etc)
+- `iconToken` (`$icon.plus`, `$icon.arrowUp`, etc)
+
+Do not use:
+
+- arbitrary remote logo URLs
+- manually drawn approximations of protected marks
+- random recoloring of brand logos
+
+## Fallback Policy
+
+If brand is unavailable:
+
+1. prefer user-provided legal asset;
+2. otherwise use semantic neutral icon (`$brand.generic`) with note;
+3. never fake official logos.
+
+---
+
+# Brand Asset Legal Fallback v5 Rule
+
+Source: `skills/refusion-skills/rules/brand-asset-legal-fallback-v5.md`
+
+# Brand Asset and Legal Fallback v5
+
+## Professional Legal Rule
+
+Every brand symbol in scene output must come from one of:
+
+1. internal canonical registry asset;
+2. user-provided licensed asset;
+3. semantic generic fallback.
+
+## Manifest Requirements
+
+- record source path or registry id;
+- include license status;
+- include checksum/hash when available;
+- include fallback reason when generic icon used.
+
+## Rejection Cases
+
+- unknown logo with no provenance;
+- claimed official logo drawn manually;
+- unlicensed third-party mark used as if official.
+
+---
+
+# Component Internal Choreography v5 Rule
+
+Source: `skills/refusion-skills/rules/component-internal-choreography-v5.md`
+
+# Component Internal Choreography v5
+
+Every professional component has micro-beats inside itself.
+
+## Required Order
+
+1. container shell enters;
+2. icon enters;
+3. label/body enters;
+4. interaction affordance enters;
+5. exit in reverse order unless design says otherwise.
+
+## Prompt Input Bar Contract
+
+- Shell appears first (pop or stretch).
+- Plus icon and send icon are slot-bound and optically centered.
+- Text reveal starts only after shell and icons are stable.
+- Enter action uses coherent follow-through, not raw opacity drop.
+
+## Reject
+
+- child elements animating before parent shell exists;
+- text and icon moving in unrelated directions with no handoff;
+- uniform fade-only choreography for all children.
+
+---
+
+# Inter-Component Choreography v5 Rule
+
+Source: `skills/refusion-skills/rules/inter-component-choreography-v5.md`
+
+# Inter-Component Choreography v5
+
+Scene-level choreography must coordinate siblings, not animate each card in
+isolation.
+
+## Required
+
+- Stagger siblings by at least 60ms unless intentionally simultaneous.
+- Mirror directional entrances where appropriate.
+- Keep one dominant focus per beat.
+- Use coherent group exit (shared recipe family).
+
+## Forbidden
+
+- all cards entering with identical fade at same time;
+- one card using extreme energy while all neighbors also peak simultaneously;
+- unbounded overlap that hides card labels or body text.
+
+---
+
+# Background Semantic Pairing v5 Rule
+
+Source: `skills/refusion-skills/rules/background-semantic-pairing-v5.md`
+
+# Background Semantic Pairing v5
+
+Background should support scene meaning, not distract from foreground.
+
+## Mapping Examples
+
+- audio or voice -> subtle waveform motif
+- coding -> subtle grid motif
+- cloud sync -> sparse node-link motif
+- image grading -> soft tonal gradient motif
+- social promo -> low-contrast network motif
+
+## Rules
+
+- Background contrast must preserve text readability.
+- Background motion energy must be lower than foreground focus.
+- If uncertain, choose clean minimal background.
+
+---
+
+# Text Layout v5 Rule
+
+Source: `skills/refusion-skills/rules/text-layout-v5.md`
+
+# Text Layout v5
+
+Text must fit by contract in every bounded component slot.
+
+## Defaults
+
+- Body copy defaults to `fitPolicy: $textFit.wrapToLines`.
+- If overflow remains, shrink within typography bounds.
+- Reject cut-off phrases that end mid-structure (`and`, `or`, trailing comma).
+
+## Required
+
+- Respect slot content insets.
+- Respect min/max typography tokens.
+- Keep readable hold for key statements.
+
+## Forbidden
+
+- clip-as-default for body text in cards;
+- text larger than card body bounds;
+- mixing independent text motion and card motion with no parent linkage.
+
+---
+
+# Scene Composition v5 Rule
+
+Source: `skills/refusion-skills/rules/scene-composition-v5.md`
+
+# Scene Composition v5
+
+Use composition intents and safe areas instead of loose coordinates.
+
+## Composition Intent Tokens
+
+- `$composition.heroPrompt`
+- `$composition.featureGrid`
+- `$composition.testimonialWall`
+- `$composition.splitBeforeAfter`
+
+## Rules
+
+1. Solve layout with safe area and aspect-aware grid.
+2. Keep card groups balanced in available canvas.
+3. Maintain optical center for hero icon and title clusters.
+4. Reject placements outside safe area.
+
+## Aspect Guidance
+
+- 9:16: prioritize vertical rhythm.
+- 16:9: widen card groups and preserve breathing room.
+- 1:1: avoid edge crowding and keep central anchor strong.
+
+---
+
+# Rhythm Density Principles v5 Rule
+
+Source: `skills/refusion-skills/rules/rhythm-density-principles-v5.md`
+
+# Rhythm and Density Principles v5
+
+## Rhythm
+
+- Introduce clear beats: intro, expansion, hold, exit.
+- Hold important text long enough to read.
+- Avoid extreme rapid-fire transitions unless explicitly requested.
+
+## Density
+
+- Avoid visual overload from too many simultaneous motions.
+- Keep one primary focus per beat.
+- Preserve negative space for readability.
+
+## Variety
+
+- Use multiple motion recipes across sibling groups.
+- Do not rely on fade-only animation as default scene language.
+
+---
+
+# Professional Taste Checklist v5 Rule
+
+Source: `skills/refusion-skills/rules/professional-taste-checklist-v5.md`
+
+# Professional Taste Checklist v5
+
+Use this final gate before delivering scene JSON.
+
+- Is one focal point clear at each beat?
+- Are icons optically centered, not just mathematically centered?
+- Does body text fit fully inside card bounds?
+- Are entrances and exits coherent and non-repetitive?
+- Are motion speeds readable and intentional?
+- Is background supporting the message without noise?
+- Are brand marks legal and registry-backed?
+- Does the scene avoid card-over-card clutter?
+- Does the timeline feel deliberate rather than random?
+- Would this pass as a polished product promo without manual rescue?
+
+If any answer is no, revise before output.
+
+---
+
+# Repair Loop Examples v5 Rule
+
+Source: `skills/refusion-skills/rules/repair-loop-examples-v5.md`
+
+# Visual Closure Repair Examples v5
+
+These examples show the expected repair behavior.
+
+## Example: Motion Variety Low
+
+- Error: `MOTION_VARIETY_LOW`
+- Suggested path: `components.cards.motionRecipe`
+- Suggested alternatives:
+  - `$motion.slideInFromLeft`
+  - `$motion.slideInFromRight`
+  - `$motion.scaleInBounce`
+  - `$motion.rotateIn`
+
+## Example: Mid-Phrase Text Cut
+
+- Error: `BAD_PHRASE_CUT`
+- Suggested path: `components.cardA.slots.body.textFrame.fitPolicy`
+- Suggested value: `$textFit.shorten`
+
+## Example: Optical Alignment
+
+- Error: `ICON_OPTICAL_CENTER_OFF`
+- Suggested path:
+  `components.promptAppIcon.componentChoreography.opticalAlignment`
+- Suggested value: `auto`
+
+---
+
+# VERSION 5 Examples Catalog
+
+Source: `skills/refusion-skills/examples/v5/README.md`
+
+# VERSION 5 Director Brief Examples
+
+This folder contains Director-first examples for v5.
+
+## Good Examples (accepted target)
+
+1. `good/good-01-prompt-morph.json`
+2. `good/good-02-feature-grid-fast-voice-smart-image.json`
+3. `good/good-03-saas-feedback-wall.json`
+4. `good/good-04-audio-engineering-card.json`
+5. `good/good-05-kinetic-captions-card.json`
+6. `good/good-06-image-retouch-card.json`
+7. `good/good-07-multi-aspect-adaptation.json`
+8. `good/good-08-ai-features-cascade.json`
+9. `good/good-09-social-app-promo.json`
+10. `good/good-10-tech-brand-intro.json`
+
+## Rejected Examples (must fail with reason)
+
+1. `bad/bad-01-vague-intent.json` -> vague brief intent
+2. `bad/bad-02-raw-coordinates-overuse.json` -> loose coordinates
+3. `bad/bad-03-fade-only-cards.json` -> motion variety low
+4. `bad/bad-04-brand-without-registry.json` -> missing brand asset
+5. `bad/bad-05-text-cut-mid-phrase.json` -> bad phrase cut
+6. `bad/bad-06-overloaded-motion-density.json` -> unsafe simultaneous motion
+7. `bad/bad-07-missing-primary-focus.json` -> focus conflict
+8. `bad/bad-08-contradictory-mood.json` -> mood contradiction
+9. `bad/bad-09-component-choreography-missing.json` -> weak choreography
+10. `bad/bad-10-safe-area-violation.json` -> composition violation
 
 ---
 
@@ -10003,5 +10544,483 @@ Source: `skills/refusion-skills/examples/revival-premium-app-demo-60s.json`
         ]
       }
     ]
+  }
+}
+
+---
+
+# v5 Good Example 01
+
+Source: `skills/refusion-skills/examples/v5/good/good-01-prompt-morph.json`
+
+{
+  "directorBrief": {
+    "intent": "morph app icon into chatbot prompt bar and open feature showcase",
+    "audience": "startup founders",
+    "mood": "modern professional energetic",
+    "primaryFocus": "prompt icon morph",
+    "rhythm": "intro pop then stretch then type then burst",
+    "aspect": "$canvas.vertical9x16",
+    "durationIntent": "$duration.deliberate",
+    "elements": [
+      {
+        "kind": "promptMorph",
+        "importance": "primary"
+      }
+    ]
+  }
+}
+
+---
+
+# v5 Good Example 02
+
+Source: `skills/refusion-skills/examples/v5/good/good-02-feature-grid-fast-voice-smart-image.json`
+
+{
+  "directorBrief": {
+    "intent": "present four core product features with premium card choreography",
+    "audience": "content creators",
+    "mood": "clean premium confident",
+    "primaryFocus": "feature card group",
+    "rhythm": "title intro then mirrored card cascade then coherent group exit",
+    "aspect": "$canvas.vertical9x16",
+    "durationIntent": "$duration.deliberate",
+    "elements": [
+      {
+        "kind": "featureCardGroup",
+        "importance": "primary",
+        "primaryCardIndex": 0
+      }
+    ]
+  }
+}
+
+---
+
+# v5 Good Example 03
+
+Source: `skills/refusion-skills/examples/v5/good/good-03-saas-feedback-wall.json`
+
+{
+  "directorBrief": {
+    "intent": "show multi-platform feedback unified in one workspace",
+    "audience": "product teams",
+    "mood": "minimal trusted professional",
+    "primaryFocus": "feedback wall",
+    "rhythm": "slow intro then layered cards with calm drift hold",
+    "aspect": "$canvas.horizontal16x9",
+    "durationIntent": "$duration.medium",
+    "elements": [
+      {
+        "kind": "testimonialWall",
+        "importance": "primary"
+      }
+    ]
+  }
+}
+
+---
+
+# v5 Good Example 04
+
+Source: `skills/refusion-skills/examples/v5/good/good-04-audio-engineering-card.json`
+
+{
+  "directorBrief": {
+    "intent": "highlight audio cleanup quality with one hero card",
+    "audience": "podcasters",
+    "mood": "focused technical refined",
+    "primaryFocus": "audio card",
+    "rhythm": "single card hero with waveform support and readable hold",
+    "aspect": "$canvas.vertical9x16",
+    "durationIntent": "$duration.medium",
+    "elements": [
+      {
+        "kind": "featureCard",
+        "importance": "primary",
+        "topic": "audio"
+      }
+    ]
+  }
+}
+
+---
+
+# v5 Good Example 05
+
+Source: `skills/refusion-skills/examples/v5/good/good-05-kinetic-captions-card.json`
+
+{
+  "directorBrief": {
+    "intent": "demonstrate readable kinetic captions as product capability",
+    "audience": "social video editors",
+    "mood": "energetic controlled",
+    "primaryFocus": "captions card",
+    "rhythm": "title pop then typewriter body then pulse accent",
+    "aspect": "$canvas.vertical9x16",
+    "durationIntent": "$duration.medium",
+    "elements": [
+      {
+        "kind": "featureCard",
+        "importance": "primary",
+        "topic": "captions"
+      }
+    ]
+  }
+}
+
+---
+
+# v5 Good Example 06
+
+Source: `skills/refusion-skills/examples/v5/good/good-06-image-retouch-card.json`
+
+{
+  "directorBrief": {
+    "intent": "show image retouch and grading workflow quality",
+    "audience": "visual creators",
+    "mood": "cinematic precise",
+    "primaryFocus": "image plus card",
+    "rhythm": "soft reveal then texture detail hold then snap exit",
+    "aspect": "$canvas.vertical4x5",
+    "durationIntent": "$duration.medium",
+    "elements": [
+      {
+        "kind": "featureCard",
+        "importance": "primary",
+        "topic": "image"
+      }
+    ]
+  }
+}
+
+---
+
+# v5 Good Example 07
+
+Source: `skills/refusion-skills/examples/v5/good/good-07-multi-aspect-adaptation.json`
+
+{
+  "directorBrief": {
+    "intent": "prove same concept adapts cleanly across major aspect ratios",
+    "audience": "agencies",
+    "mood": "structured premium",
+    "primaryFocus": "adaptive feature layout",
+    "rhythm": "stable intro and balanced transitions between aspect snapshots",
+    "aspect": "$canvas.square1x1",
+    "durationIntent": "$duration.medium",
+    "elements": [
+      {
+        "kind": "adaptiveGrid",
+        "importance": "primary"
+      }
+    ]
+  }
+}
+
+---
+
+# v5 Good Example 08
+
+Source: `skills/refusion-skills/examples/v5/good/good-08-ai-features-cascade.json`
+
+{
+  "directorBrief": {
+    "intent": "show ai-assisted pipeline stages in cascading order",
+    "audience": "founders and operators",
+    "mood": "smart efficient",
+    "primaryFocus": "ai feature cascade",
+    "rhythm": "deliberate intro then staggered feature reveals and concise outro",
+    "aspect": "$canvas.vertical9x16",
+    "durationIntent": "$duration.deliberate",
+    "elements": [
+      {
+        "kind": "featureCardGroup",
+        "importance": "primary",
+        "primaryCardIndex": 1
+      }
+    ]
+  }
+}
+
+---
+
+# v5 Good Example 09
+
+Source: `skills/refusion-skills/examples/v5/good/good-09-social-app-promo.json`
+
+{
+  "directorBrief": {
+    "intent": "promote social app launch with clean mobile-native storytelling",
+    "audience": "gen z creators",
+    "mood": "playful polished",
+    "primaryFocus": "app flow strip",
+    "rhythm": "quick icon punch then smooth card sequence and coherent end",
+    "aspect": "$canvas.vertical9x16",
+    "durationIntent": "$duration.medium",
+    "elements": [
+      {
+        "kind": "appFlow",
+        "importance": "primary"
+      }
+    ]
+  }
+}
+
+---
+
+# v5 Good Example 10
+
+Source: `skills/refusion-skills/examples/v5/good/good-10-tech-brand-intro.json`
+
+{
+  "directorBrief": {
+    "intent": "introduce tech brand identity with restrained premium motion",
+    "audience": "enterprise buyers",
+    "mood": "minimal trustworthy",
+    "primaryFocus": "brand lockup",
+    "rhythm": "slow reveal with ample negative space then elegant exit",
+    "aspect": "$canvas.horizontal16x9",
+    "durationIntent": "$duration.deliberate",
+    "elements": [
+      {
+        "kind": "brandIntro",
+        "importance": "primary"
+      }
+    ]
+  }
+}
+
+---
+
+# v5 Bad Example 01
+
+Source: `skills/refusion-skills/examples/v5/bad/bad-01-vague-intent.json`
+
+{
+  "directorBrief": {
+    "intent": "make something cool",
+    "audience": "everyone",
+    "mood": "random",
+    "primaryFocus": "everything",
+    "rhythm": "whatever",
+    "aspect": "$canvas.vertical9x16",
+    "durationIntent": "$duration.medium",
+    "expectedRejectionReason": "BRIEF_INTENT_TOO_VAGUE"
+  }
+}
+
+---
+
+# v5 Bad Example 02
+
+Source: `skills/refusion-skills/examples/v5/bad/bad-02-raw-coordinates-overuse.json`
+
+{
+  "directorBrief": {
+    "intent": "show product cards",
+    "audience": "creators",
+    "mood": "professional",
+    "primaryFocus": "cards",
+    "rhythm": "normal",
+    "aspect": "$canvas.vertical9x16",
+    "durationIntent": "$duration.medium",
+    "elements": [
+      {
+        "kind": "featureCard",
+        "x": 923,
+        "y": 1711
+      }
+    ],
+    "expectedRejectionReason": "LOOSE_COORDINATE_AUTHORING"
+  }
+}
+
+---
+
+# v5 Bad Example 03
+
+Source: `skills/refusion-skills/examples/v5/bad/bad-03-fade-only-cards.json`
+
+{
+  "directorBrief": {
+    "intent": "show four cards",
+    "audience": "founders",
+    "mood": "modern",
+    "primaryFocus": "card group",
+    "rhythm": "flat",
+    "aspect": "$canvas.vertical9x16",
+    "durationIntent": "$duration.medium",
+    "elements": [
+      {
+        "kind": "featureCardGroup",
+        "motionRecipe": "$motion.fadeIn",
+        "expectedRejectionReason": "MOTION_VARIETY_LOW"
+      }
+    ]
+  }
+}
+
+---
+
+# v5 Bad Example 04
+
+Source: `skills/refusion-skills/examples/v5/bad/bad-04-brand-without-registry.json`
+
+{
+  "directorBrief": {
+    "intent": "show global brand feature",
+    "audience": "marketers",
+    "mood": "premium",
+    "primaryFocus": "logo card",
+    "rhythm": "quick",
+    "aspect": "$canvas.vertical9x16",
+    "durationIntent": "$duration.medium",
+    "elements": [
+      {
+        "kind": "brandIntro",
+        "brandName": "unknown-secret-logo"
+      }
+    ],
+    "expectedRejectionReason": "MISSING_BRAND_ASSET"
+  }
+}
+
+---
+
+# v5 Bad Example 05
+
+Source: `skills/refusion-skills/examples/v5/bad/bad-05-text-cut-mid-phrase.json`
+
+{
+  "directorBrief": {
+    "intent": "show card copy",
+    "audience": "teams",
+    "mood": "clean",
+    "primaryFocus": "body text",
+    "rhythm": "short",
+    "aspect": "$canvas.vertical9x16",
+    "durationIntent": "$duration.medium",
+    "elements": [
+      {
+        "kind": "featureCard",
+        "body": "Fast exports, stable sync, and"
+      }
+    ],
+    "expectedRejectionReason": "BAD_PHRASE_CUT"
+  }
+}
+
+---
+
+# v5 Bad Example 06
+
+Source: `skills/refusion-skills/examples/v5/bad/bad-06-overloaded-motion-density.json`
+
+{
+  "directorBrief": {
+    "intent": "maximize motion for all elements",
+    "audience": "any",
+    "mood": "hyper",
+    "primaryFocus": "none",
+    "rhythm": "all at once",
+    "aspect": "$canvas.vertical9x16",
+    "durationIntent": "$duration.medium",
+    "expectedRejectionReason": "UNSAFE_SIMULTANEOUS_MOTION"
+  }
+}
+
+---
+
+# v5 Bad Example 07
+
+Source: `skills/refusion-skills/examples/v5/bad/bad-07-missing-primary-focus.json`
+
+{
+  "directorBrief": {
+    "intent": "show features",
+    "audience": "creators",
+    "mood": "professional",
+    "primaryFocus": "",
+    "rhythm": "intro then cards",
+    "aspect": "$canvas.vertical9x16",
+    "durationIntent": "$duration.medium",
+    "expectedRejectionReason": "BRIEF_PRIMARY_FOCUS_CONFLICT"
+  }
+}
+
+---
+
+# v5 Bad Example 08
+
+Source: `skills/refusion-skills/examples/v5/bad/bad-08-contradictory-mood.json`
+
+{
+  "directorBrief": {
+    "intent": "serious financial update scene",
+    "audience": "executives",
+    "mood": "calm minimal",
+    "primaryFocus": "title",
+    "rhythm": "steady and readable",
+    "aspect": "$canvas.horizontal16x9",
+    "durationIntent": "$duration.deliberate",
+    "elements": [
+      {
+        "kind": "title",
+        "motionRecipe": "$motion.whipPan"
+      }
+    ],
+    "expectedRejectionReason": "BRIEF_MOOD_CONTRADICTION"
+  }
+}
+
+---
+
+# v5 Bad Example 09
+
+Source: `skills/refusion-skills/examples/v5/bad/bad-09-component-choreography-missing.json`
+
+{
+  "directorBrief": {
+    "intent": "show prompt bar",
+    "audience": "users",
+    "mood": "clean",
+    "primaryFocus": "prompt bar",
+    "rhythm": "simple",
+    "aspect": "$canvas.vertical9x16",
+    "durationIntent": "$duration.medium",
+    "elements": [
+      {
+        "kind": "promptMorph",
+        "disableChoreography": true
+      }
+    ],
+    "expectedRejectionReason": "WEAK_COMPONENT_CHOREOGRAPHY"
+  }
+}
+
+---
+
+# v5 Bad Example 10
+
+Source: `skills/refusion-skills/examples/v5/bad/bad-10-safe-area-violation.json`
+
+{
+  "directorBrief": {
+    "intent": "show hero card near edges",
+    "audience": "creators",
+    "mood": "bold",
+    "primaryFocus": "hero card",
+    "rhythm": "quick",
+    "aspect": "$canvas.vertical9x16",
+    "durationIntent": "$duration.medium",
+    "elements": [
+      {
+        "kind": "featureCard",
+        "placementHint": "outsideSafeArea"
+      }
+    ],
+    "expectedRejectionReason": "SAFE_AREA_VIOLATION"
   }
 }

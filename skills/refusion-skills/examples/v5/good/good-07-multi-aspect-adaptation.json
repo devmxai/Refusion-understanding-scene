@@ -1,0 +1,18 @@
+{
+  "directorBrief": {
+    "intent": "prove same concept adapts cleanly across major aspect ratios",
+    "audience": "agencies",
+    "mood": "structured premium",
+    "primaryFocus": "adaptive feature layout",
+    "rhythm": "stable intro and balanced transitions between aspect snapshots",
+    "aspect": "$canvas.square1x1",
+    "durationIntent": "$duration.medium",
+    "elements": [
+      {
+        "kind": "adaptiveGrid",
+        "importance": "primary"
+      }
+    ]
+  }
+}
+

@@ -1,0 +1,19 @@
+{
+  "directorBrief": {
+    "intent": "show card copy",
+    "audience": "teams",
+    "mood": "clean",
+    "primaryFocus": "body text",
+    "rhythm": "short",
+    "aspect": "$canvas.vertical9x16",
+    "durationIntent": "$duration.medium",
+    "elements": [
+      {
+        "kind": "featureCard",
+        "body": "Fast exports, stable sync, and"
+      }
+    ],
+    "expectedRejectionReason": "BAD_PHRASE_CUT"
+  }
+}
+

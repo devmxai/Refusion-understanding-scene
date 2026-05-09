@@ -1,0 +1,19 @@
+{
+  "directorBrief": {
+    "intent": "show ai-assisted pipeline stages in cascading order",
+    "audience": "founders and operators",
+    "mood": "smart efficient",
+    "primaryFocus": "ai feature cascade",
+    "rhythm": "deliberate intro then staggered feature reveals and concise outro",
+    "aspect": "$canvas.vertical9x16",
+    "durationIntent": "$duration.deliberate",
+    "elements": [
+      {
+        "kind": "featureCardGroup",
+        "importance": "primary",
+        "primaryCardIndex": 1
+      }
+    ]
+  }
+}
+

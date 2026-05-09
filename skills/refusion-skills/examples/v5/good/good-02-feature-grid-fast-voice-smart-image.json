@@ -1,0 +1,19 @@
+{
+  "directorBrief": {
+    "intent": "present four core product features with premium card choreography",
+    "audience": "content creators",
+    "mood": "clean premium confident",
+    "primaryFocus": "feature card group",
+    "rhythm": "title intro then mirrored card cascade then coherent group exit",
+    "aspect": "$canvas.vertical9x16",
+    "durationIntent": "$duration.deliberate",
+    "elements": [
+      {
+        "kind": "featureCardGroup",
+        "importance": "primary",
+        "primaryCardIndex": 0
+      }
+    ]
+  }
+}
+

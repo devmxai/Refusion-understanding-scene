@@ -1,0 +1,13 @@
+{
+  "directorBrief": {
+    "intent": "maximize motion for all elements",
+    "audience": "any",
+    "mood": "hyper",
+    "primaryFocus": "none",
+    "rhythm": "all at once",
+    "aspect": "$canvas.vertical9x16",
+    "durationIntent": "$duration.medium",
+    "expectedRejectionReason": "UNSAFE_SIMULTANEOUS_MOTION"
+  }
+}
+

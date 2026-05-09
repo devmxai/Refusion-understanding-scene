@@ -1,0 +1,18 @@
+{
+  "directorBrief": {
+    "intent": "show hero card near edges",
+    "audience": "creators",
+    "mood": "bold",
+    "primaryFocus": "hero card",
+    "rhythm": "quick",
+    "aspect": "$canvas.vertical9x16",
+    "durationIntent": "$duration.medium",
+    "elements": [
+      {
+        "kind": "featureCard",
+        "placementHint": "outsideSafeArea"
+      }
+    ],
+    "expectedRejectionReason": "SAFE_AREA_VIOLATION"
+  }
+}
